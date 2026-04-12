@@ -115,6 +115,8 @@ RewriteRule . /index.php [L]
    - SMTP plugin
    - SEO plugin
 
+Keep the real `wp-config.php` only on the server. This repo provides `wp-config.example.php` as a template and should not store live database credentials.
+
 The bootstrap script intentionally does not seed a saved WordPress menu. The theme fallback navigation already renders `Home`, `About`, `Sermons`, and `Contact` with environment-correct URLs. If you want a custom menu in production, create it directly in that environment and avoid importing menu items with hardcoded localhost or port-based URLs.
 
 Recommended production plugins:

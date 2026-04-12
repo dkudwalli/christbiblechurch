@@ -64,9 +64,18 @@ function church_theme_resolve_url(string $url): string
 function church_theme_get_page_url(string $slug): string
 {
     $normalized_slug = trim($slug, '/');
+    $page = $normalized_slug !== '' ? get_page_by_path($normalized_slug) : null;
+
+    if ($page instanceof WP_Post) {
+        $permalink = get_permalink($page);
+
+        if (is_string($permalink) && $permalink !== '') {
+            return $permalink;
+        }
+    }
 
     if ($normalized_slug !== '') {
-        return add_query_arg('pagename', $normalized_slug, home_url('/'));
+        return home_url('/' . $normalized_slug . '/');
     }
 
     return home_url('/');
@@ -74,40 +83,20 @@ function church_theme_get_page_url(string $slug): string
 
 function church_theme_get_sermon_archive_url(): string
 {
-    return add_query_arg('post_type', 'sermon', home_url('/'));
+    return get_post_type_archive_link('sermon') ?: home_url('/sermons/');
 }
 
 function church_theme_get_sermon_url(?int $post_id = null): string
 {
     $resolved_post_id = $post_id ?: get_the_ID();
-    $post_slug = $resolved_post_id > 0 ? (string) get_post_field('post_name', $resolved_post_id) : '';
+    $permalink = $resolved_post_id > 0 ? get_permalink($resolved_post_id) : '';
 
-    if ($post_slug !== '') {
-        return add_query_arg('sermon', $post_slug, home_url('/'));
-    }
-
-    if ($resolved_post_id > 0) {
-        return add_query_arg([
-            'post_type' => 'sermon',
-            'p' => (string) $resolved_post_id,
-        ], home_url('/'));
+    if (is_string($permalink) && $permalink !== '') {
+        return $permalink;
     }
 
     return church_theme_get_sermon_archive_url();
 }
-
-function church_theme_filter_canonical_redirect($redirect_url)
-{
-    $page_id = isset($_GET['page_id']) ? absint(wp_unslash((string) $_GET['page_id'])) : 0;
-    $post_type = isset($_GET['post_type']) ? sanitize_key(wp_unslash((string) $_GET['post_type'])) : '';
-
-    if ($page_id > 0 || $post_type === 'sermon') {
-        return false;
-    }
-
-    return $redirect_url;
-}
-add_filter('redirect_canonical', 'church_theme_filter_canonical_redirect');
 
 function church_theme_split_lines(string $value): array
 {

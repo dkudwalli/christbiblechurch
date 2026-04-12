@@ -1,0 +1,16 @@
+# Local secrets and host-specific config
+wp-config.php
+.htaccess.bk
+
+# Hostinger backups and export artifacts
+*-public-html-backup-*/
+*.sql
+*.zip
+
+# WordPress runtime/cache files
+wp-content/cache/
+wp-content/upgrade/
+wp-content/debug.log
+
+# OS/editor noise
+.DS_Store
