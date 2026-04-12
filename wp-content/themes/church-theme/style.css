@@ -1,0 +1,14 @@
+/*
+Theme Name: Church Theme
+Theme URI: https://example.com/church-theme
+Author: Codex
+Description: Custom WordPress theme for a church website with sermons, a custom home page, and contact workflow.
+Version: 1.0.0
+Requires at least: 6.5
+Requires PHP: 8.2
+Text Domain: church-theme
+*/
+
+body {
+  margin: 0;
+}
