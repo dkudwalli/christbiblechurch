@@ -63,13 +63,13 @@ function church_theme_resolve_url(string $url): string
 
 function church_theme_get_page_url(string $slug): string
 {
-    $page = get_page_by_path($slug);
+    $normalized_slug = trim($slug, '/');
 
-    if ($page instanceof WP_Post) {
-        return add_query_arg('page_id', (string) $page->ID, home_url('/'));
+    if ($normalized_slug !== '') {
+        return add_query_arg('pagename', $normalized_slug, home_url('/'));
     }
 
-    return home_url('/' . trim($slug, '/') . '/');
+    return home_url('/');
 }
 
 function church_theme_get_sermon_archive_url(): string
@@ -80,6 +80,11 @@ function church_theme_get_sermon_archive_url(): string
 function church_theme_get_sermon_url(?int $post_id = null): string
 {
     $resolved_post_id = $post_id ?: get_the_ID();
+    $post_slug = $resolved_post_id > 0 ? (string) get_post_field('post_name', $resolved_post_id) : '';
+
+    if ($post_slug !== '') {
+        return add_query_arg('sermon', $post_slug, home_url('/'));
+    }
 
     if ($resolved_post_id > 0) {
         return add_query_arg([

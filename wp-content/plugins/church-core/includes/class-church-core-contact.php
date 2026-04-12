@@ -147,13 +147,7 @@ final class Church_Core_Contact
 
     private static function get_contact_page_url(): string
     {
-        $contact_page = get_page_by_path('contact');
-
-        if ($contact_page instanceof WP_Post) {
-            return add_query_arg('page_id', (string) $contact_page->ID, home_url('/'));
-        }
-
-        return home_url('/contact/');
+        return add_query_arg('pagename', 'contact', home_url('/'));
     }
 
     public static function submission_columns(array $columns): array
