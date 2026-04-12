@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 COMPOSE="docker compose"
 SITE_URL="${SITE_URL:-http://localhost:${WORDPRESS_PORT:-8080}}"
 SITE_TITLE="${SITE_TITLE:-Christ Bible Church}"
@@ -37,37 +36,6 @@ ensure_page() {
   else
     printf '%s\n' "${page_id}"
   fi
-}
-
-menu_has_item() {
-  local menu_name="$1"
-  local title="$2"
-
-  run_wp menu item list "${menu_name}" --fields=title --format=csv 2>/dev/null | grep -Fxq "${title}"
-}
-
-menu_item_ids_by_title() {
-  local menu_name="$1"
-  local title="$2"
-
-  run_wp menu item list "${menu_name}" --fields=db_id,title --format=csv 2>/dev/null | awk -F, -v target="${title}" 'NR > 1 && $2 == target { print $1 }'
-}
-
-remove_menu_items_by_title() {
-  local menu_name="$1"
-  local title="$2"
-  local ids
-
-  ids="$(menu_item_ids_by_title "${menu_name}" "${title}" || true)"
-
-  if [[ -z "${ids}" ]]; then
-    return
-  fi
-
-  while IFS= read -r id; do
-    [[ -z "${id}" ]] && continue
-    run_wp menu item delete "${id}" >/dev/null
-  done <<< "${ids}"
 }
 
 echo "Starting local WordPress services..."
@@ -118,21 +86,14 @@ fi
 
 run_wp option update show_on_front page
 run_wp option update page_on_front "${HOME_ID}"
-
-run_wp menu create 'Primary Navigation' >/dev/null 2>&1 || true
-
-remove_menu_items_by_title 'Primary Navigation' 'Home'
-remove_menu_items_by_title 'Primary Navigation' 'About'
-remove_menu_items_by_title 'Primary Navigation' 'What We Teach'
-remove_menu_items_by_title 'Primary Navigation' 'Sermons'
-remove_menu_items_by_title 'Primary Navigation' 'Contact'
-
-run_wp menu item add-post 'Primary Navigation' "${HOME_ID}" >/dev/null
-run_wp menu item add-post 'Primary Navigation' "${ABOUT_ID}" >/dev/null
-run_wp menu item add-custom 'Primary Navigation' 'Sermons' "${SITE_URL%/}/sermons/" >/dev/null
-run_wp menu item add-post 'Primary Navigation' "${CONTACT_ID}" >/dev/null
-
-run_wp menu location assign 'Primary Navigation' primary
+run_wp eval '
+$locations = get_theme_mod("nav_menu_locations", []);
+if (! is_array($locations)) {
+    $locations = [];
+}
+$locations["primary"] = 0;
+set_theme_mod("nav_menu_locations", $locations);
+' >/dev/null
 
 if [[ -z "$(run_wp term list speaker --field=slug 2>/dev/null || true)" ]]; then
   run_wp term create speaker 'Pastor Daniel' --slug=pastor-daniel >/dev/null
@@ -157,5 +118,6 @@ echo
 echo "Local WordPress is ready."
 echo "Site: ${SITE_URL}"
 echo "Admin: ${SITE_URL%/}/wp-admin/"
+echo "Navigation: using the theme fallback menu until a menu is created in this environment."
 echo "Username: ${ADMIN_USER}"
 echo "Password: ${ADMIN_PASSWORD}"

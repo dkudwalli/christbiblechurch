@@ -36,12 +36,73 @@ function church_theme_resolve_url(string $url): string
         return '';
     }
 
+    $path = trim((string) wp_parse_url($url, PHP_URL_PATH), '/');
+    $url_host = (string) wp_parse_url($url, PHP_URL_HOST);
+    $site_host = (string) wp_parse_url(home_url('/'), PHP_URL_HOST);
+
+    if ($path !== '' && ($url_host === '' || $url_host === $site_host)) {
+        if ($path === 'about') {
+            return church_theme_get_page_url('about');
+        }
+
+        if ($path === 'contact') {
+            return church_theme_get_page_url('contact');
+        }
+
+        if ($path === 'sermons') {
+            return church_theme_get_sermon_archive_url();
+        }
+    }
+
     if (str_starts_with($url, '/')) {
         return home_url($url);
     }
 
     return $url;
 }
+
+function church_theme_get_page_url(string $slug): string
+{
+    $page = get_page_by_path($slug);
+
+    if ($page instanceof WP_Post) {
+        return add_query_arg('page_id', (string) $page->ID, home_url('/'));
+    }
+
+    return home_url('/' . trim($slug, '/') . '/');
+}
+
+function church_theme_get_sermon_archive_url(): string
+{
+    return add_query_arg('post_type', 'sermon', home_url('/'));
+}
+
+function church_theme_get_sermon_url(?int $post_id = null): string
+{
+    $resolved_post_id = $post_id ?: get_the_ID();
+
+    if ($resolved_post_id > 0) {
+        return add_query_arg([
+            'post_type' => 'sermon',
+            'p' => (string) $resolved_post_id,
+        ], home_url('/'));
+    }
+
+    return church_theme_get_sermon_archive_url();
+}
+
+function church_theme_filter_canonical_redirect($redirect_url)
+{
+    $page_id = isset($_GET['page_id']) ? absint(wp_unslash((string) $_GET['page_id'])) : 0;
+    $post_type = isset($_GET['post_type']) ? sanitize_key(wp_unslash((string) $_GET['post_type'])) : '';
+
+    if ($page_id > 0 || $post_type === 'sermon') {
+        return false;
+    }
+
+    return $redirect_url;
+}
+add_filter('redirect_canonical', 'church_theme_filter_canonical_redirect');
 
 function church_theme_split_lines(string $value): array
 {
@@ -208,9 +269,9 @@ function church_theme_fallback_menu(): void
 {
     $items = [
         ['label' => __('Home', 'church-theme'), 'url' => home_url('/')],
-        ['label' => __('About', 'church-theme'), 'url' => home_url('/about/')],
-        ['label' => __('Sermons', 'church-theme'), 'url' => get_post_type_archive_link('sermon') ?: home_url('/sermons/')],
-        ['label' => __('Contact', 'church-theme'), 'url' => home_url('/contact/')],
+        ['label' => __('About', 'church-theme'), 'url' => church_theme_get_page_url('about')],
+        ['label' => __('Sermons', 'church-theme'), 'url' => church_theme_get_sermon_archive_url()],
+        ['label' => __('Contact', 'church-theme'), 'url' => church_theme_get_page_url('contact')],
     ];
 
     echo '<ul id="primary-menu" class="site-nav__list">';
@@ -223,6 +284,49 @@ function church_theme_fallback_menu(): void
     }
     echo '</ul>';
 }
+
+function church_theme_filter_primary_menu_items(array $items, $args): array
+{
+    if (! isset($args->theme_location) || $args->theme_location !== 'primary') {
+        return $items;
+    }
+
+    foreach ($items as $item) {
+        $menu_title = sanitize_title((string) $item->title);
+        $menu_path = trim((string) wp_parse_url((string) $item->url, PHP_URL_PATH), '/');
+
+        if ($item->object === 'page') {
+            $page_slug = (string) get_post_field('post_name', (int) $item->object_id);
+
+            if ($page_slug === 'home') {
+                $item->url = home_url('/');
+                continue;
+            }
+
+            if (in_array($page_slug, ['about', 'contact'], true)) {
+                $item->url = church_theme_get_page_url($page_slug);
+                continue;
+            }
+        }
+
+        if ($menu_title === 'about' || $menu_path === 'about') {
+            $item->url = church_theme_get_page_url('about');
+            continue;
+        }
+
+        if ($menu_title === 'contact' || $menu_path === 'contact') {
+            $item->url = church_theme_get_page_url('contact');
+            continue;
+        }
+
+        if ($menu_title === 'sermons' || $menu_path === 'sermons') {
+            $item->url = church_theme_get_sermon_archive_url();
+        }
+    }
+
+    return $items;
+}
+add_filter('wp_nav_menu_objects', 'church_theme_filter_primary_menu_items', 10, 2);
 
 function church_theme_get_sermon_date(int $post_id): string
 {

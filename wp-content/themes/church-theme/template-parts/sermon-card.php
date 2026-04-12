@@ -8,7 +8,7 @@ $scripture = (string) get_post_meta(get_the_ID(), 'scripture_reference', true);
 ?>
 <article class="card sermon-card">
     <p class="eyebrow"><?php echo esc_html(church_theme_get_sermon_date(get_the_ID())); ?></p>
-    <h2><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h2>
+    <h2><a href="<?php echo esc_url(church_theme_get_sermon_url(get_the_ID())); ?>"><?php the_title(); ?></a></h2>
 
     <p class="sermon-meta">
         <?php if ($speaker_terms && ! is_wp_error($speaker_terms)) : ?>
@@ -21,7 +21,7 @@ $scripture = (string) get_post_meta(get_the_ID(), 'scripture_reference', true);
 
     <p><?php echo esc_html(wp_trim_words(get_the_excerpt() ?: wp_strip_all_tags(get_the_content()), 24)); ?></p>
 
-    <a class="text-link" href="<?php the_permalink(); ?>">
+    <a class="text-link" href="<?php echo esc_url(church_theme_get_sermon_url(get_the_ID())); ?>">
         <?php esc_html_e('Open sermon', 'church-theme'); ?>
     </a>
 </article>

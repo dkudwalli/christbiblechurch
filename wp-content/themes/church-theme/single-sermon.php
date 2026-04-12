@@ -113,7 +113,7 @@ while (have_posts()) :
                         <h2><?php esc_html_e('Keep Listening', 'church-theme'); ?></h2>
                         <p><?php esc_html_e('Browse the full sermon archive or share this message with someone in your church community.', 'church-theme'); ?></p>
                     </div>
-                    <a class="button button--secondary" href="<?php echo esc_url(get_post_type_archive_link('sermon') ?: home_url('/sermons/')); ?>">
+                    <a class="button button--secondary" href="<?php echo esc_url(church_theme_get_sermon_archive_url()); ?>">
                         <?php esc_html_e('Back to all sermons', 'church-theme'); ?>
                     </a>
                 </article>

@@ -91,13 +91,31 @@ Use Hostinger managed WordPress for the live site, then deploy only the custom c
 1. Upload `church-theme` as a theme.
 2. Upload `church-core` as a plugin.
 3. Activate both in WordPress admin.
-4. Recreate the pages or use WP-CLI if available.
-5. Configure:
+4. Recreate the `Home`, `About`, and `Contact` pages or use WP-CLI if available.
+5. Go to `Settings > Permalinks`, keep the structure at `/%postname%/`, and click `Save Changes` once on the live site.
+6. If Hostinger still shows its default 404 page for valid WordPress URLs, restore the standard WordPress rewrite rules in the document-root `.htaccess`:
+
+```apache
+# BEGIN WordPress
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /
+RewriteRule ^index\.php$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.php [L]
+</IfModule>
+# END WordPress
+```
+
+7. Configure:
    - site title and tagline
    - homepage content in the Customizer
    - contact email, phone, address, and map URL
    - SMTP plugin
    - SEO plugin
+
+The bootstrap script intentionally does not seed a saved WordPress menu. The theme fallback navigation already renders `Home`, `About`, `Sermons`, and `Contact` with environment-correct URLs. If you want a custom menu in production, create it directly in that environment and avoid importing menu items with hardcoded localhost or port-based URLs.
 
 Recommended production plugins:
 

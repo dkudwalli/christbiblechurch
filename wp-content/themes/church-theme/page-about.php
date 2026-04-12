@@ -76,7 +76,7 @@ $leadership = church_theme_get_about_leadership();
             <p><?php esc_html_e('If you are considering joining us on a Sunday, reach out ahead of time and we will help you with directions, access, and any questions you may have.', 'church-theme'); ?></p>
         </div>
 
-        <a class="button" href="<?php echo esc_url(home_url('/contact/')); ?>">
+        <a class="button" href="<?php echo esc_url(church_theme_get_page_url('contact')); ?>">
             <?php esc_html_e('Contact Us', 'church-theme'); ?>
         </a>
     </div>

@@ -89,7 +89,7 @@ final class Church_Core_Contact
 
     public static function handle_submission(): void
     {
-        $redirect = wp_get_referer() ?: home_url('/contact/');
+        $redirect = wp_get_referer() ?: self::get_contact_page_url();
 
         if (! isset($_POST['church_core_contact_nonce']) || ! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['church_core_contact_nonce'])), 'church_core_contact_submit')) {
             self::redirect_with_status($redirect, 'invalid');
@@ -143,6 +143,17 @@ final class Church_Core_Contact
     {
         wp_safe_redirect(add_query_arg('church_contact_status', $status, $redirect));
         exit;
+    }
+
+    private static function get_contact_page_url(): string
+    {
+        $contact_page = get_page_by_path('contact');
+
+        if ($contact_page instanceof WP_Post) {
+            return add_query_arg('page_id', (string) $contact_page->ID, home_url('/'));
+        }
+
+        return home_url('/contact/');
     }
 
     public static function submission_columns(array $columns): array

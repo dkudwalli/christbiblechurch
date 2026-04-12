@@ -26,7 +26,7 @@ if (is_wp_error($speakers)) {
 
 <section class="section section--muted">
     <div class="wrap">
-        <form class="filter-bar" method="get" action="<?php echo esc_url(get_post_type_archive_link('sermon') ?: home_url('/sermons/')); ?>">
+        <form class="filter-bar" method="get" action="<?php echo esc_url(church_theme_get_sermon_archive_url()); ?>">
             <label>
                 <span class="screen-reader-text"><?php esc_html_e('Search sermons', 'church-theme'); ?></span>
                 <input type="search" name="s" value="<?php echo esc_attr($current_search); ?>" placeholder="<?php esc_attr_e('Search sermons', 'church-theme'); ?>">
@@ -66,9 +66,15 @@ if (is_wp_error($speakers)) {
     <div class="wrap pagination-wrap">
         <?php
         the_posts_pagination([
+            'base' => add_query_arg('paged', '%#%', church_theme_get_sermon_archive_url()),
+            'format' => '',
             'mid_size' => 1,
             'prev_text' => __('Previous', 'church-theme'),
             'next_text' => __('Next', 'church-theme'),
+            'add_args' => array_filter([
+                's' => $current_search,
+                'speaker' => $current_speaker,
+            ]),
         ]);
         ?>
     </div>

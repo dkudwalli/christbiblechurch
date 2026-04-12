@@ -70,10 +70,10 @@ $latest_sermon = new WP_Query([
                 </div>
 
                 <div class="sermon-feature__actions">
-                    <a class="button button--secondary" href="<?php the_permalink(); ?>">
+                    <a class="button button--secondary" href="<?php echo esc_url(church_theme_get_sermon_url(get_the_ID())); ?>">
                         <?php esc_html_e('Watch or Listen', 'church-theme'); ?>
                     </a>
-                    <a class="text-link" href="<?php echo esc_url(get_post_type_archive_link('sermon') ?: home_url('/sermons/')); ?>">
+                    <a class="text-link" href="<?php echo esc_url(church_theme_get_sermon_archive_url()); ?>">
                         <?php esc_html_e('Browse all sermons', 'church-theme'); ?>
                     </a>
                 </div>
@@ -94,7 +94,7 @@ $latest_sermon = new WP_Query([
             <h2><?php esc_html_e('Questions before Sunday?', 'church-theme'); ?></h2>
             <p><?php esc_html_e('Use the contact page to ask about service times, children’s ministry, prayer needs, or your first visit.', 'church-theme'); ?></p>
         </div>
-        <a class="button" href="<?php echo esc_url(home_url('/contact/')); ?>">
+        <a class="button" href="<?php echo esc_url(church_theme_get_page_url('contact')); ?>">
             <?php esc_html_e('Contact Us', 'church-theme'); ?>
         </a>
     </div>
