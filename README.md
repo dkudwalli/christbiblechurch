@@ -49,7 +49,9 @@ After setup:
 - `wp-content/themes/church-theme`: custom PHP theme
 - `wp-content/plugins/church-core`: sermon model and contact workflow
 
-WordPress core is not committed. The Docker image supplies it, and the repo only tracks the custom code.
+WordPress core is not committed. The Docker image supplies it, and the repo only tracks the custom church code plus the clean-route shims under `about/`, `contact/`, and `sermons/`.
+
+On Hostinger, this repository is meant to be pulled into an existing WordPress install. Do not add WordPress core files, bundled plugins, or `wp-content/uploads` to Git, because Hostinger's pull-based deploy will refuse to overwrite the live untracked install.
 
 ## Content Model
 

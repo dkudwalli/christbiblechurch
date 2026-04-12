@@ -1,6 +1,25 @@
 # Local secrets and host-specific config
 wp-config.php
+.htaccess
 .htaccess.bk
+
+# WordPress core in existing Hostinger installs
+index.php
+license.txt
+readme.html
+xmlrpc.php
+wp-*.php
+wp-admin/
+wp-includes/
+
+# Host-managed WordPress content
+wp-content/index.php
+wp-content/plugins/index.php
+wp-content/plugins/akismet/
+wp-content/plugins/esv-crossref/
+wp-content/themes/index.php
+wp-content/uploads/
+wp-content/mu-plugins/
 
 # Hostinger backups and export artifacts
 *-public-html-backup-*/
