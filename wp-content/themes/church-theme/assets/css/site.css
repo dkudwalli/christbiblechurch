@@ -651,6 +651,79 @@ textarea {
 
 .pagination-wrap {
   padding-top: 1.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.pagination-wrap .navigation.pagination {
+  width: 100%;
+}
+
+.pagination-wrap .nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.pagination-wrap .page-numbers {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--control-height);
+  height: var(--control-height);
+  padding: 0 1.15rem;
+  border: 1px solid rgba(64, 50, 36, 0.18);
+  border-radius: 18px;
+  background: var(--surface-strong);
+  color: var(--text);
+  font-weight: 700;
+  box-shadow: 0 12px 28px rgba(47, 36, 24, 0.08);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease,
+    color 180ms ease;
+}
+
+.pagination-wrap a.page-numbers:hover {
+  transform: translateY(-1px);
+  border-color: rgba(95, 127, 101, 0.3);
+  background: #fffdf8;
+  color: var(--accent-deep);
+  box-shadow: 0 16px 32px rgba(47, 36, 24, 0.12);
+}
+
+.pagination-wrap a.page-numbers:focus-visible {
+  outline: none;
+  border-color: rgba(95, 127, 101, 0.38);
+  box-shadow:
+    0 0 0 3px rgba(95, 127, 101, 0.16),
+    0 16px 32px rgba(47, 36, 24, 0.12);
+}
+
+.pagination-wrap .page-numbers.current {
+  border-color: transparent;
+  background: linear-gradient(145deg, var(--accent-deep), #4b6750);
+  color: #fff9f0;
+  box-shadow: 0 16px 34px rgba(47, 36, 24, 0.16);
+}
+
+.pagination-wrap .page-numbers.dots {
+  min-width: auto;
+  height: auto;
+  padding: 0 0.2rem;
+  border: 0;
+  background: transparent;
+  color: var(--text-soft);
+  box-shadow: none;
+}
+
+.pagination-wrap .prev.page-numbers,
+.pagination-wrap .next.page-numbers {
+  padding: 0 1.35rem;
 }
 
 .nav-is-open {
