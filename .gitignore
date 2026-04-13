@@ -21,6 +21,13 @@ wp-content/themes/index.php
 wp-content/uploads/
 wp-content/mu-plugins/
 
+# Clean-route shim files that are intentionally committed
+!about/index.php
+!contact/index.php
+!sermons/**/index.php
+!series/**/index.php
+!speaker/**/index.php
+
 # Hostinger backups and export artifacts
 *-public-html-backup-*/
 *.sql
