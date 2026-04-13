@@ -99,6 +99,10 @@ if [[ -z "$(run_wp term list speaker --field=slug 2>/dev/null || true)" ]]; then
   run_wp term create speaker 'Pastor Daniel' --slug=pastor-daniel >/dev/null
 fi
 
+if [[ -z "$(run_wp term list series --field=slug 2>/dev/null || true)" ]]; then
+  run_wp term create series 'Living Hope' --slug=living-hope --description='A short sample series about finding steady hope in Christ through uncertain seasons.' >/dev/null
+fi
+
 if [[ -z "$(run_wp post list --post_type=sermon --field=ID --posts_per_page=1 2>/dev/null || true)" ]]; then
   SAMPLE_SERMON_ID="$(run_wp post create \
     --post_type=sermon \
@@ -112,6 +116,7 @@ if [[ -z "$(run_wp post list --post_type=sermon --field=ID --posts_per_page=1 2>
   run_wp post meta update "${SAMPLE_SERMON_ID}" youtube_url 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' >/dev/null
   run_wp post meta update "${SAMPLE_SERMON_ID}" audio_url '' >/dev/null
   run_wp post term set "${SAMPLE_SERMON_ID}" speaker pastor-daniel >/dev/null
+  run_wp post term set "${SAMPLE_SERMON_ID}" series living-hope >/dev/null
 fi
 
 echo

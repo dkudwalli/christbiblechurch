@@ -280,6 +280,16 @@ h3 {
   font-size: 0.95rem;
 }
 
+.sermon-meta a {
+  color: var(--accent-deep);
+  font-weight: 700;
+}
+
+.sermon-meta a:hover,
+.single-sermon__meta-card h2 a:hover {
+  color: var(--accent);
+}
+
 .sermon-meta span {
   position: relative;
 }
@@ -337,7 +347,8 @@ button[type="submit"]:hover {
 .filter-bar {
   display: grid;
   gap: 1rem;
-  grid-template-columns: 1.8fr 1fr auto;
+  grid-template-columns: 1.8fr 1fr 1fr auto;
+  align-items: end;
 }
 
 input[type="search"],
@@ -449,7 +460,7 @@ textarea {
 .single-sermon__meta-grid {
   display: grid;
   gap: 1rem;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
 .single-sermon__meta-card {
@@ -460,6 +471,10 @@ textarea {
   margin: 0.35rem 0 0;
   font-size: clamp(1.15rem, 1.6vw, 1.5rem);
   line-height: 1.2;
+}
+
+.single-sermon__meta-card h2 a {
+  color: var(--accent-deep);
 }
 
 .single-sermon__summary {

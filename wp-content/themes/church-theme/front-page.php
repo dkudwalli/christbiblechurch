@@ -57,11 +57,15 @@ $latest_sermon = new WP_Query([
 
         <?php if ($latest_sermon->have_posts()) : ?>
             <?php $latest_sermon->the_post(); ?>
+            <?php $series_term = church_theme_get_sermon_primary_term(get_the_ID(), 'series'); ?>
             <article class="card sermon-feature">
                 <div>
                     <h3><?php the_title(); ?></h3>
                     <p class="sermon-meta">
                         <span><?php echo esc_html(church_theme_get_sermon_date(get_the_ID())); ?></span>
+                        <?php if ($series_term) : ?>
+                            <span><a href="<?php echo esc_url(church_theme_get_sermon_term_url($series_term)); ?>"><?php echo esc_html($series_term->name); ?></a></span>
+                        <?php endif; ?>
                         <?php if (get_post_meta(get_the_ID(), 'scripture_reference', true)) : ?>
                             <span><?php echo esc_html((string) get_post_meta(get_the_ID(), 'scripture_reference', true)); ?></span>
                         <?php endif; ?>

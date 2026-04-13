@@ -3,7 +3,8 @@ if (! defined('ABSPATH')) {
     exit;
 }
 
-$speaker_terms = get_the_terms(get_the_ID(), 'speaker');
+$series_term = church_theme_get_sermon_primary_term(get_the_ID(), 'series');
+$speaker_term = church_theme_get_sermon_primary_term(get_the_ID(), 'speaker');
 $scripture = (string) get_post_meta(get_the_ID(), 'scripture_reference', true);
 ?>
 <article class="card sermon-card">
@@ -11,8 +12,11 @@ $scripture = (string) get_post_meta(get_the_ID(), 'scripture_reference', true);
     <h2><a href="<?php echo esc_url(church_theme_get_sermon_url(get_the_ID())); ?>"><?php the_title(); ?></a></h2>
 
     <p class="sermon-meta">
-        <?php if ($speaker_terms && ! is_wp_error($speaker_terms)) : ?>
-            <span><?php echo esc_html($speaker_terms[0]->name); ?></span>
+        <?php if ($series_term) : ?>
+            <span><a href="<?php echo esc_url(church_theme_get_sermon_term_url($series_term)); ?>"><?php echo esc_html($series_term->name); ?></a></span>
+        <?php endif; ?>
+        <?php if ($speaker_term) : ?>
+            <span><?php echo esc_html($speaker_term->name); ?></span>
         <?php endif; ?>
         <?php if ($scripture !== '') : ?>
             <span><?php echo esc_html($scripture); ?></span>

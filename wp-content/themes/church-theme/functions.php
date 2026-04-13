@@ -339,3 +339,73 @@ function church_theme_get_sermon_audio_url(int $post_id): string
 {
     return (string) get_post_meta($post_id, 'audio_url', true);
 }
+
+function church_theme_get_sermon_primary_term(int $post_id, string $taxonomy): ?WP_Term
+{
+    $terms = get_the_terms($post_id, $taxonomy);
+
+    if (! is_array($terms) || $terms === [] || is_wp_error($terms)) {
+        return null;
+    }
+
+    return $terms[0] instanceof WP_Term ? $terms[0] : null;
+}
+
+function church_theme_get_sermon_term_url(?WP_Term $term): string
+{
+    if (! $term instanceof WP_Term) {
+        return church_theme_get_sermon_archive_url();
+    }
+
+    $link = get_term_link($term);
+
+    return is_string($link) ? $link : church_theme_get_sermon_archive_url();
+}
+
+function church_theme_get_sermon_active_term_slug(string $taxonomy): string
+{
+    if (is_tax($taxonomy)) {
+        $term = get_queried_object();
+
+        if ($term instanceof WP_Term && $term->taxonomy === $taxonomy) {
+            return $term->slug;
+        }
+    }
+
+    return isset($_GET[$taxonomy]) ? sanitize_title(wp_unslash((string) $_GET[$taxonomy])) : '';
+}
+
+function church_theme_get_sermon_archive_context(): array
+{
+    if (is_tax(['speaker', 'series'])) {
+        $term = get_queried_object();
+
+        if ($term instanceof WP_Term) {
+            $summary = trim(wp_strip_all_tags((string) $term->description));
+
+            if ($summary === '') {
+                if ($term->taxonomy === 'speaker') {
+                    $summary = sprintf(__('Messages preached by %s.', 'church-theme'), $term->name);
+                }
+
+                if ($term->taxonomy === 'series') {
+                    $summary = sprintf(__('Messages from the %s series.', 'church-theme'), $term->name);
+                }
+            }
+
+            return [
+                'eyebrow' => $term->taxonomy === 'series' ? __('Series', 'church-theme') : __('Speaker', 'church-theme'),
+                'title' => $term->name,
+                'summary' => $summary,
+            ];
+        }
+    }
+
+    $title = post_type_archive_title('', false);
+
+    return [
+        'eyebrow' => __('Sermons', 'church-theme'),
+        'title' => $title !== '' ? $title : __('Sermons', 'church-theme'),
+        'summary' => __('Browse recent teaching by series, preacher, or keyword.', 'church-theme'),
+    ];
+}

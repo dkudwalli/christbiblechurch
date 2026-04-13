@@ -20,6 +20,7 @@ The initial scope matches the approved MVP:
 - `church-theme` with custom templates for home, sermons, pages, and contact
 - `church-core` plugin with:
   - `sermon` custom post type
+  - `series` taxonomy
   - `speaker` taxonomy
   - sermon metadata fields
   - sermon archive filtering
@@ -66,6 +67,7 @@ On Hostinger, this repository is meant to be pulled into an existing WordPress i
 Each sermon supports:
 
 - title
+- series via `series` taxonomy
 - preacher via `speaker` taxonomy
 - sermon date
 - Scripture reference

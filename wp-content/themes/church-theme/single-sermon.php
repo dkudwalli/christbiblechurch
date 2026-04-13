@@ -15,15 +15,44 @@ while (have_posts()) :
     $summary_content = get_the_content();
     $has_summary = trim(wp_strip_all_tags($summary_content)) !== '';
     $has_media = $youtube_url !== '' || $audio_url !== '';
-    $speakers = get_the_terms($post_id, 'speaker');
-    $related_sermons = new WP_Query([
+    $speaker_term = church_theme_get_sermon_primary_term($post_id, 'speaker');
+    $series_term = church_theme_get_sermon_primary_term($post_id, 'series');
+    $related_section_eyebrow = __('More Teaching', 'church-theme');
+    $related_section_title = __('Recent Sermons', 'church-theme');
+    $related_query_args = [
         'post_type' => 'sermon',
         'posts_per_page' => 3,
         'post__not_in' => [$post_id],
         'meta_key' => 'sermon_date',
         'orderby' => 'meta_value',
         'order' => 'DESC',
-    ]);
+    ];
+
+    if ($series_term) {
+        $related_query_args['tax_query'] = [[
+            'taxonomy' => 'series',
+            'field' => 'term_id',
+            'terms' => [$series_term->term_id],
+        ]];
+    }
+
+    $related_sermons = new WP_Query($related_query_args);
+
+    if ($series_term && $related_sermons->have_posts()) {
+        $related_section_eyebrow = __('Series', 'church-theme');
+        $related_section_title = sprintf(__('More in %s', 'church-theme'), $series_term->name);
+    }
+
+    if ($series_term && ! $related_sermons->have_posts()) {
+        $related_sermons = new WP_Query([
+            'post_type' => 'sermon',
+            'posts_per_page' => 3,
+            'post__not_in' => [$post_id],
+            'meta_key' => 'sermon_date',
+            'orderby' => 'meta_value',
+            'order' => 'DESC',
+        ]);
+    }
     ?>
     <section class="page-hero">
         <div class="wrap">
@@ -31,8 +60,11 @@ while (have_posts()) :
             <h1><?php the_title(); ?></h1>
             <p class="sermon-meta sermon-meta--hero">
                 <span><?php echo esc_html(church_theme_get_sermon_date($post_id)); ?></span>
-                <?php if ($speakers && ! is_wp_error($speakers)) : ?>
-                    <span><?php echo esc_html($speakers[0]->name); ?></span>
+                <?php if ($series_term) : ?>
+                    <span><a href="<?php echo esc_url(church_theme_get_sermon_term_url($series_term)); ?>"><?php echo esc_html($series_term->name); ?></a></span>
+                <?php endif; ?>
+                <?php if ($speaker_term) : ?>
+                    <span><?php echo esc_html($speaker_term->name); ?></span>
                 <?php endif; ?>
                 <?php if ($scripture !== '') : ?>
                     <span><?php echo esc_html($scripture); ?></span>
@@ -78,10 +110,17 @@ while (have_posts()) :
                         <h2><?php echo esc_html(church_theme_get_sermon_date($post_id)); ?></h2>
                     </article>
 
-                    <?php if ($speakers && ! is_wp_error($speakers)) : ?>
+                    <?php if ($series_term) : ?>
+                        <article class="card single-sermon__meta-card">
+                            <p class="eyebrow"><?php esc_html_e('Series', 'church-theme'); ?></p>
+                            <h2><a href="<?php echo esc_url(church_theme_get_sermon_term_url($series_term)); ?>"><?php echo esc_html($series_term->name); ?></a></h2>
+                        </article>
+                    <?php endif; ?>
+
+                    <?php if ($speaker_term) : ?>
                         <article class="card single-sermon__meta-card">
                             <p class="eyebrow"><?php esc_html_e('Preacher', 'church-theme'); ?></p>
-                            <h2><?php echo esc_html($speakers[0]->name); ?></h2>
+                            <h2><?php echo esc_html($speaker_term->name); ?></h2>
                         </article>
                     <?php endif; ?>
 
@@ -125,8 +164,8 @@ while (have_posts()) :
         <section class="section">
             <div class="wrap">
                 <div class="section-heading">
-                    <p class="eyebrow"><?php esc_html_e('More Teaching', 'church-theme'); ?></p>
-                    <h2><?php esc_html_e('Recent Sermons', 'church-theme'); ?></h2>
+                    <p class="eyebrow"><?php echo esc_html($related_section_eyebrow); ?></p>
+                    <h2><?php echo esc_html($related_section_title); ?></h2>
                 </div>
 
                 <div class="sermon-grid">
