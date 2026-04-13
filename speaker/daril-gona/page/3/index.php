@@ -1,9 +1,5 @@
 <?php
 
-$_GET['speaker'] = 'daril-gona';
-$_GET['paged'] = '3';
-$_REQUEST['speaker'] = 'daril-gona';
-$_REQUEST['paged'] = '3';
-$_SERVER['QUERY_STRING'] = 'speaker=daril-gona&paged=3';
+require dirname(dirname(dirname(dirname(__DIR__)))) . '/taxonomy-route-shim.php';
 
-require dirname(dirname(dirname(dirname(__DIR__)))) . '/index.php';
+church_route_shim_boot_taxonomy('speaker', 'daril-gona', 3);

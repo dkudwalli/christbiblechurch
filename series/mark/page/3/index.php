@@ -1,9 +1,5 @@
 <?php
 
-$_GET['series'] = 'mark';
-$_GET['paged'] = '3';
-$_REQUEST['series'] = 'mark';
-$_REQUEST['paged'] = '3';
-$_SERVER['QUERY_STRING'] = 'series=mark&paged=3';
+require dirname(dirname(dirname(dirname(__DIR__)))) . '/taxonomy-route-shim.php';
 
-require dirname(dirname(dirname(dirname(__DIR__)))) . '/index.php';
+church_route_shim_boot_taxonomy('series', 'mark', 3);
