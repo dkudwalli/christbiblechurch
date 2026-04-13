@@ -10,6 +10,7 @@
   --accent-deep: #5f7f65;
   --shadow: 0 18px 50px rgba(47, 36, 24, 0.1);
   --radius: 24px;
+  --control-height: 54px;
   --wrap: min(1120px, calc(100vw - 2rem));
 }
 
@@ -313,8 +314,8 @@ button[type="submit"] {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 46px;
-  padding: 0.8rem 1.2rem;
+  height: var(--control-height);
+  padding: 0 1.2rem;
   border: 0;
   border-radius: 999px;
   background: var(--accent);
@@ -357,15 +358,22 @@ input[type="email"],
 textarea,
 select {
   width: 100%;
-  min-height: 48px;
-  padding: 0.85rem 1rem;
+  padding: 0 1rem;
   border: 1px solid rgba(64, 50, 36, 0.18);
   border-radius: 16px;
   background: var(--surface-strong);
 }
 
+input[type="search"],
+input[type="text"],
+input[type="email"],
+select {
+  height: var(--control-height);
+}
+
 textarea {
   min-height: 150px;
+  padding: 0.85rem 1rem;
   resize: vertical;
 }
 
