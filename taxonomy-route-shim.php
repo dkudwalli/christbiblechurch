@@ -3,22 +3,29 @@
 if (! function_exists('church_route_shim_boot_taxonomy')) {
     function church_route_shim_boot_taxonomy(string $taxonomy, string $slug, int $paged = 1): void
     {
-        $query_vars = [$taxonomy => $slug];
+        $query_vars = [
+            'taxonomy' => $taxonomy,
+            'term' => $slug,
+        ];
 
         if (! defined('WP_USE_THEMES')) {
             define('WP_USE_THEMES', true);
         }
 
         $_GET[$taxonomy] = $slug;
+        $_GET['taxonomy'] = $taxonomy;
+        $_GET['term'] = $slug;
         $_REQUEST[$taxonomy] = $slug;
+        $_REQUEST['taxonomy'] = $taxonomy;
+        $_REQUEST['term'] = $slug;
 
         if ($paged > 1) {
             $query_vars['paged'] = $paged;
             $_GET['paged'] = (string) $paged;
             $_REQUEST['paged'] = (string) $paged;
-            $_SERVER['QUERY_STRING'] = sprintf('%s=%s&paged=%d', $taxonomy, $slug, $paged);
+            $_SERVER['QUERY_STRING'] = sprintf('taxonomy=%s&term=%s&paged=%d', $taxonomy, $slug, $paged);
         } else {
-            $_SERVER['QUERY_STRING'] = sprintf('%s=%s', $taxonomy, $slug);
+            $_SERVER['QUERY_STRING'] = sprintf('taxonomy=%s&term=%s', $taxonomy, $slug);
         }
 
         require dirname(__FILE__) . '/wp-load.php';
