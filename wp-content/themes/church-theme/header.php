@@ -13,14 +13,33 @@ if (! defined('ABSPATH')) {
 <body <?php body_class(); ?>>
 <?php wp_body_open(); ?>
 <header class="site-header">
+    <?php
+    $contact_email = church_theme_get_mod('contact_email');
+    $contact_phone = church_theme_get_mod('contact_phone');
+    $brand_logo = church_theme_get_brand_logo_asset();
+    ?>
+    <div class="site-header__topbar">
+        <div class="wrap site-header__topbar-inner">
+            <?php if ($contact_email !== '') : ?>
+                <a href="mailto:<?php echo esc_attr($contact_email); ?>"><?php echo esc_html($contact_email); ?></a>
+            <?php endif; ?>
+
+            <?php if ($contact_phone !== '') : ?>
+                <a href="tel:<?php echo esc_attr(church_theme_phone_href($contact_phone)); ?>">
+                    <?php printf(esc_html__('Call or WhatsApp: %s', 'church-theme'), esc_html($contact_phone)); ?>
+                </a>
+            <?php endif; ?>
+        </div>
+    </div>
+
     <div class="wrap site-header__inner">
         <a class="site-brand" href="<?php echo esc_url(home_url('/')); ?>">
             <img
                 class="site-brand__mark"
-                src="<?php echo esc_url(get_template_directory_uri() . '/assets/images/logo-fav.svg'); ?>"
-                alt="<?php esc_attr_e('Christ Bible Church logo', 'church-theme'); ?>"
-                width="44"
-                height="44">
+                src="<?php echo esc_url((string) $brand_logo['src']); ?>"
+                alt="<?php echo esc_attr((string) $brand_logo['alt']); ?>"
+                width="<?php echo esc_attr((string) $brand_logo['width']); ?>"
+                height="<?php echo esc_attr((string) $brand_logo['height']); ?>">
             <span class="site-brand__text">
                 <span class="site-brand__name"><?php bloginfo('name'); ?></span>
                 <span class="site-brand__tagline"><?php bloginfo('description'); ?></span>
@@ -28,7 +47,7 @@ if (! defined('ABSPATH')) {
         </a>
 
         <button class="site-nav__toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-menu">
-            <span>Menu</span>
+            <span><?php esc_html_e('Menu', 'church-theme'); ?></span>
         </button>
 
         <nav class="site-nav" data-nav aria-label="<?php esc_attr_e('Primary navigation', 'church-theme'); ?>">

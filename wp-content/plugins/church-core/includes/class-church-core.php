@@ -8,6 +8,7 @@ final class Church_Core
     public static function boot(): void
     {
         Church_Core_Sermons::boot();
+        Church_Core_Events::boot();
         Church_Core_Contact::boot();
     }
 

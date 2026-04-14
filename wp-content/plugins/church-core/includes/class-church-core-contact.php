@@ -147,7 +147,11 @@ final class Church_Core_Contact
 
     private static function get_contact_page_url(): string
     {
-        $contact_page = get_page_by_path('contact');
+        $contact_page = get_page_by_path('contact-us');
+
+        if (! $contact_page instanceof WP_Post) {
+            $contact_page = get_page_by_path('contact');
+        }
 
         if ($contact_page instanceof WP_Post) {
             $permalink = get_permalink($contact_page);
@@ -157,7 +161,7 @@ final class Church_Core_Contact
             }
         }
 
-        return home_url('/contact/');
+        return home_url('/contact-us/');
     }
 
     public static function submission_columns(array $columns): array
