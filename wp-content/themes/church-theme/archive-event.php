@@ -10,7 +10,6 @@ $past_events = church_theme_get_event_query(false);
 ?>
 <section class="page-hero">
     <div class="wrap">
-        <p class="eyebrow"><?php esc_html_e('Events', 'church-theme'); ?></p>
         <h1><?php post_type_archive_title(); ?></h1>
         <p class="page-hero__summary"><?php esc_html_e('Find upcoming church events, online meetings, and recent gatherings from Crossroad South Church.', 'church-theme'); ?></p>
     </div>
@@ -19,7 +18,6 @@ $past_events = church_theme_get_event_query(false);
 <section class="section">
     <div class="wrap event-section">
         <div class="section-heading">
-            <p class="eyebrow"><?php esc_html_e('Upcoming', 'church-theme'); ?></p>
             <h2><?php esc_html_e('Join us at the next gathering.', 'church-theme'); ?></h2>
         </div>
 
@@ -42,7 +40,6 @@ $past_events = church_theme_get_event_query(false);
 <section class="section section--muted">
     <div class="wrap event-section">
         <div class="section-heading">
-            <p class="eyebrow"><?php esc_html_e('Past Events', 'church-theme'); ?></p>
             <h2><?php esc_html_e('Recent gatherings and meetings.', 'church-theme'); ?></h2>
         </div>
 

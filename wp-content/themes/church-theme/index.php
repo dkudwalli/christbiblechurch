@@ -7,7 +7,6 @@ get_header();
 ?>
 <section class="page-hero">
     <div class="wrap">
-        <p class="eyebrow"><?php esc_html_e('Updates', 'church-theme'); ?></p>
         <h1><?php bloginfo('name'); ?></h1>
     </div>
 </section>

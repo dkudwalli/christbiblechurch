@@ -33,7 +33,6 @@ if (is_wp_error($series_terms)) {
 ?>
 <section class="page-hero">
     <div class="wrap">
-        <p class="eyebrow"><?php echo esc_html($archive_context['eyebrow']); ?></p>
         <h1><?php echo esc_html($archive_context['title']); ?></h1>
         <p class="page-hero__summary"><?php echo esc_html($archive_context['summary']); ?></p>
     </div>

@@ -16,7 +16,6 @@ $map_embed_url = church_theme_get_mod('map_embed_url');
 ?>
 <section class="page-hero">
     <div class="wrap">
-        <p class="eyebrow"><?php esc_html_e('Connect', 'church-theme'); ?></p>
         <h1><?php the_title(); ?></h1>
         <div class="page-hero__summary prose prose--compact">
             <?php echo apply_filters('the_content', get_the_content()); ?>

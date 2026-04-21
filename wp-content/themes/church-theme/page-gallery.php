@@ -14,7 +14,6 @@ $gallery_feature = church_theme_get_gallery_feature_media();
 <section class="page-hero">
     <div class="wrap<?php echo $gallery_feature ? ' page-hero__grid' : ''; ?>">
         <div>
-            <p class="eyebrow"><?php esc_html_e('Gallery', 'church-theme'); ?></p>
             <h1><?php the_title(); ?></h1>
             <div class="page-hero__summary prose prose--compact">
                 <?php echo apply_filters('the_content', get_the_content()); ?>

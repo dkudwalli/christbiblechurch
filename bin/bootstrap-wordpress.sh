@@ -81,7 +81,6 @@ run_wp option update home "${SITE_URL}"
 run_wp option update siteurl "${SITE_URL}"
 run_wp option update permalink_structure '/%postname%/'
 run_wp rewrite flush --hard
-run_wp theme mod set hero_eyebrow '' >/dev/null
 run_wp theme mod set contact_phone '+919663065363' >/dev/null
 run_wp theme mod set contact_email 'crossroadsouthchurch@gmail.com' >/dev/null
 run_wp theme mod set service_times $'Corporate Worship - Sunday 10 am\nWednesday Bible Study at 7:30pm - Online Meeting\nOffice Hours - Tuesday to Saturday 9:30 am - 5:30 pm' >/dev/null
@@ -93,32 +92,32 @@ HTML
 
 ABOUT_CONTENT="$(cat <<'HTML'
 <p>Crossroad South Church is a community of Christ-followers from diverse linguistic, geographic, and cultural backgrounds. We gather to glorify the Triune God, enjoy Him together, and grow in faithful Christian discipleship.</p>
-<p>The sections below summarize the beliefs, mission priorities, leadership, governance, and core values that shape our life together as a local church.</p>
+<p>The sections below summarize the beliefs, mission priorities, leadership, governance, stewardship, membership, and core values that shape our life together as a local church.</p>
 HTML
 )"
 
 BELIEFS_CONTENT="$(cat <<'HTML'
-<p>What follows is our understanding of the basic essentials of the biblical, orthodox Christian faith. This section functions as a concise doctrinal statement for the church.</p>
+<p>What follows is our understanding of the basic essentials of the biblical, orthodox Christian faith. We regard these as theological convictions commonly held by Christ-followers throughout the history of Christian thought and teaching, as derived from the sixty-six books of the Bible.</p>
 <h3>The Bible</h3>
-<p>We believe that Scripture is the inspired, infallible, and authoritative Word of God, sufficient for all matters of faith and practice.</p>
+<p>We believe the Bible, both the Old and New Testaments, to be the inspired Word of God, without error in the original writings, the complete revelation of God’s will for the salvation of men, and the divine and final authority for all Christian faith and practice.</p>
 <h3>God</h3>
-<p>There is one true and living God who eternally exists in three persons: Father, Son, and Holy Spirit, each fully God and equal in essence.</p>
+<p>We believe in one God, Creator of all things, infinitely perfect and eternally existing in three persons: Father, Son, and Holy Spirit.</p>
 <h3>Jesus Christ</h3>
-<p>Jesus Christ, the eternal Son of God, took on human flesh, lived a sinless life, died in the place of sinners, rose bodily from the dead, and reigns as Lord and King.</p>
+<p>We believe that Jesus Christ is true God and true man, conceived of the Holy Spirit and born of the Virgin Mary. He died on the cross as a sacrifice for our sins according to the Scriptures, was bodily raised on the third day, ascended into heaven, and now serves as our High Priest and Advocate.</p>
 <h3>The Holy Spirit</h3>
-<p>The Holy Spirit regenerates sinners, indwells believers, convicts of sin, and empowers God’s people for holy living and witness.</p>
-<h3>Salvation</h3>
-<p>Salvation is by grace alone, through faith alone, in Christ alone. Sinners are justified apart from works and are kept secure by the finished work of Christ.</p>
-<h3>The Church</h3>
-<p>The Church is the body of Christ, called to worship God, preach the gospel, administer baptism and the Lord’s Supper, and make disciples.</p>
-<h3>The Future</h3>
-<p>Christ will return personally and visibly to judge the living and the dead, gather His people, and establish His everlasting kingdom.</p>
+<p>We believe that the ministry of the Holy Spirit is to glorify the Lord Jesus Christ and, in this age, to convict, regenerate, indwell, guide, instruct, and empower the believer for godly living and service.</p>
+<h3>Man</h3>
+<p>We believe that man was created in the image of God but fell into sin and is therefore eternally separated from God. Only through regeneration by the Holy Spirit can salvation and eternal spiritual life be obtained.</p>
+<h3>Cross</h3>
+<p>We believe that the blood of Jesus Christ, shed in His death on the cross, together with His resurrection from the dead, provides the only ground for justification and salvation for all who believe. Those who receive Jesus Christ are born of the Holy Spirit and become children of God.</p>
+<h3>Ordinances</h3>
+<p>We believe that water baptism and the Lord’s Supper are ordinances to be observed by the church during the present age. They are not, however, to be regarded as means of salvation.</p>
 HTML
 )"
 
 MISSIONS_CONTENT="$(cat <<'HTML'
-<p>The New Testament church displayed grace-filled generosity toward the wider work of the gospel. Crossroad South Church considers such participation essential to maturing as a gospel-centered church.</p>
-<p>The live church site notes that the church currently supports four mission-related projects. This page provides the section structure now and can be expanded with named partners and reports as those details are curated.</p>
+<p>We believe the New Testament church showed much grace in contributions, whether small or large, toward the wider needs of the mission work happening around them. As a church we consider such participation essential to our maturing as a gospel-centered church.</p>
+<p>Crossroad South Church currently supports four mission-related projects and desires to keep growing in generous, outward-facing partnership for the sake of the gospel.</p>
 HTML
 )"
 
@@ -135,31 +134,58 @@ HTML
 )"
 
 GOVERNANCE_CONTENT="$(cat <<'HTML'
-<p>The church is governed by a male elder board in which the pastor in charge serves as first among equals. Regular board meetings review spiritual health, finances, missions, and the broader direction of the church.</p>
-<p>The appointment of an elder follows the scriptural guidelines of 1 Timothy 3 and Titus 1 along with formal agreement on the church’s doctrinal commitments. The church also relies on staff and volunteers who coordinate weekly worship preparation and congregational life.</p>
+<p>The church is governed by a male elder board in which the pastor in charge is considered first among equals. Monthly board meetings review matters related to spiritual health, finances, missions, and the broader direction of the church.</p>
+<p>The appointment of an elder follows the scriptural guidelines of 1 Timothy 3 and Titus 1 together with a more formal review of the church’s doctrinal understandings.</p>
+<p>Apart from the elder board, the church has paid staff and also relies heavily on volunteers who give their time and talent to weekly ministry. A working committee meets regularly to deliberate on aspects of the worship service such as praise and worship, announcements, and preaching, reviewing the previous Sunday and preparing for the following Sunday.</p>
+HTML
+)"
+
+STEWARDSHIP_CONTENT="$(cat <<'HTML'
+<p>The giving offered on Sundays and at other times is understood as stewardship. We believe New Testament teaching on giving calls individuals to cheerfully extend their resources, exercising faith in the work of the church and participating in the expansion of the kingdom of God.</p>
+<p>Financial integrity and accountability are a high priority in the church. Transparency in bookkeeping and accounts should be in place, allowing members to access financial information for valid reasons.</p>
+<p>From time to time, preferably each quarter, the financial health of the church is presented to the members.</p>
+HTML
+)"
+
+MEMBERSHIP_CONTENT="$(cat <<'HTML'
+<p>All are welcome to become members of the community of faith. Those desiring membership are expected to align with the mission, vision, values, and beliefs of the church, which includes attending a membership class.</p>
+<p>Membership is then expressed through active and regular participation in Sunday services, Life Groups, and biblical stewardship.</p>
 HTML
 )"
 
 CORE_VALUES_CONTENT="$(cat <<'HTML'
-<p>Crossroad South Church’s core values are breaking down barriers, gospel-centered living, deep biblical conviction, and missional engagement.</p>
-<h3>Breaking Down Barriers</h3>
-<p>The church aims to welcome people across linguistic, geographic, and cultural backgrounds into meaningful life together under Christ.</p>
 <h3>Gospel-Centered</h3>
-<p>All our dealings within and outside the community of faith should bear witness to the grace we ourselves have received.</p>
+<p>All our dealings within and outside the community of faith should witness to the grace of which we ourselves have been recipients.</p>
 <h3>Deeply Biblical</h3>
-<p>Preaching, teaching, discipleship, and decision-making are shaped by the authority and sufficiency of Scripture.</p>
+<p>The Word of God is studied, taught, and preached with the understanding that its right interpretation and application are crucial to the health of the church.</p>
+<h3>Breaking Down Barriers</h3>
+<p>The church should reflect the nature of the New Testament church where all are considered equally loved and cared for by the Triune Lord.</p>
 <h3>Missional Living</h3>
-<p>The church wants every member to see ordinary life as a setting for witness, service, hospitality, and gospel mission.</p>
+<p>Every individual should exemplify the witness of the gospel wherever they may be: in the neighbourhood, school, college, or workplace.</p>
 HTML
 )"
 
 WORSHIP_CONTENT="$(cat <<'HTML'
-<p>Corporate worship and small groups are conducted in English. Crossroad South Church is kids, youth, and adult friendly, and the page sections below explain how worship and age-group ministries currently function.</p>
+<p>Corporate worship and small groups are conducted in English. The sections below explain how Sunday worship, Life Groups, age-group ministries, and periodic ministries currently function in the life of Crossroad South Church.</p>
 HTML
 )"
 
 CORPORATE_WORSHIP_CONTENT="$(cat <<'HTML'
-<p>The corporate worship service is held each Sunday at 10 am. The gathering includes a time of intercession, praise, and the preaching of God’s Word.</p>
+<p>We believe the whole time spent in the presence of the Triune Lord on a Sunday worship service or any other community gathering is centered on Him.</p>
+<p>This means that singing, preaching, teaching, fasting, studying, and giving are drawn from Him and yielded back to Him as a response, because we are His children.</p>
+<p>The corporate worship service is currently held each Sunday at 10 am and includes a time of intercession, praise, and the preaching of God’s Word.</p>
+HTML
+)"
+
+PRIMARY_MINISTRIES_CONTENT="$(cat <<'HTML'
+<p>We believe that discipleship is key to the Great Commission and that these ministries happen especially through the pulpit ministry and the Life Group.</p>
+<p>The Life Group is intended to be a community in which we become vulnerable and available, being influenced together by the study of God’s Word.</p>
+<p>These primary ministries also include the church’s ongoing ministry to children and young adults.</p>
+HTML
+)"
+
+SECONDARY_MINISTRIES_CONTENT="$(cat <<'HTML'
+<p>These are ministries that happen from time to time, addressing themes such as parenting, marriage, book studies, and related areas of Christian life and discipleship.</p>
 HTML
 )"
 
@@ -209,12 +235,16 @@ BELIEFS_ID="$(ensure_page beliefs 'Beliefs' "${BELIEFS_CONTENT}" "${ABOUT_ID}" 1
 MISSIONS_ID="$(ensure_page missions 'Missions' "${MISSIONS_CONTENT}" "${ABOUT_ID}" 20)"
 ELDER_BOARD_ID="$(ensure_page elder-board 'Elder Board' "${ELDER_BOARD_CONTENT}" "${ABOUT_ID}" 30)"
 GOVERNANCE_ID="$(ensure_page governance 'Governance' "${GOVERNANCE_CONTENT}" "${ABOUT_ID}" 40)"
-CORE_VALUES_ID="$(ensure_page core-values 'Core Values' "${CORE_VALUES_CONTENT}" "${ABOUT_ID}" 50)"
+STEWARDSHIP_ID="$(ensure_page stewardship 'Stewardship' "${STEWARDSHIP_CONTENT}" "${ABOUT_ID}" 50)"
+MEMBERSHIP_ID="$(ensure_page membership 'Membership' "${MEMBERSHIP_CONTENT}" "${ABOUT_ID}" 60)"
+CORE_VALUES_ID="$(ensure_page core-values 'Core Values' "${CORE_VALUES_CONTENT}" "${ABOUT_ID}" 70)"
 WORSHIP_ID="$(ensure_page worship 'Worship' "${WORSHIP_CONTENT}" 0 20)"
 CORPORATE_WORSHIP_ID="$(ensure_page corporate-worship 'Corporate Worship' "${CORPORATE_WORSHIP_CONTENT}" "${WORSHIP_ID}" 10)"
-KIDS_MINISTRY_ID="$(ensure_page kids-ministry 'Kingdom Warriors' "${KIDS_MINISTRY_CONTENT}" "${WORSHIP_ID}" 20)"
-TEENS_MINISTRY_ID="$(ensure_page teens-ministry 'Teens Ministry' "${TEENS_MINISTRY_CONTENT}" "${WORSHIP_ID}" 30)"
-WOMENS_MINISTRY_ID="$(ensure_page womens-ministry "Women's Ministry" "${WOMENS_MINISTRY_CONTENT}" "${WORSHIP_ID}" 40)"
+PRIMARY_MINISTRIES_ID="$(ensure_page primary-ministries 'Primary Ministries' "${PRIMARY_MINISTRIES_CONTENT}" "${WORSHIP_ID}" 20)"
+SECONDARY_MINISTRIES_ID="$(ensure_page secondary-ministries 'Secondary Ministries' "${SECONDARY_MINISTRIES_CONTENT}" "${WORSHIP_ID}" 30)"
+KIDS_MINISTRY_ID="$(ensure_page kids-ministry 'Kingdom Warriors' "${KIDS_MINISTRY_CONTENT}" "${WORSHIP_ID}" 40)"
+TEENS_MINISTRY_ID="$(ensure_page teens-ministry 'Teens Ministry' "${TEENS_MINISTRY_CONTENT}" "${WORSHIP_ID}" 50)"
+WOMENS_MINISTRY_ID="$(ensure_page womens-ministry "Women's Ministry" "${WOMENS_MINISTRY_CONTENT}" "${WORSHIP_ID}" 60)"
 GALLERY_ID="$(ensure_page gallery 'Gallery' "${GALLERY_CONTENT}" 0 30)"
 GIVE_ID="$(ensure_page give 'Give' "${GIVE_CONTENT}" 0 40)"
 CONTACT_ID="$(ensure_page contact-us 'Contact Us' "${CONTACT_CONTENT}" 0 50)"
@@ -264,11 +294,16 @@ if (is_array(\$items)) {
 \$add_custom('Missions', trailingslashit(get_permalink((int) ${ABOUT_ID})) . '#missions', \$about_item);
 \$add_custom('Elder Board', trailingslashit(get_permalink((int) ${ABOUT_ID})) . '#elder-board', \$about_item);
 \$add_custom('Governance', trailingslashit(get_permalink((int) ${ABOUT_ID})) . '#governance', \$about_item);
+\$add_custom('Stewardship', trailingslashit(get_permalink((int) ${ABOUT_ID})) . '#stewardship', \$about_item);
+\$add_custom('Membership', trailingslashit(get_permalink((int) ${ABOUT_ID})) . '#membership', \$about_item);
 \$add_custom('Core Values', trailingslashit(get_permalink((int) ${ABOUT_ID})) . '#core-values', \$about_item);
 \$worship_item = \$add_page((int) ${WORSHIP_ID});
 \$add_custom('Corporate Worship', trailingslashit(get_permalink((int) ${WORSHIP_ID})) . '#corporate-worship', \$worship_item);
+\$add_custom('Primary Ministries', trailingslashit(get_permalink((int) ${WORSHIP_ID})) . '#primary-ministries', \$worship_item);
+\$add_custom('Secondary Ministries', trailingslashit(get_permalink((int) ${WORSHIP_ID})) . '#secondary-ministries', \$worship_item);
 \$add_custom('Kids Ministry', trailingslashit(get_permalink((int) ${WORSHIP_ID})) . '#kids-ministry', \$worship_item);
 \$add_custom('Teens Ministry', trailingslashit(get_permalink((int) ${WORSHIP_ID})) . '#teens-ministry', \$worship_item);
+\$add_custom('Women\'s Ministry', trailingslashit(get_permalink((int) ${WORSHIP_ID})) . '#womens-ministry', \$worship_item);
 \$add_page((int) ${GALLERY_ID});
 \$add_page((int) ${GIVE_ID});
 \$add_custom('Sermons', get_post_type_archive_link('sermon') ?: home_url('/sermons/'));

@@ -6,7 +6,6 @@ if (! defined('ABSPATH')) {
 function church_theme_defaults(): array
 {
     return [
-        'hero_eyebrow' => '',
         'hero_title' => 'Exalting the Triune God, Edifying Believers, Evangelizing the Unreached.',
         'hero_primary_label' => 'Plan Your Visit',
         'hero_primary_url' => '/contact-us/',
@@ -635,7 +634,6 @@ function church_theme_customize_register(WP_Customize_Manager $wp_customize): vo
     }
 
     $fields = [
-        ['section' => 'church_theme_home', 'id' => 'hero_eyebrow', 'label' => __('Hero Eyebrow', 'church-theme'), 'type' => 'text', 'sanitize' => 'sanitize_text_field'],
         ['section' => 'church_theme_home', 'id' => 'hero_title', 'label' => __('Hero Title', 'church-theme'), 'type' => 'text', 'sanitize' => 'sanitize_text_field'],
         ['section' => 'church_theme_home', 'id' => 'hero_primary_label', 'label' => __('Hero Button Label', 'church-theme'), 'type' => 'text', 'sanitize' => 'sanitize_text_field'],
         ['section' => 'church_theme_home', 'id' => 'hero_primary_url', 'label' => __('Hero Button URL', 'church-theme'), 'type' => 'url', 'sanitize' => 'esc_url_raw'],
@@ -688,6 +686,8 @@ function church_theme_get_primary_nav_items(): array
                 ['label' => __('Missions', 'church-theme'), 'url' => church_theme_get_page_url('about-us') . '#missions'],
                 ['label' => __('Elder Board', 'church-theme'), 'url' => church_theme_get_page_url('about-us') . '#elder-board'],
                 ['label' => __('Governance', 'church-theme'), 'url' => church_theme_get_page_url('about-us') . '#governance'],
+                ['label' => __('Stewardship', 'church-theme'), 'url' => church_theme_get_page_url('about-us') . '#stewardship'],
+                ['label' => __('Membership', 'church-theme'), 'url' => church_theme_get_page_url('about-us') . '#membership'],
                 ['label' => __('Core Values', 'church-theme'), 'url' => church_theme_get_page_url('about-us') . '#core-values'],
             ],
         ],
@@ -696,8 +696,11 @@ function church_theme_get_primary_nav_items(): array
             'url' => church_theme_get_page_url('worship'),
             'children' => [
                 ['label' => __('Corporate Worship', 'church-theme'), 'url' => church_theme_get_page_url('worship') . '#corporate-worship'],
+                ['label' => __('Primary Ministries', 'church-theme'), 'url' => church_theme_get_page_url('worship') . '#primary-ministries'],
+                ['label' => __('Secondary Ministries', 'church-theme'), 'url' => church_theme_get_page_url('worship') . '#secondary-ministries'],
                 ['label' => __('Kids Ministry', 'church-theme'), 'url' => church_theme_get_page_url('worship') . '#kids-ministry'],
                 ['label' => __('Teens Ministry', 'church-theme'), 'url' => church_theme_get_page_url('worship') . '#teens-ministry'],
+                ['label' => __('Women\'s Ministry', 'church-theme'), 'url' => church_theme_get_page_url('worship') . '#womens-ministry'],
             ],
         ],
         [
@@ -949,7 +952,6 @@ function church_theme_get_sermon_archive_context(): array
             }
 
             return [
-                'eyebrow' => $term->taxonomy === 'series' ? __('Series', 'church-theme') : __('Speaker', 'church-theme'),
                 'title' => $term->name,
                 'summary' => $summary,
             ];
@@ -959,7 +961,6 @@ function church_theme_get_sermon_archive_context(): array
     $title = post_type_archive_title('', false);
 
     return [
-        'eyebrow' => __('Sermons', 'church-theme'),
         'title' => $title !== '' ? $title : __('Sermons', 'church-theme'),
         'summary' => __('Browse recent teaching and upcoming archive imports from Crossroad South Church.', 'church-theme'),
     ];

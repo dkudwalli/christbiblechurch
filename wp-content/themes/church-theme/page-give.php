@@ -12,7 +12,6 @@ $contact_email = church_theme_get_mod('contact_email');
 ?>
 <section class="page-hero">
     <div class="wrap">
-        <p class="eyebrow"><?php esc_html_e('Give', 'church-theme'); ?></p>
         <h1><?php the_title(); ?></h1>
     </div>
 </section>

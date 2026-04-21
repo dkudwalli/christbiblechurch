@@ -8,7 +8,6 @@ get_header();
 <section class="page-hero">
     <div class="wrap">
         <?php while (have_posts()) : the_post(); ?>
-            <p class="eyebrow"><?php esc_html_e('Page', 'church-theme'); ?></p>
             <h1><?php the_title(); ?></h1>
         <?php endwhile; ?>
         <?php rewind_posts(); ?>

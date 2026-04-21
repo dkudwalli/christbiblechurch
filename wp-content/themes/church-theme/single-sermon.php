@@ -17,7 +17,6 @@ while (have_posts()) :
     $has_media = $youtube_url !== '' || $audio_url !== '';
     $speaker_term = church_theme_get_sermon_primary_term($post_id, 'speaker');
     $series_term = church_theme_get_sermon_primary_term($post_id, 'series');
-    $related_section_eyebrow = __('More Teaching', 'church-theme');
     $related_section_title = __('Recent Sermons', 'church-theme');
     $related_query_args = [
         'post_type' => 'sermon',
@@ -39,7 +38,6 @@ while (have_posts()) :
     $related_sermons = new WP_Query($related_query_args);
 
     if ($series_term && $related_sermons->have_posts()) {
-        $related_section_eyebrow = __('Series', 'church-theme');
         $related_section_title = sprintf(__('More in %s', 'church-theme'), $series_term->name);
     }
 
@@ -56,7 +54,6 @@ while (have_posts()) :
     ?>
     <section class="page-hero">
         <div class="wrap">
-            <p class="eyebrow"><?php esc_html_e('Sermon', 'church-theme'); ?></p>
             <h1><?php the_title(); ?></h1>
             <p class="sermon-meta sermon-meta--hero">
                 <span><?php echo esc_html(church_theme_get_sermon_date($post_id)); ?></span>
@@ -164,7 +161,6 @@ while (have_posts()) :
         <section class="section">
             <div class="wrap">
                 <div class="section-heading">
-                    <p class="eyebrow"><?php echo esc_html($related_section_eyebrow); ?></p>
                     <h2><?php echo esc_html($related_section_title); ?></h2>
                 </div>
 

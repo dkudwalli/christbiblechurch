@@ -15,7 +15,6 @@ while (have_posts()) :
     ?>
     <section class="page-hero">
         <div class="wrap">
-            <p class="eyebrow"><?php esc_html_e('Event', 'church-theme'); ?></p>
             <h1><?php the_title(); ?></h1>
             <p class="page-hero__summary"><?php echo esc_html(church_theme_get_event_datetime($post_id)); ?></p>
         </div>
