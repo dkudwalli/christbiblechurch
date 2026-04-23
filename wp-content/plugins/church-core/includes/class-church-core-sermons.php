@@ -204,6 +204,15 @@ final class Church_Core_Sermons
 
             update_post_meta($post_id, $meta_key, $value);
         }
+
+        $youtube_url = (string) get_post_meta($post_id, 'youtube_url', true);
+        $youtube_video_id = Church_Core_Youtube_Client::extract_video_id_from_url($youtube_url);
+
+        if ($youtube_video_id === '') {
+            delete_post_meta($post_id, 'youtube_video_id');
+        } else {
+            update_post_meta($post_id, 'youtube_video_id', $youtube_video_id);
+        }
     }
 
     public static function tune_archive_query(WP_Query $query): void
