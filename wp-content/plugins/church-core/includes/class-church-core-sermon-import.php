@@ -350,6 +350,12 @@ final class Church_Core_Sermon_Import
                 update_post_meta($post_id, $meta_key, $row[$meta_key]);
             }
 
+            $youtube_video_id = Church_Core_Youtube_Client::extract_video_id_from_url($row['youtube_url']);
+
+            if ($youtube_video_id !== '') {
+                update_post_meta($post_id, 'youtube_video_id', $youtube_video_id);
+            }
+
             $result['imported']++;
         }
 
