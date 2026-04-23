@@ -1,5 +1,5 @@
 <?php
-if (! defined('ABSPATH')) {
+if (!defined('ABSPATH')) {
     exit;
 }
 
@@ -7,6 +7,74 @@ final class Church_Core_Sermon_Sync_Service
 {
     private const CONTENT_WORD_LIMIT = 400;
     private const EXCERPT_WORD_LIMIT = 40;
+    private const SCRIPTURE_BOOK_ALIASES = [
+        'Genesis' => ['Genesis', 'Gen', 'Ge', 'Gn'],
+        'Exodus' => ['Exodus', 'Exod', 'Exo', 'Ex'],
+        'Leviticus' => ['Leviticus', 'Lev', 'Le', 'Lv'],
+        'Numbers' => ['Numbers', 'Num', 'Nu', 'Nm', 'Nb'],
+        'Deuteronomy' => ['Deuteronomy', 'Deut', 'Deu', 'Dt'],
+        'Joshua' => ['Joshua', 'Josh', 'Jos', 'Jsh'],
+        'Judges' => ['Judges', 'Judg', 'Jdg', 'Jdgs'],
+        'Ruth' => ['Ruth', 'Rth', 'Ru'],
+        '1 Samuel' => ['1 Samuel', '1 Sam', '1Sa', '1 Sa'],
+        '2 Samuel' => ['2 Samuel', '2 Sam', '2Sa', '2 Sa'],
+        '1 Kings' => ['1 Kings', '1 Kgs', '1 Ki', '1Ki', '1 Kngs'],
+        '2 Kings' => ['2 Kings', '2 Kgs', '2 Ki', '2Ki', '2 Kngs'],
+        '1 Chronicles' => ['1 Chronicles', '1 Chron', '1 Chr', '1Ch', '1 Chrn'],
+        '2 Chronicles' => ['2 Chronicles', '2 Chron', '2 Chr', '2Ch', '2 Chrn'],
+        'Ezra' => ['Ezra', 'Ezr'],
+        'Nehemiah' => ['Nehemiah', 'Neh', 'Ne'],
+        'Esther' => ['Esther', 'Esth', 'Est'],
+        'Job' => ['Job'],
+        'Psalms' => ['Psalms', 'Psalm', 'Ps'],
+        'Proverbs' => ['Proverbs', 'Prov', 'Pro', 'Prv', 'Pr'],
+        'Ecclesiastes' => ['Ecclesiastes', 'Eccles', 'Eccl', 'Ecc', 'Qoh'],
+        'Song of Solomon' => ['Song of Solomon', 'Song of Songs', 'Song', 'SOS', 'Canticles'],
+        'Isaiah' => ['Isaiah', 'Isa'],
+        'Jeremiah' => ['Jeremiah', 'Jer'],
+        'Lamentations' => ['Lamentations', 'Lam'],
+        'Ezekiel' => ['Ezekiel', 'Ezek', 'Eze', 'Ezk'],
+        'Daniel' => ['Daniel', 'Dan', 'Da', 'Dn'],
+        'Hosea' => ['Hosea', 'Hos', 'Ho'],
+        'Joel' => ['Joel', 'Joe', 'Jl'],
+        'Amos' => ['Amos', 'Am'],
+        'Obadiah' => ['Obadiah', 'Obad', 'Ob'],
+        'Jonah' => ['Jonah', 'Jon'],
+        'Micah' => ['Micah', 'Mic'],
+        'Nahum' => ['Nahum', 'Nah'],
+        'Habakkuk' => ['Habakkuk', 'Hab'],
+        'Zephaniah' => ['Zephaniah', 'Zeph', 'Zep'],
+        'Haggai' => ['Haggai', 'Hag', 'Hg'],
+        'Zechariah' => ['Zechariah', 'Zech', 'Zec'],
+        'Malachi' => ['Malachi', 'Mal'],
+        'Matthew' => ['Matthew', 'Matt', 'Mt'],
+        'Mark' => ['Mark', 'Mrk', 'Mk', 'Mr'],
+        'Luke' => ['Luke', 'Luk', 'Lk'],
+        'John' => ['John', 'Jn', 'Jhn'],
+        'Acts' => ['Acts', 'Act', 'Ac'],
+        'Romans' => ['Romans', 'Rom', 'Ro', 'Rm'],
+        '1 Corinthians' => ['1 Corinthians', '1 Cor', '1Co', '1 Co'],
+        '2 Corinthians' => ['2 Corinthians', '2 Cor', '2Co', '2 Co'],
+        'Galatians' => ['Galatians', 'Gal', 'Ga'],
+        'Ephesians' => ['Ephesians', 'Eph'],
+        'Philippians' => ['Philippians', 'Phil', 'Php', 'Pp'],
+        'Colossians' => ['Colossians', 'Col', 'Colos', 'Coloss'],
+        '1 Thessalonians' => ['1 Thessalonians', '1 Thess', '1 Thes', '1Th', '1 Th'],
+        '2 Thessalonians' => ['2 Thessalonians', '2 Thess', '2 Thes', '2Th', '2 Th'],
+        '1 Timothy' => ['1 Timothy', '1 Tim', '1Ti', '1 Ti'],
+        '2 Timothy' => ['2 Timothy', '2 Tim', '2Ti', '2 Ti'],
+        'Titus' => ['Titus', 'Tit'],
+        'Philemon' => ['Philemon', 'Phlm', 'Phm', 'Pm'],
+        'Hebrews' => ['Hebrews', 'Heb'],
+        'James' => ['James', 'Jas', 'Jm'],
+        '1 Peter' => ['1 Peter', '1 Pet', '1Pe', '1 Pt'],
+        '2 Peter' => ['2 Peter', '2 Pet', '2Pe', '2 Pt'],
+        '1 John' => ['1 John', '1 Jn', '1Jn', '1 Jhn'],
+        '2 John' => ['2 John', '2 Jn', '2Jn', '2 Jhn'],
+        '3 John' => ['3 John', '3 Jn', '3Jn', '3 Jhn'],
+        'Jude' => ['Jude', 'Jud'],
+        'Revelation' => ['Revelation', 'Rev', 'Re', 'Revelations'],
+    ];
 
     private Church_Core_Youtube_Client $youtube_client;
 
@@ -38,14 +106,20 @@ final class Church_Core_Sermon_Sync_Service
         }
 
         foreach ($videos as $video) {
-            if (! $this->should_import_video($video)) {
+            if (!$this->should_import_video($video)) {
                 $result['skipped']++;
                 continue;
             }
 
+            $scripture_reference = $this->extract_scripture_reference_from_title((string) $video['title']);
+
             $existing_post_id = $this->find_existing_post_by_video_id((string) $video['video_id']);
 
             if ($existing_post_id > 0) {
+                if ($this->maybe_backfill_scripture_reference((int) $existing_post_id, $scripture_reference)) {
+                    $result['backfilled']++;
+                }
+
                 $result['skipped']++;
                 continue;
             }
@@ -54,12 +128,13 @@ final class Church_Core_Sermon_Sync_Service
 
             if ($legacy_post_id > 0) {
                 update_post_meta($legacy_post_id, 'youtube_video_id', (string) $video['video_id']);
+                $this->maybe_backfill_scripture_reference((int) $legacy_post_id, $scripture_reference);
                 $result['backfilled']++;
                 $result['skipped']++;
                 continue;
             }
 
-            $created_post_id = $this->create_sermon_post($video);
+            $created_post_id = $this->create_sermon_post($video, $scripture_reference);
 
             if (is_wp_error($created_post_id)) {
                 $result['status'] = 'error';
@@ -118,7 +193,7 @@ final class Church_Core_Sermon_Sync_Service
         return true;
     }
 
-    private function create_sermon_post(array $video)
+    private function create_sermon_post(array $video, string $scripture_reference)
     {
         $dates = $this->build_post_dates((string) $video['published_at']);
 
@@ -134,6 +209,16 @@ final class Church_Core_Sermon_Sync_Service
             $slug = 'youtube-video-' . sanitize_title((string) $video['video_id']);
         }
 
+        $meta_input = [
+            'sermon_date' => $dates['sermon_date'],
+            'youtube_video_id' => (string) $video['video_id'],
+            'youtube_url' => (string) $video['youtube_url'],
+        ];
+
+        if ($scripture_reference !== '') {
+            $meta_input['scripture_reference'] = $scripture_reference;
+        }
+
         $post_id = wp_insert_post([
             'post_type' => 'sermon',
             'post_status' => 'publish',
@@ -143,11 +228,7 @@ final class Church_Core_Sermon_Sync_Service
             'post_content' => $summary,
             'post_date' => $dates['post_date'],
             'post_date_gmt' => $dates['post_date_gmt'],
-            'meta_input' => [
-                'sermon_date' => $dates['sermon_date'],
-                'youtube_video_id' => (string) $video['video_id'],
-                'youtube_url' => (string) $video['youtube_url'],
-            ],
+            'meta_input' => $meta_input,
         ], true);
 
         if (is_wp_error($post_id)) {
@@ -267,11 +348,153 @@ final class Church_Core_Sermon_Sync_Service
 
         $words = preg_split('/\s+/u', $description, -1, PREG_SPLIT_NO_EMPTY);
 
-        if (! is_array($words) || count($words) <= $max_words) {
+        if (!is_array($words) || count($words) <= $max_words) {
             return $description;
         }
 
         return rtrim(implode(' ', array_slice($words, 0, $max_words)), " \t\n\r\0\x0B,.;:-") . '...';
+    }
+
+    private function extract_scripture_reference_from_title(string $title): string
+    {
+        $title = html_entity_decode(trim($title), ENT_QUOTES, get_bloginfo('charset') ?: 'UTF-8');
+
+        if ($title === '') {
+            return '';
+        }
+
+        $pattern = sprintf(
+            '/(?<![A-Za-z])(?P<book>%1$s)\.?\s*(?P<chapter>\d{1,3})\s*:\s*(?P<verse>\d{1,3})(?:(?P<separator>\s*[-–—]\s*)(?:(?P<end_chapter>\d{1,3})\s*:\s*)?(?P<end_verse>\d{1,3}))?/iu',
+            $this->get_scripture_book_pattern()
+        );
+
+        if (preg_match($pattern, $title, $matches) !== 1) {
+            return '';
+        }
+
+        $book_name = $this->expand_scripture_book_name((string) $matches['book']);
+
+        if ($book_name === '') {
+            return '';
+        }
+
+        $separator = isset($matches['separator']) && $matches['separator'] !== ''
+            ? preg_replace('/\s+/u', '', (string) $matches['separator'])
+            : '';
+
+        $reference = (string) $matches['chapter'] . ':' . (string) $matches['verse'];
+
+        if (isset($matches['end_verse']) && $matches['end_verse'] !== '') {
+            $separator = $separator !== '' ? $separator : '-';
+            $reference .= $separator;
+
+            if (isset($matches['end_chapter']) && $matches['end_chapter'] !== '') {
+                $reference .= (string) $matches['end_chapter'] . ':';
+            }
+
+            $reference .= (string) $matches['end_verse'];
+        }
+
+        $scripture_reference = sanitize_text_field($book_name . ' ' . $reference);
+        $scripture_reference = (string) apply_filters(
+            'church_core_sermon_sync_extract_scripture_reference',
+            $scripture_reference,
+            $title,
+            $matches
+        );
+
+        return sanitize_text_field(trim($scripture_reference));
+    }
+
+    private function maybe_backfill_scripture_reference(int $post_id, string $scripture_reference): bool
+    {
+        if ($scripture_reference === '') {
+            return false;
+        }
+
+        if ((string) get_post_meta($post_id, 'scripture_reference', true) !== '') {
+            return false;
+        }
+
+        update_post_meta($post_id, 'scripture_reference', $scripture_reference);
+
+        return true;
+    }
+
+    private function expand_scripture_book_name(string $book_name): string
+    {
+        $normalized_book = $this->normalize_scripture_book_alias($book_name);
+        $alias_map = $this->get_scripture_book_alias_map();
+
+        return $alias_map[$normalized_book] ?? '';
+    }
+
+    private function get_scripture_book_alias_map(): array
+    {
+        static $alias_map = null;
+
+        if (is_array($alias_map)) {
+            return $alias_map;
+        }
+
+        $alias_map = [];
+
+        foreach (self::SCRIPTURE_BOOK_ALIASES as $canonical_name => $aliases) {
+            $alias_map[$this->normalize_scripture_book_alias($canonical_name)] = $canonical_name;
+
+            foreach ($aliases as $alias) {
+                $alias_map[$this->normalize_scripture_book_alias($alias)] = $canonical_name;
+            }
+        }
+
+        return $alias_map;
+    }
+
+    private function get_scripture_book_pattern(): string
+    {
+        static $pattern = null;
+
+        if (is_string($pattern) && $pattern !== '') {
+            return $pattern;
+        }
+
+        $aliases = [];
+
+        foreach (self::SCRIPTURE_BOOK_ALIASES as $canonical_name => $book_aliases) {
+            $aliases[$canonical_name] = $canonical_name;
+
+            foreach ($book_aliases as $alias) {
+                $aliases[$alias] = $alias;
+            }
+        }
+
+        $aliases = array_values($aliases);
+
+        usort(
+            $aliases,
+            static function (string $left, string $right): int {
+                return strlen($right) <=> strlen($left);
+            }
+        );
+
+        $pattern_parts = [];
+
+        foreach ($aliases as $alias) {
+            $pattern_parts[] = str_replace('\ ', '\s*', preg_quote($alias, '/'));
+        }
+
+        $pattern = '(?:' . implode('|', $pattern_parts) . ')';
+
+        return $pattern;
+    }
+
+    private function normalize_scripture_book_alias(string $book_name): string
+    {
+        $book_name = strtolower($book_name);
+        $book_name = preg_replace('/\.+/u', '', $book_name) ?: $book_name;
+        $book_name = preg_replace('/\s+/u', '', $book_name) ?: $book_name;
+
+        return preg_replace('/[^a-z0-9]/u', '', $book_name) ?: '';
     }
 
     private function find_existing_post_by_video_id(string $video_id): int
@@ -281,10 +504,12 @@ final class Church_Core_Sermon_Sync_Service
             'post_status' => 'any',
             'posts_per_page' => 1,
             'fields' => 'ids',
-            'meta_query' => [[
-                'key' => 'youtube_video_id',
-                'value' => $video_id,
-            ]],
+            'meta_query' => [
+                [
+                    'key' => 'youtube_video_id',
+                    'value' => $video_id,
+                ]
+            ],
         ]);
 
         if ($posts === []) {
@@ -301,11 +526,13 @@ final class Church_Core_Sermon_Sync_Service
             'post_status' => 'any',
             'posts_per_page' => 10,
             'fields' => 'ids',
-            'meta_query' => [[
-                'key' => 'youtube_url',
-                'value' => $video_id,
-                'compare' => 'LIKE',
-            ]],
+            'meta_query' => [
+                [
+                    'key' => 'youtube_url',
+                    'value' => $video_id,
+                    'compare' => 'LIKE',
+                ]
+            ],
         ]);
 
         foreach ($posts as $post_id) {
@@ -326,11 +553,13 @@ final class Church_Core_Sermon_Sync_Service
             'post_status' => 'any',
             'posts_per_page' => -1,
             'fields' => 'ids',
-            'meta_query' => [[
-                'key' => 'youtube_url',
-                'value' => '',
-                'compare' => '!=',
-            ]],
+            'meta_query' => [
+                [
+                    'key' => 'youtube_url',
+                    'value' => '',
+                    'compare' => '!=',
+                ]
+            ],
         ]);
 
         $backfilled = 0;
