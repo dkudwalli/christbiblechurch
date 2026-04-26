@@ -14,24 +14,8 @@ if (! defined('ABSPATH')) {
 <?php wp_body_open(); ?>
 <header class="site-header">
     <?php
-    $contact_email = church_theme_get_mod('contact_email');
-    $contact_phone = church_theme_get_mod('contact_phone');
     $brand_logo = church_theme_get_brand_logo_asset();
     ?>
-    <div class="site-header__topbar">
-        <div class="wrap site-header__topbar-inner">
-            <?php if ($contact_email !== '') : ?>
-                <a href="mailto:<?php echo esc_attr($contact_email); ?>"><?php echo esc_html($contact_email); ?></a>
-            <?php endif; ?>
-
-            <?php if ($contact_phone !== '') : ?>
-                <a href="tel:<?php echo esc_attr(church_theme_phone_href($contact_phone)); ?>">
-                    <?php printf(esc_html__('Call or WhatsApp: %s', 'church-theme'), esc_html($contact_phone)); ?>
-                </a>
-            <?php endif; ?>
-        </div>
-    </div>
-
     <div class="wrap site-header__inner">
         <a class="site-brand" href="<?php echo esc_url(home_url('/')); ?>">
             <img
