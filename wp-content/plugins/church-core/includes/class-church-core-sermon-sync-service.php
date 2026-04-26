@@ -268,7 +268,23 @@ final class Church_Core_Sermon_Sync_Service
             return $cached_term_id;
         }
 
-        $speaker_name = (string) apply_filters('church_core_sermon_sync_default_speaker', 'Daril Gona');
+        if (Church_Core_Sermon_Cron::has_default_speaker_setting()) {
+            $speaker_term_id = Church_Core_Sermon_Cron::get_default_speaker_term_id();
+            $speaker_term = $speaker_term_id > 0 ? get_term($speaker_term_id, 'speaker') : null;
+
+            if (! $speaker_term instanceof WP_Term || is_wp_error($speaker_term)) {
+                return new WP_Error(
+                    'church_core_sermon_sync_invalid_default_speaker',
+                    __('The saved default speaker for YouTube sync no longer exists. Choose a new default speaker in the YouTube Sync settings.', 'church-core')
+                );
+            }
+
+            $cached_term_id = $speaker_term_id;
+
+            return $cached_term_id;
+        }
+
+        $speaker_name = (string) apply_filters('church_core_sermon_sync_default_speaker', 'Unknown');
         $speaker_name = sanitize_text_field($speaker_name);
 
         if ($speaker_name === '') {

@@ -1,38 +1,61 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const mediaButtons = document.querySelectorAll("[data-media-target]");
+  const defaultSpeakerChoice = document.querySelector(
+    "[data-default-speaker-choice]"
+  );
+  const defaultSpeakerCustom = document.querySelector(
+    "[data-default-speaker-custom]"
+  );
+  const defaultSpeakerInput = defaultSpeakerCustom
+    ? defaultSpeakerCustom.querySelector("input")
+    : null;
 
-  if (!mediaButtons.length || !window.wp || !window.wp.media) {
-    return;
+  if (defaultSpeakerChoice && defaultSpeakerCustom) {
+    const toggleDefaultSpeakerInput = () => {
+      const shouldShowInput = defaultSpeakerChoice.value === "other";
+
+      defaultSpeakerCustom.hidden = !shouldShowInput;
+
+      if (defaultSpeakerInput) {
+        defaultSpeakerInput.disabled = !shouldShowInput;
+      }
+    };
+
+    defaultSpeakerChoice.addEventListener("change", toggleDefaultSpeakerInput);
+    toggleDefaultSpeakerInput();
   }
 
-  mediaButtons.forEach((button) => {
-    button.addEventListener("click", (event) => {
-      event.preventDefault();
+  const mediaButtons = document.querySelectorAll("[data-media-target]");
 
-      const selector = button.getAttribute("data-media-target");
-      const target = selector ? document.querySelector(selector) : null;
+  if (mediaButtons.length && window.wp && window.wp.media) {
+    mediaButtons.forEach((button) => {
+      button.addEventListener("click", (event) => {
+        event.preventDefault();
 
-      if (!target) {
-        return;
-      }
+        const selector = button.getAttribute("data-media-target");
+        const target = selector ? document.querySelector(selector) : null;
 
-      const frame = window.wp.media({
-        title: "Choose an audio file",
-        button: {
-          text: "Use this audio",
-        },
-        library: {
-          type: ["audio"],
-        },
-        multiple: false,
+        if (!target) {
+          return;
+        }
+
+        const frame = window.wp.media({
+          title: "Choose an audio file",
+          button: {
+            text: "Use this audio",
+          },
+          library: {
+            type: ["audio"],
+          },
+          multiple: false,
+        });
+
+        frame.on("select", () => {
+          const attachment = frame.state().get("selection").first().toJSON();
+          target.value = attachment.url || "";
+        });
+
+        frame.open();
       });
-
-      frame.on("select", () => {
-        const attachment = frame.state().get("selection").first().toJSON();
-        target.value = attachment.url || "";
-      });
-
-      frame.open();
     });
-  });
+  }
 });
