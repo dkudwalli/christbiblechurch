@@ -27,6 +27,7 @@ final class Church_Core_Sermon_Cron
         return [
             'api_key' => '',
             'channel_id' => '',
+            'default_speaker_term_id' => 0,
             'schedule_weekday' => 'sunday',
             'schedule_time' => '12:30',
         ];
@@ -41,6 +42,24 @@ final class Church_Core_Sermon_Cron
         }
 
         return wp_parse_args($settings, self::get_default_settings());
+    }
+
+    public static function has_default_speaker_setting(): bool
+    {
+        $settings = get_option(self::SETTINGS_OPTION, []);
+
+        return is_array($settings) && array_key_exists('default_speaker_term_id', $settings);
+    }
+
+    public static function get_default_speaker_term_id(): int
+    {
+        $settings = get_option(self::SETTINGS_OPTION, []);
+
+        if (! is_array($settings) || ! array_key_exists('default_speaker_term_id', $settings)) {
+            return 0;
+        }
+
+        return absint($settings['default_speaker_term_id']);
     }
 
     public static function get_last_run(): array

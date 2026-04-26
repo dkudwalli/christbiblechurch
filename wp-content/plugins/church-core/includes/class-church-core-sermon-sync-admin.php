@@ -10,16 +10,19 @@ final class Church_Core_Sermon_Sync_Admin
     private const NOTICE_TRANSIENT_PREFIX = 'church_core_sermon_sync_notice_';
     private const NOTICE_TTL = 300;
 
+    private static string $page_hook = '';
+
     public static function boot(): void
     {
         add_action('admin_menu', [__CLASS__, 'register_admin_page']);
         add_action('admin_init', [__CLASS__, 'register_settings']);
+        add_action('admin_enqueue_scripts', [__CLASS__, 'enqueue_admin_assets']);
         add_action('admin_post_church_core_sermon_sync_now', [__CLASS__, 'handle_manual_sync']);
     }
 
     public static function register_admin_page(): void
     {
-        add_submenu_page(
+        self::$page_hook = (string) add_submenu_page(
             'edit.php?post_type=sermon',
             __('YouTube Sync', 'church-core'),
             __('YouTube Sync', 'church-core'),
@@ -60,12 +63,152 @@ final class Church_Core_Sermon_Sync_Admin
             $schedule_weekday = $defaults['schedule_weekday'];
         }
 
-        return [
+        $sanitized = [
             'api_key' => sanitize_text_field((string) $settings['api_key']),
             'channel_id' => sanitize_text_field((string) $settings['channel_id']),
             'schedule_weekday' => $schedule_weekday,
             'schedule_time' => $schedule_time,
         ];
+
+        self::sanitize_default_speaker_setting($settings, $sanitized);
+
+        return $sanitized;
+    }
+
+    public static function enqueue_admin_assets(string $hook): void
+    {
+        if ($hook !== self::$page_hook) {
+            return;
+        }
+
+        wp_enqueue_script(
+            'church-core-admin',
+            CHURCH_CORE_URL . 'assets/admin.js',
+            [],
+            filemtime(CHURCH_CORE_PATH . 'assets/admin.js'),
+            true
+        );
+    }
+
+    private static function sanitize_default_speaker_setting(array $settings, array &$sanitized): void
+    {
+        $speaker_choice = isset($settings['default_speaker_term_id'])
+            ? sanitize_text_field((string) $settings['default_speaker_term_id'])
+            : '';
+
+        if ($speaker_choice === 'other') {
+            $speaker_name = isset($settings['default_speaker_name'])
+                ? sanitize_text_field((string) $settings['default_speaker_name'])
+                : '';
+
+            if ($speaker_name === '') {
+                self::add_settings_error(__('Enter a default speaker name, or choose an existing speaker.', 'church-core'));
+                self::preserve_previous_default_speaker_setting($sanitized);
+
+                return;
+            }
+
+            $speaker_term_id = self::resolve_or_create_speaker_term_id($speaker_name);
+
+            if (is_wp_error($speaker_term_id)) {
+                self::add_settings_error($speaker_term_id->get_error_message());
+                self::preserve_previous_default_speaker_setting($sanitized);
+
+                return;
+            }
+
+            $sanitized['default_speaker_term_id'] = $speaker_term_id;
+
+            return;
+        }
+
+        $speaker_term_id = absint($speaker_choice);
+
+        if ($speaker_term_id <= 0) {
+            self::add_settings_error(__('Choose a default speaker, or use Other to create one.', 'church-core'));
+            self::preserve_previous_default_speaker_setting($sanitized);
+
+            return;
+        }
+
+        if (! self::is_valid_speaker_term_id($speaker_term_id)) {
+            self::add_settings_error(__('The selected default speaker no longer exists. Choose another speaker.', 'church-core'));
+            self::preserve_previous_default_speaker_setting($sanitized);
+
+            return;
+        }
+
+        $sanitized['default_speaker_term_id'] = $speaker_term_id;
+    }
+
+    private static function resolve_or_create_speaker_term_id(string $speaker_name)
+    {
+        $existing_term = term_exists($speaker_name, 'speaker');
+
+        if (is_array($existing_term) && isset($existing_term['term_id'])) {
+            return (int) $existing_term['term_id'];
+        }
+
+        if (is_string($existing_term) || is_int($existing_term)) {
+            return (int) $existing_term;
+        }
+
+        $inserted_term = wp_insert_term($speaker_name, 'speaker');
+
+        if (is_wp_error($inserted_term)) {
+            return new WP_Error(
+                'church_core_sermon_sync_speaker_insert_failed',
+                sprintf(
+                    __('Could not create the default speaker term "%1$s": %2$s', 'church-core'),
+                    $speaker_name,
+                    $inserted_term->get_error_message()
+                )
+            );
+        }
+
+        return (int) $inserted_term['term_id'];
+    }
+
+    private static function preserve_previous_default_speaker_setting(array &$sanitized): void
+    {
+        if (! Church_Core_Sermon_Cron::has_default_speaker_setting()) {
+            return;
+        }
+
+        $sanitized['default_speaker_term_id'] = Church_Core_Sermon_Cron::get_default_speaker_term_id();
+    }
+
+    private static function is_valid_speaker_term_id(int $speaker_term_id): bool
+    {
+        if ($speaker_term_id <= 0) {
+            return false;
+        }
+
+        $term = get_term($speaker_term_id, 'speaker');
+
+        return $term instanceof WP_Term && ! is_wp_error($term);
+    }
+
+    private static function get_speaker_terms(): array
+    {
+        $terms = get_terms([
+            'taxonomy' => 'speaker',
+            'hide_empty' => false,
+            'orderby' => 'name',
+            'order' => 'ASC',
+        ]);
+
+        return is_wp_error($terms) ? [] : $terms;
+    }
+
+    private static function add_settings_error(string $message): void
+    {
+        add_settings_error(
+            self::SETTINGS_GROUP,
+            'church_core_sermon_sync_default_speaker',
+            $message,
+            'error'
+        );
     }
 
     public static function render_page(): void
@@ -73,6 +216,10 @@ final class Church_Core_Sermon_Sync_Admin
         self::assert_permissions();
 
         $settings = Church_Core_Sermon_Cron::get_settings();
+        $speaker_terms = self::get_speaker_terms();
+        $has_saved_default_speaker = Church_Core_Sermon_Cron::has_default_speaker_setting();
+        $selected_default_speaker_term_id = Church_Core_Sermon_Cron::get_default_speaker_term_id();
+        $selected_default_speaker_exists = $selected_default_speaker_term_id > 0 && self::is_valid_speaker_term_id($selected_default_speaker_term_id);
         $last_run = Church_Core_Sermon_Cron::get_last_run();
         $logs = Church_Core_Sermon_Cron::get_log_entries();
         $next_run = Church_Core_Sermon_Cron::get_next_scheduled_timestamp();
@@ -86,6 +233,8 @@ final class Church_Core_Sermon_Sync_Admin
         ?>
         <div class="wrap">
             <h1><?php esc_html_e('YouTube Sync', 'church-core'); ?></h1>
+
+            <?php settings_errors(self::SETTINGS_GROUP); ?>
 
             <?php if (is_array($notice)) : ?>
                 <?php
@@ -122,6 +271,45 @@ final class Church_Core_Sermon_Sync_Admin
                             <td>
                                 <input class="regular-text" type="text" id="church-core-youtube-channel-id" name="<?php echo esc_attr(Church_Core_Sermon_Cron::SETTINGS_OPTION); ?>[channel_id]" value="<?php echo esc_attr((string) $settings['channel_id']); ?>" placeholder="UCxxxxxxxxxxxxxxxxxxxxxx">
                                 <p class="description"><?php esc_html_e('Paste the channel ID for the church YouTube channel, not the @handle.', 'church-core'); ?></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">
+                                <label for="church-core-default-speaker"><?php esc_html_e('Default Speaker', 'church-core'); ?></label>
+                            </th>
+                            <td>
+                                <select class="regular-text" id="church-core-default-speaker" name="<?php echo esc_attr(Church_Core_Sermon_Cron::SETTINGS_OPTION); ?>[default_speaker_term_id]" data-default-speaker-choice>
+                                    <option value=""><?php esc_html_e('Select a speaker', 'church-core'); ?></option>
+                                    <?php if ($has_saved_default_speaker && $selected_default_speaker_term_id > 0 && ! $selected_default_speaker_exists) : ?>
+                                        <option value="<?php echo esc_attr((string) $selected_default_speaker_term_id); ?>" selected>
+                                            <?php
+                                            printf(
+                                                esc_html__('Missing speaker (term ID %d)', 'church-core'),
+                                                $selected_default_speaker_term_id
+                                            );
+                                            ?>
+                                        </option>
+                                    <?php endif; ?>
+                                    <?php foreach ($speaker_terms as $speaker_term) : ?>
+                                        <option value="<?php echo esc_attr((string) $speaker_term->term_id); ?>" <?php selected($selected_default_speaker_term_id, (int) $speaker_term->term_id); ?>>
+                                            <?php echo esc_html($speaker_term->name); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                    <option value="other"><?php esc_html_e('Other', 'church-core'); ?></option>
+                                </select>
+                                <div class="church-core-default-speaker-custom" data-default-speaker-custom hidden style="margin-top: 8px;">
+                                    <label for="church-core-default-speaker-name" class="screen-reader-text"><?php esc_html_e('New default speaker name', 'church-core'); ?></label>
+                                    <input class="regular-text" type="text" id="church-core-default-speaker-name" name="<?php echo esc_attr(Church_Core_Sermon_Cron::SETTINGS_OPTION); ?>[default_speaker_name]" value="" placeholder="<?php esc_attr_e('Speaker name', 'church-core'); ?>" disabled>
+                                </div>
+                                <?php if (! $has_saved_default_speaker) : ?>
+                                    <p class="description"><?php esc_html_e('Until a default speaker is saved, YouTube sync will use the fallback speaker "Unknown".', 'church-core'); ?></p>
+                                <?php elseif ($selected_default_speaker_term_id <= 0) : ?>
+                                    <p class="description"><?php esc_html_e('No default speaker is saved. Choose one before the next sync.', 'church-core'); ?></p>
+                                <?php elseif ($selected_default_speaker_term_id > 0 && ! $selected_default_speaker_exists) : ?>
+                                    <p class="description"><?php esc_html_e('The saved default speaker could not be found. Choose another speaker before the next sync.', 'church-core'); ?></p>
+                                <?php else : ?>
+                                    <p class="description"><?php esc_html_e('New sermons imported from YouTube will be assigned to this speaker.', 'church-core'); ?></p>
+                                <?php endif; ?>
                             </td>
                         </tr>
                         <tr>
