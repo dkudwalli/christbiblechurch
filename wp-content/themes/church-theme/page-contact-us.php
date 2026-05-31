@@ -45,42 +45,42 @@ $map_embed_url = church_theme_get_mod('map_embed_url');
             <div class="card">
                 <h2><?php esc_html_e('Visit and Connect', 'church-theme'); ?></h2>
 
-                <div class="detail-list">
+                <dl class="detail-list">
                     <?php if ($contact_email !== '') : ?>
                         <div class="detail-list__item">
-                            <strong><?php esc_html_e('Email', 'church-theme'); ?></strong>
-                            <p><a href="mailto:<?php echo esc_attr($contact_email); ?>"><?php echo esc_html($contact_email); ?></a></p>
+                            <dt><?php esc_html_e('Email', 'church-theme'); ?></dt>
+                            <dd><a href="mailto:<?php echo esc_attr($contact_email); ?>"><?php echo esc_html($contact_email); ?></a></dd>
                         </div>
                     <?php endif; ?>
 
                     <?php if ($contact_phone !== '') : ?>
                         <div class="detail-list__item">
-                            <strong><?php esc_html_e('Phone', 'church-theme'); ?></strong>
-                            <p><a href="tel:<?php echo esc_attr(church_theme_phone_href($contact_phone)); ?>"><?php echo esc_html($contact_phone); ?></a></p>
+                            <dt><?php esc_html_e('Phone', 'church-theme'); ?></dt>
+                            <dd><a href="tel:<?php echo esc_attr(church_theme_phone_href($contact_phone)); ?>"><?php echo esc_html($contact_phone); ?></a></dd>
                         </div>
                     <?php endif; ?>
 
                     <?php if ($service_times !== []) : ?>
                         <div class="detail-list__item">
-                            <strong><?php esc_html_e('Timings', 'church-theme'); ?></strong>
-                            <p><?php echo esc_html(implode(' | ', $service_times)); ?></p>
+                            <dt><?php esc_html_e('Timings', 'church-theme'); ?></dt>
+                            <dd><?php echo esc_html(implode(' | ', $service_times)); ?></dd>
                         </div>
                     <?php endif; ?>
 
                     <?php if ($worship_location !== []) : ?>
                         <div class="detail-list__item">
-                            <strong><?php esc_html_e('Worship Location', 'church-theme'); ?></strong>
-                            <p><?php echo esc_html(implode(', ', $worship_location)); ?></p>
+                            <dt><?php esc_html_e('Worship Location', 'church-theme'); ?></dt>
+                            <dd><?php echo esc_html(implode(', ', $worship_location)); ?></dd>
                         </div>
                     <?php endif; ?>
 
                     <?php if ($communication_address !== []) : ?>
                         <div class="detail-list__item">
-                            <strong><?php esc_html_e('Communication Address', 'church-theme'); ?></strong>
-                            <p><?php echo esc_html(implode(', ', $communication_address)); ?></p>
+                            <dt><?php esc_html_e('Communication Address', 'church-theme'); ?></dt>
+                            <dd><?php echo esc_html(implode(', ', $communication_address)); ?></dd>
                         </div>
                     <?php endif; ?>
-                </div>
+                </dl>
             </div>
 
             <div class="card">

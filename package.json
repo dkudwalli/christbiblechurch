@@ -1,0 +1,17 @@
+{
+  "name": "church-frontend-quality",
+  "private": true,
+  "scripts": {
+    "lint": "npm run lint:php && npm run lint:phpcs && npm run lint:css",
+    "lint:css": "stylelint \"wp-content/themes/church-theme/assets/css/**/*.css\"",
+    "lint:php": "find wp-content/themes/church-theme wp-content/plugins/church-core -name '*.php' -print0 | xargs -0 -n1 php -l",
+    "lint:phpcs": "./bin/lint-phpcs.sh",
+    "test": "npm run lint",
+    "test:smoke": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.1",
+    "stylelint": "^16.10.0",
+    "stylelint-config-standard": "^36.0.1"
+  }
+}

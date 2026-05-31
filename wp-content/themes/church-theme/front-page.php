@@ -146,7 +146,7 @@ $upcoming_events = church_theme_get_event_query(true, 3);
             </article>
         <?php endif; ?>
 
-        <div class="callout__actions">
+        <div class="callout__actions event-archive__actions">
             <a class="button" href="<?php echo esc_url(church_theme_get_event_archive_url()); ?>">
                 <?php esc_html_e('View All Events', 'church-theme'); ?>
             </a>

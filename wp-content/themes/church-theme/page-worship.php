@@ -44,49 +44,23 @@ $worship_location = church_theme_split_lines(church_theme_get_mod('worship_locat
 <?php if ($sections !== []) : ?>
     <section class="section section--muted section-nav-band">
         <div class="wrap">
-            <nav class="section-nav" aria-label="<?php esc_attr_e('Worship page sections', 'church-theme'); ?>">
-                <ul class="section-nav__list">
-                    <?php foreach ($sections as $section) : ?>
-                        <li><a href="#<?php echo esc_attr(church_theme_get_section_anchor($section)); ?>"><?php echo esc_html(get_the_title($section)); ?></a></li>
-                    <?php endforeach; ?>
-                </ul>
-            </nav>
+            <?php
+            get_template_part('template-parts/section', 'nav', [
+                'sections' => $sections,
+                'label' => __('Worship page sections', 'church-theme'),
+            ]);
+            ?>
         </div>
     </section>
 
     <?php foreach ($sections as $index => $section) : ?>
         <?php
-        $section_slug = church_theme_get_section_anchor($section);
-        $section_media = church_theme_get_section_media($page_slug, $section_slug);
+        get_template_part('template-parts/page', 'section', [
+            'section' => $section,
+            'page_slug' => $page_slug,
+            'index' => $index,
+        ]);
         ?>
-        <section id="<?php echo esc_attr(church_theme_get_section_anchor($section)); ?>" class="section<?php echo $index % 2 === 1 ? ' section--muted' : ''; ?>">
-            <div class="wrap section-layout">
-                <div class="section-heading">
-                    <h2><?php echo esc_html(get_the_title($section)); ?></h2>
-                </div>
-
-                <?php if (($section_media['layout'] ?? '') === 'feature') : ?>
-                    <div class="section-story">
-                        <figure class="card section-visual">
-                            <img
-                                src="<?php echo esc_url((string) $section_media['item']['src']); ?>"
-                                alt="<?php echo esc_attr((string) $section_media['item']['alt']); ?>"
-                                width="<?php echo esc_attr((string) $section_media['item']['width']); ?>"
-                                height="<?php echo esc_attr((string) $section_media['item']['height']); ?>"
-                                loading="lazy">
-                        </figure>
-
-                        <article class="card section-card prose prose--wide">
-                            <?php echo apply_filters('the_content', $section->post_content); ?>
-                        </article>
-                    </div>
-                <?php else : ?>
-                    <article class="card section-card prose prose--wide">
-                        <?php echo apply_filters('the_content', $section->post_content); ?>
-                    </article>
-                <?php endif; ?>
-            </div>
-        </section>
     <?php endforeach; ?>
 <?php endif; ?>
 

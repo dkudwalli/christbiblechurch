@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<ruleset name="Church Frontend">
+  <description>PHP code quality checks for the theme and church-core plugin.</description>
+
+  <file>wp-content/themes/church-theme</file>
+  <file>wp-content/plugins/church-core</file>
+
+  <arg name="basepath" value="."/>
+  <arg name="colors"/>
+  <arg name="parallel" value="4"/>
+  <arg name="warning-severity" value="0"/>
+
+  <rule ref="PSR12">
+    <exclude name="PSR1.Classes.ClassDeclaration.MissingNamespace"/>
+    <exclude name="PSR1.Files.SideEffects.FoundWithSymbols"/>
+    <exclude name="PSR1.Methods.CamelCapsMethodName.NotCamelCaps"/>
+    <exclude name="PSR12.Files.FileHeader.SpacingAfterBlock"/>
+    <exclude name="Squiz.Classes.ValidClassName.NotCamelCaps"/>
+    <exclude name="Squiz.ControlStructures.ControlSignature.NewlineAfterOpenBrace"/>
+    <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.NewlineBeforeOpenBrace"/>
+  </rule>
+
+  <exclude-pattern>*/assets/*</exclude-pattern>
+</ruleset>

@@ -22,6 +22,7 @@ $series_terms = get_terms([
 ]);
 $archive_context = church_theme_get_sermon_archive_context();
 $pagination_base = str_replace('999999999', '%#%', esc_url(get_pagenum_link(999999999)));
+$has_active_filters = $current_search !== '' || $current_speaker !== '' || $current_series !== '';
 
 if (is_wp_error($speakers)) {
     $speakers = [];
@@ -40,14 +41,14 @@ if (is_wp_error($series_terms)) {
 
 <section class="section section--muted">
     <div class="wrap">
-        <form class="filter-bar" method="get" action="<?php echo esc_url(church_theme_get_sermon_archive_url()); ?>">
+        <form class="filter-bar" method="get" action="<?php echo esc_url(church_theme_get_sermon_archive_url()); ?>" aria-label="<?php esc_attr_e('Filter sermons', 'church-theme'); ?>">
             <label>
-                <span class="screen-reader-text"><?php esc_html_e('Search sermons', 'church-theme'); ?></span>
+                <span class="filter-field__label"><?php esc_html_e('Search', 'church-theme'); ?></span>
                 <input type="search" name="s" value="<?php echo esc_attr($current_search); ?>" placeholder="<?php esc_attr_e('Search sermons', 'church-theme'); ?>">
             </label>
 
             <label>
-                <span class="screen-reader-text"><?php esc_html_e('Filter by speaker', 'church-theme'); ?></span>
+                <span class="filter-field__label"><?php esc_html_e('Speaker', 'church-theme'); ?></span>
                 <select name="speaker">
                     <option value=""><?php esc_html_e('All speakers', 'church-theme'); ?></option>
                     <?php foreach ($speakers as $speaker) : ?>
@@ -59,7 +60,7 @@ if (is_wp_error($series_terms)) {
             </label>
 
             <label>
-                <span class="screen-reader-text"><?php esc_html_e('Filter by series', 'church-theme'); ?></span>
+                <span class="filter-field__label"><?php esc_html_e('Series', 'church-theme'); ?></span>
                 <select name="series">
                     <option value=""><?php esc_html_e('All series', 'church-theme'); ?></option>
                     <?php foreach ($series_terms as $series_term) : ?>
@@ -70,7 +71,14 @@ if (is_wp_error($series_terms)) {
                 </select>
             </label>
 
-            <button class="button button--secondary" type="submit"><?php esc_html_e('Filter', 'church-theme'); ?></button>
+            <div class="filter-bar__actions">
+                <button class="button button--secondary" type="submit"><?php esc_html_e('Filter', 'church-theme'); ?></button>
+                <?php if ($has_active_filters) : ?>
+                    <a class="text-link" href="<?php echo esc_url(church_theme_get_sermon_archive_url()); ?>">
+                        <?php esc_html_e('Clear filters', 'church-theme'); ?>
+                    </a>
+                <?php endif; ?>
+            </div>
         </form>
     </div>
 </section>

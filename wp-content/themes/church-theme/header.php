@@ -12,22 +12,22 @@ if (! defined('ABSPATH')) {
 </head>
 <body <?php body_class(); ?>>
 <?php wp_body_open(); ?>
+<a class="skip-link" href="#main-content"><?php esc_html_e('Skip to content', 'church-theme'); ?></a>
 <header class="site-header">
     <?php
     $brand_logo = church_theme_get_brand_logo_asset();
     ?>
     <div class="wrap site-header__inner">
         <a class="site-brand" href="<?php echo esc_url(home_url('/')); ?>">
-            <img
-                class="site-brand__mark"
-                src="<?php echo esc_url((string) $brand_logo['src']); ?>"
-                alt="<?php echo esc_attr((string) $brand_logo['alt']); ?>"
-                width="<?php echo esc_attr((string) $brand_logo['width']); ?>"
-                height="<?php echo esc_attr((string) $brand_logo['height']); ?>">
-            <span class="site-brand__text">
-                <span class="site-brand__name"><?php bloginfo('name'); ?></span>
-                <span class="site-brand__tagline"><?php bloginfo('description'); ?></span>
-            </span>
+            <?php
+            echo church_theme_render_static_image($brand_logo, [
+                'class' => 'site-brand__mark',
+                'loading' => 'eager',
+                'decoding' => 'sync',
+                'fetchpriority' => 'high',
+                'sizes' => '(max-width: 720px) 150px, 180px',
+            ]);
+            ?>
         </a>
 
         <button class="site-nav__toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-menu">
@@ -47,4 +47,4 @@ if (! defined('ABSPATH')) {
         </nav>
     </div>
 </header>
-<main class="site-main">
+<main id="main-content" class="site-main" tabindex="-1">

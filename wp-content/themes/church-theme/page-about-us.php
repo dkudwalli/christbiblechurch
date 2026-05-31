@@ -22,89 +22,23 @@ $sections = church_theme_get_child_sections(get_the_ID());
 <?php if ($sections !== []) : ?>
     <section class="section section--muted section-nav-band">
         <div class="wrap">
-            <nav class="section-nav" aria-label="<?php esc_attr_e('About page sections', 'church-theme'); ?>">
-                <ul class="section-nav__list">
-                    <?php foreach ($sections as $section) : ?>
-                        <li><a href="#<?php echo esc_attr(church_theme_get_section_anchor($section)); ?>"><?php echo esc_html(get_the_title($section)); ?></a></li>
-                    <?php endforeach; ?>
-                </ul>
-            </nav>
+            <?php
+            get_template_part('template-parts/section', 'nav', [
+                'sections' => $sections,
+                'label' => __('About page sections', 'church-theme'),
+            ]);
+            ?>
         </div>
     </section>
 
     <?php foreach ($sections as $index => $section) : ?>
         <?php
-        $section_slug = church_theme_get_section_anchor($section);
-        $section_media = church_theme_get_section_media($page_slug, $section_slug);
-        $elder_board = $section_slug === 'elder-board' ? church_theme_get_elder_board_cards($section, $section_media) : [];
-        $has_elder_cards = ($elder_board['cards'] ?? []) !== [];
+        get_template_part('template-parts/page', 'section', [
+            'section' => $section,
+            'page_slug' => $page_slug,
+            'index' => $index,
+        ]);
         ?>
-        <section id="<?php echo esc_attr(church_theme_get_section_anchor($section)); ?>" class="section<?php echo $index % 2 === 1 ? ' section--muted' : ''; ?>">
-            <div class="wrap section-layout">
-                <div class="section-heading">
-                    <h2><?php echo esc_html(get_the_title($section)); ?></h2>
-                </div>
-
-                <?php if ($has_elder_cards) : ?>
-                    <?php if (($elder_board['intro'] ?? '') !== '') : ?>
-                        <div class="elder-board-intro prose prose--wide">
-                            <?php echo wp_kses_post((string) $elder_board['intro']); ?>
-                        </div>
-                    <?php endif; ?>
-
-                    <div class="elder-board-grid">
-                        <?php foreach ($elder_board['cards'] as $card) : ?>
-                            <?php $image = $card['image']; ?>
-                            <article class="card elder-card">
-                                <div class="elder-card__media-frame">
-                                    <img
-                                        class="elder-card__media"
-                                        src="<?php echo esc_url((string) $image['src']); ?>"
-                                        alt="<?php echo esc_attr((string) $image['alt']); ?>"
-                                        <?php if (! empty($image['width'])) : ?>width="<?php echo esc_attr((string) $image['width']); ?>"<?php endif; ?>
-                                        <?php if (! empty($image['height'])) : ?>height="<?php echo esc_attr((string) $image['height']); ?>"<?php endif; ?>
-                                        <?php if (! empty($image['object_position'])) : ?>style="object-position: <?php echo esc_attr((string) $image['object_position']); ?>;"<?php endif; ?>
-                                        loading="lazy">
-                                </div>
-
-                                <div class="elder-card__body">
-                                    <?php if (($card['family'] ?? '') !== '') : ?>
-                                        <p class="elder-card__family"><?php echo esc_html((string) $card['family']); ?></p>
-                                    <?php endif; ?>
-
-                                    <h3><?php echo esc_html((string) $card['name']); ?></h3>
-
-                                    <div class="prose prose--compact elder-card__content">
-                                        <?php echo wp_kses_post((string) $card['content']); ?>
-                                    </div>
-                                </div>
-                            </article>
-                        <?php endforeach; ?>
-                    </div>
-                <?php else : ?>
-                    <?php if (($section_media['layout'] ?? '') === 'gallery') : ?>
-                        <div class="section-media-grid">
-                            <?php foreach ($section_media['items'] as $item) : ?>
-                                <figure class="card person-card">
-                                    <img
-                                        class="person-card__media"
-                                        src="<?php echo esc_url((string) $item['src']); ?>"
-                                        alt="<?php echo esc_attr((string) $item['alt']); ?>"
-                                        width="<?php echo esc_attr((string) $item['width']); ?>"
-                                        height="<?php echo esc_attr((string) $item['height']); ?>"
-                                        loading="lazy">
-                                    <figcaption class="person-card__caption"><?php echo esc_html((string) $item['caption']); ?></figcaption>
-                                </figure>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php endif; ?>
-
-                    <article class="card section-card prose prose--wide">
-                        <?php echo apply_filters('the_content', $section->post_content); ?>
-                    </article>
-                <?php endif; ?>
-            </div>
-        </section>
     <?php endforeach; ?>
 <?php endif; ?>
 

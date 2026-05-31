@@ -14,6 +14,7 @@ function church_theme_defaults(): array
         'worship_location' => "Mother Theresa Hall, Don Bosco Skill Mission\nNo. 2127/81/2D/1, Kothanur Dinne Road\nBangalore 560076",
         'communication_address' => "105, 1st Main, Bikasipura\nSubramanyapura PO\nBangalore, Karnataka 560061",
         'mission_statement' => 'Exalt the Triune God, edify fellow believers, and evangelize the unreached.',
+        'footer_mission_line' => 'Exalting the Triune God, Edifying Believers, Evangelizing the Unreached.',
         'vision_statement' => 'To be a platform for individuals and families living in South Bangalore to meet Jesus Christ and grow in Christian discipleship as a way of life.',
         'core_values_summary' => 'Breaking down barriers, gospel-centered living, deep biblical conviction, and missional engagement.',
         'footer_invite' => 'Join us live on Sundays, watch later through the sermon archive, or contact us before your first visit.',
@@ -409,6 +410,61 @@ function church_theme_file_version(string $relative_path): ?int
     return file_exists($full_path) ? filemtime($full_path) : null;
 }
 
+function church_theme_get_static_image_variants(string $relative_path, string $full_path): array
+{
+    $relative_directory = trim((string) dirname($relative_path), '.');
+    $filename = pathinfo($full_path, PATHINFO_FILENAME);
+    $extension = pathinfo($full_path, PATHINFO_EXTENSION);
+    $variants = [];
+
+    foreach (glob(dirname($full_path) . '/' . $filename . '-*.' . $extension) ?: [] as $variant_path) {
+        if (! preg_match('/-(\d+)$/', (string) pathinfo($variant_path, PATHINFO_FILENAME), $matches)) {
+            continue;
+        }
+
+        $dimensions = wp_getimagesize($variant_path);
+
+        if (! is_array($dimensions)) {
+            continue;
+        }
+
+        $width = (int) ($dimensions[0] ?? 0);
+        $height = (int) ($dimensions[1] ?? 0);
+
+        if ($width < 1 || $height < 1) {
+            continue;
+        }
+
+        $variants[$width] = [
+            'src' => get_template_directory_uri() . '/' . trim($relative_directory . '/' . basename($variant_path), '/'),
+            'width' => $width,
+            'height' => $height,
+        ];
+    }
+
+    ksort($variants);
+
+    return $variants;
+}
+
+function church_theme_build_static_image_srcset(array $variants): string
+{
+    $candidates = [];
+
+    foreach ($variants as $variant) {
+        $src = (string) ($variant['src'] ?? '');
+        $width = (int) ($variant['width'] ?? 0);
+
+        if ($src === '' || $width < 1) {
+            continue;
+        }
+
+        $candidates[] = sprintf('%s %dw', esc_url($src), $width);
+    }
+
+    return implode(', ', $candidates);
+}
+
 function church_theme_get_static_image(
     string $relative_path,
     string $alt,
@@ -424,14 +480,92 @@ function church_theme_get_static_image(
         return null;
     }
 
+    $dimensions = wp_getimagesize($full_path);
+    $resolved_width = $width;
+    $resolved_height = $height;
+
+    if (is_array($dimensions)) {
+        $resolved_width = $resolved_width ?: (int) ($dimensions[0] ?? 0);
+        $resolved_height = $resolved_height ?: (int) ($dimensions[1] ?? 0);
+    }
+
+    $variants = church_theme_get_static_image_variants($relative_path, $full_path);
+
+    if (($resolved_width ?? 0) > 0 && ($resolved_height ?? 0) > 0) {
+        $variants[(int) $resolved_width] = [
+            'src' => get_template_directory_uri() . $relative_path,
+            'width' => (int) $resolved_width,
+            'height' => (int) $resolved_height,
+        ];
+        ksort($variants);
+    }
+
     return [
         'src' => get_template_directory_uri() . $relative_path,
         'alt' => $alt,
         'caption' => $caption,
-        'width' => $width,
-        'height' => $height,
+        'width' => $resolved_width,
+        'height' => $resolved_height,
         'object_position' => $object_position,
+        'srcset' => church_theme_build_static_image_srcset($variants),
+        'variants' => $variants,
     ];
+}
+
+function church_theme_render_html_attributes(array $attributes): string
+{
+    $parts = [];
+
+    foreach ($attributes as $name => $value) {
+        if ($value === null || $value === false || $value === '') {
+            continue;
+        }
+
+        if ($value === true) {
+            $parts[] = sanitize_key((string) $name);
+            continue;
+        }
+
+        $parts[] = sprintf(
+            '%s="%s"',
+            sanitize_key((string) $name),
+            esc_attr((string) $value)
+        );
+    }
+
+    return implode(' ', $parts);
+}
+
+function church_theme_render_static_image(?array $image, array $attributes = []): string
+{
+    if (! is_array($image)) {
+        return '';
+    }
+
+    $style = trim((string) ($attributes['style'] ?? ''));
+    $object_position = trim((string) ($attributes['object_position'] ?? ($image['object_position'] ?? '')));
+
+    if ($object_position !== '') {
+        $style = trim($style . ($style !== '' ? '; ' : '') . 'object-position: ' . $object_position . ';');
+    }
+
+    $default_attributes = [
+        'src' => (string) ($image['src'] ?? ''),
+        'alt' => (string) ($image['alt'] ?? ''),
+        'width' => (int) ($image['width'] ?? 0) > 0 ? (int) $image['width'] : null,
+        'height' => (int) ($image['height'] ?? 0) > 0 ? (int) $image['height'] : null,
+        'loading' => 'lazy',
+        'decoding' => 'async',
+        'srcset' => (string) ($image['srcset'] ?? ''),
+        'sizes' => null,
+        'fetchpriority' => null,
+        'style' => $style,
+    ];
+    $resolved_attributes = array_merge($default_attributes, $attributes);
+
+    unset($resolved_attributes['object_position']);
+
+    return sprintf('<img %s>', church_theme_render_html_attributes($resolved_attributes));
 }
 
 function church_theme_get_brand_logo_asset(): array
@@ -606,6 +740,18 @@ function church_theme_enqueue_assets(): void
         ['church-theme-core'],
         church_theme_file_version('/assets/css/site.css')
     );
+    wp_enqueue_style(
+        'church-theme-accessibility',
+        get_template_directory_uri() . '/assets/css/accessibility.css',
+        ['church-theme-site'],
+        church_theme_file_version('/assets/css/accessibility.css')
+    );
+    wp_enqueue_style(
+        'church-theme-forms',
+        get_template_directory_uri() . '/assets/css/forms.css',
+        ['church-theme-accessibility'],
+        church_theme_file_version('/assets/css/forms.css')
+    );
 
     wp_enqueue_script(
         'church-theme-site',
@@ -642,6 +788,7 @@ function church_theme_customize_register(WP_Customize_Manager $wp_customize): vo
         ['section' => 'church_theme_home', 'id' => 'worship_location', 'label' => __('Worship Location', 'church-theme'), 'type' => 'textarea', 'sanitize' => 'sanitize_textarea_field'],
         ['section' => 'church_theme_home', 'id' => 'latest_sermon_heading', 'label' => __('Latest Sermon Heading', 'church-theme'), 'type' => 'text', 'sanitize' => 'sanitize_text_field'],
         ['section' => 'church_theme_identity', 'id' => 'mission_statement', 'label' => __('Mission Statement', 'church-theme'), 'type' => 'textarea', 'sanitize' => 'sanitize_textarea_field'],
+        ['section' => 'church_theme_identity', 'id' => 'footer_mission_line', 'label' => __('Footer Mission Line', 'church-theme'), 'type' => 'textarea', 'sanitize' => 'sanitize_textarea_field'],
         ['section' => 'church_theme_identity', 'id' => 'vision_statement', 'label' => __('Vision Statement', 'church-theme'), 'type' => 'textarea', 'sanitize' => 'sanitize_textarea_field'],
         ['section' => 'church_theme_identity', 'id' => 'core_values_summary', 'label' => __('Core Values Summary', 'church-theme'), 'type' => 'textarea', 'sanitize' => 'sanitize_textarea_field'],
         ['section' => 'church_theme_identity', 'id' => 'footer_invite', 'label' => __('Footer Invite Copy', 'church-theme'), 'type' => 'textarea', 'sanitize' => 'sanitize_textarea_field'],
@@ -673,6 +820,9 @@ add_action('customize_register', 'church_theme_customize_register');
 
 function church_theme_get_primary_nav_items(): array
 {
+    $about_sections = church_theme_get_page_section_nav_items('about-us');
+    $worship_sections = church_theme_get_page_section_nav_items('worship');
+
     return [
         [
             'label' => __('Home', 'church-theme'),
@@ -681,27 +831,12 @@ function church_theme_get_primary_nav_items(): array
         [
             'label' => __('About Us', 'church-theme'),
             'url' => church_theme_get_page_url('about-us'),
-            'children' => [
-                ['label' => __('Beliefs', 'church-theme'), 'url' => church_theme_get_page_url('about-us') . '#beliefs'],
-                ['label' => __('Missions', 'church-theme'), 'url' => church_theme_get_page_url('about-us') . '#missions'],
-                ['label' => __('Elder Board', 'church-theme'), 'url' => church_theme_get_page_url('about-us') . '#elder-board'],
-                ['label' => __('Governance', 'church-theme'), 'url' => church_theme_get_page_url('about-us') . '#governance'],
-                ['label' => __('Stewardship', 'church-theme'), 'url' => church_theme_get_page_url('about-us') . '#stewardship'],
-                ['label' => __('Membership', 'church-theme'), 'url' => church_theme_get_page_url('about-us') . '#membership'],
-                ['label' => __('Core Values', 'church-theme'), 'url' => church_theme_get_page_url('about-us') . '#core-values'],
-            ],
+            'children' => $about_sections,
         ],
         [
             'label' => __('Worship', 'church-theme'),
             'url' => church_theme_get_page_url('worship'),
-            'children' => [
-                ['label' => __('Corporate Worship', 'church-theme'), 'url' => church_theme_get_page_url('worship') . '#corporate-worship'],
-                ['label' => __('Primary Ministries', 'church-theme'), 'url' => church_theme_get_page_url('worship') . '#primary-ministries'],
-                ['label' => __('Secondary Ministries', 'church-theme'), 'url' => church_theme_get_page_url('worship') . '#secondary-ministries'],
-                ['label' => __('Kids Ministry', 'church-theme'), 'url' => church_theme_get_page_url('worship') . '#kids-ministry'],
-                ['label' => __('Teens Ministry', 'church-theme'), 'url' => church_theme_get_page_url('worship') . '#teens-ministry'],
-                ['label' => __('Women\'s Ministry', 'church-theme'), 'url' => church_theme_get_page_url('worship') . '#womens-ministry'],
-            ],
+            'children' => $worship_sections,
         ],
         [
             'label' => __('Gallery', 'church-theme'),
@@ -720,6 +855,26 @@ function church_theme_get_primary_nav_items(): array
             'url' => church_theme_get_page_url('contact-us'),
         ],
     ];
+}
+
+function church_theme_get_page_section_nav_items(string $page_slug): array
+{
+    $page = church_theme_get_page_by_paths([$page_slug]);
+
+    if (! $page instanceof WP_Post) {
+        return [];
+    }
+
+    $items = [];
+
+    foreach (church_theme_get_child_sections($page->ID) as $section) {
+        $items[] = [
+            'label' => get_the_title($section),
+            'url' => church_theme_get_page_url($page_slug) . '#' . church_theme_get_section_anchor($section),
+        ];
+    }
+
+    return $items;
 }
 
 function church_theme_fallback_menu(): void

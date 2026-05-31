@@ -1,0 +1,41 @@
+name: Frontend Quality
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Lint frontend and PHP
+        run: |
+          chmod +x bin/lint-phpcs.sh
+          npm run lint
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Bootstrap WordPress
+        run: |
+          chmod +x bin/bootstrap-wordpress.sh
+          ./bin/bootstrap-wordpress.sh
+
+      - name: Run Playwright smoke tests
+        env:
+          PLAYWRIGHT_BASE_URL: http://localhost:8080
+        run: npm run test:smoke

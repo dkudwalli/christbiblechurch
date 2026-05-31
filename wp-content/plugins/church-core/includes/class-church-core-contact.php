@@ -35,15 +35,18 @@ final class Church_Core_Contact
     public static function render_form(): string
     {
         $status = isset($_GET['church_contact_status']) ? sanitize_key(wp_unslash((string) $_GET['church_contact_status'])) : '';
+        $form_state = self::get_form_state();
+        $has_notice = in_array($status, ['success', 'invalid', 'error'], true);
+        $notice_id = 'church-contact-form-notice';
         ob_start();
         ?>
         <div class="contact-form-shell">
             <?php if ($status === 'success') : ?>
-                <p class="contact-form__notice"><?php esc_html_e('Thanks for reaching out. Your message has been received.', 'church-core'); ?></p>
+                <p id="<?php echo esc_attr($notice_id); ?>" class="contact-form__notice" role="status" aria-live="polite"><?php esc_html_e('Thanks for reaching out. Your message has been received.', 'church-core'); ?></p>
             <?php elseif ($status === 'invalid') : ?>
-                <p class="contact-form__notice is-error"><?php esc_html_e('Please complete the required fields and try again.', 'church-core'); ?></p>
+                <p id="<?php echo esc_attr($notice_id); ?>" class="contact-form__notice is-error" role="alert" aria-live="assertive"><?php esc_html_e('Please complete the required fields and try again.', 'church-core'); ?></p>
             <?php elseif ($status === 'error') : ?>
-                <p class="contact-form__notice is-error"><?php esc_html_e('Something went wrong while saving your message. Please try again.', 'church-core'); ?></p>
+                <p id="<?php echo esc_attr($notice_id); ?>" class="contact-form__notice is-error" role="alert" aria-live="assertive"><?php esc_html_e('Something went wrong while saving your message. Please try again.', 'church-core'); ?></p>
             <?php endif; ?>
 
             <form class="contact-form" method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
@@ -51,32 +54,32 @@ final class Church_Core_Contact
                 <?php wp_nonce_field('church_core_contact_submit', 'church_core_contact_nonce'); ?>
 
                 <div class="contact-form__row">
-                    <label>
+                    <label for="contact_name">
                         <span><?php esc_html_e('Name', 'church-core'); ?></span>
-                        <input type="text" name="contact_name" required>
+                        <input id="contact_name" type="text" name="contact_name" value="<?php echo esc_attr((string) ($form_state['contact_name'] ?? '')); ?>" autocomplete="name" required <?php echo $has_notice ? 'aria-describedby="' . esc_attr($notice_id) . '"' : ''; ?>>
                     </label>
 
-                    <label>
+                    <label for="contact_email">
                         <span><?php esc_html_e('Email', 'church-core'); ?></span>
-                        <input type="email" name="contact_email" required>
+                        <input id="contact_email" type="email" name="contact_email" value="<?php echo esc_attr((string) ($form_state['contact_email'] ?? '')); ?>" autocomplete="email" required <?php echo $has_notice ? 'aria-describedby="' . esc_attr($notice_id) . '"' : ''; ?>>
                     </label>
                 </div>
 
                 <div class="contact-form__row">
-                    <label>
+                    <label for="contact_phone">
                         <span><?php esc_html_e('Phone', 'church-core'); ?></span>
-                        <input type="text" name="contact_phone">
+                        <input id="contact_phone" type="tel" name="contact_phone" value="<?php echo esc_attr((string) ($form_state['contact_phone'] ?? '')); ?>" autocomplete="tel">
                     </label>
 
-                    <label class="screen-reader-text" aria-hidden="true">
+                    <label class="screen-reader-text" aria-hidden="true" for="contact_website">
                         <span><?php esc_html_e('Leave this field empty', 'church-core'); ?></span>
-                        <input type="text" name="contact_website" tabindex="-1" autocomplete="off">
+                        <input id="contact_website" type="text" name="contact_website" tabindex="-1" autocomplete="off">
                     </label>
                 </div>
 
-                <label>
+                <label for="contact_message">
                     <span><?php esc_html_e('Message', 'church-core'); ?></span>
-                    <textarea name="contact_message" required></textarea>
+                    <textarea id="contact_message" name="contact_message" required <?php echo $has_notice ? 'aria-describedby="' . esc_attr($notice_id) . '"' : ''; ?>><?php echo esc_textarea((string) ($form_state['contact_message'] ?? '')); ?></textarea>
                 </label>
 
                 <button type="submit"><?php esc_html_e('Send Message', 'church-core'); ?></button>
@@ -103,9 +106,15 @@ final class Church_Core_Contact
         $email = isset($_POST['contact_email']) ? sanitize_email(wp_unslash($_POST['contact_email'])) : '';
         $phone = isset($_POST['contact_phone']) ? sanitize_text_field(wp_unslash($_POST['contact_phone'])) : '';
         $message = isset($_POST['contact_message']) ? sanitize_textarea_field(wp_unslash($_POST['contact_message'])) : '';
+        $state = [
+            'contact_name' => $name,
+            'contact_email' => $email,
+            'contact_phone' => $phone,
+            'contact_message' => $message,
+        ];
 
         if ($name === '' || $message === '' || ! is_email($email)) {
-            self::redirect_with_status($redirect, 'invalid');
+            self::redirect_with_status($redirect, 'invalid', $state);
         }
 
         $post_id = wp_insert_post([
@@ -121,7 +130,7 @@ final class Church_Core_Contact
         ], true);
 
         if (is_wp_error($post_id)) {
-            self::redirect_with_status($redirect, 'error');
+            self::redirect_with_status($redirect, 'error', $state);
         }
 
         $recipient = apply_filters('church_core_contact_recipient', get_option('admin_email'));
@@ -139,10 +148,46 @@ final class Church_Core_Contact
         self::redirect_with_status($redirect, 'success');
     }
 
-    private static function redirect_with_status(string $redirect, string $status): void
+    private static function redirect_with_status(string $redirect, string $status, array $state = []): void
     {
-        wp_safe_redirect(add_query_arg('church_contact_status', $status, $redirect));
+        $args = [
+            'church_contact_status' => $status,
+        ];
+
+        if ($state !== [] && in_array($status, ['invalid', 'error'], true)) {
+            $args['church_contact_state'] = self::store_form_state($state);
+        }
+
+        wp_safe_redirect(add_query_arg($args, $redirect));
         exit;
+    }
+
+    private static function store_form_state(array $state): string
+    {
+        $token = wp_generate_password(20, false, false);
+
+        set_transient('church_contact_state_' . $token, $state, 10 * MINUTE_IN_SECONDS);
+
+        return $token;
+    }
+
+    private static function get_form_state(): array
+    {
+        $token = isset($_GET['church_contact_state']) ? preg_replace('/[^a-zA-Z0-9]/', '', (string) wp_unslash($_GET['church_contact_state'])) : '';
+
+        if ($token === '') {
+            return [];
+        }
+
+        $state = get_transient('church_contact_state_' . $token);
+
+        if (! is_array($state)) {
+            return [];
+        }
+
+        delete_transient('church_contact_state_' . $token);
+
+        return $state;
     }
 
     private static function get_contact_page_url(): string

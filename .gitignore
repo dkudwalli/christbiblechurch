@@ -46,3 +46,7 @@ wp-content/debug.log
 
 # OS/editor noise
 .DS_Store
+node_modules/
+.tools/
+playwright-report/
+test-results/

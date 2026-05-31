@@ -22,12 +22,13 @@ $gallery_feature = church_theme_get_gallery_feature_media();
 
         <?php if ($gallery_feature) : ?>
             <figure class="card page-hero__media">
-                <img
-                    src="<?php echo esc_url((string) $gallery_feature['src']); ?>"
-                    alt="<?php echo esc_attr((string) $gallery_feature['alt']); ?>"
-                    width="<?php echo esc_attr((string) $gallery_feature['width']); ?>"
-                    height="<?php echo esc_attr((string) $gallery_feature['height']); ?>"
-                    loading="lazy">
+                <?php
+                echo church_theme_render_static_image($gallery_feature, [
+                    'loading' => 'eager',
+                    'fetchpriority' => 'high',
+                    'sizes' => '(max-width: 960px) 100vw, 42vw',
+                ]);
+                ?>
             </figure>
         <?php endif; ?>
     </div>
@@ -58,7 +59,7 @@ $gallery_feature = church_theme_get_gallery_feature_media();
                         ?>
                         <article class="gallery-card">
                             <a class="gallery-card__media" href="<?php echo esc_url((string) $item['permalink']); ?>" target="_blank" rel="noreferrer noopener">
-                                <img src="<?php echo esc_url((string) $item['image_url']); ?>" alt="<?php echo esc_attr($caption !== '' ? $caption : __('Crossroad South Church Instagram post', 'church-theme')); ?>" loading="lazy">
+                                <img src="<?php echo esc_url((string) $item['image_url']); ?>" alt="<?php echo esc_attr($caption !== '' ? $caption : __('Crossroad South Church Instagram post', 'church-theme')); ?>" loading="lazy" decoding="async">
                             </a>
 
                             <div class="gallery-card__meta">
