@@ -4,17 +4,18 @@ if (! defined('ABSPATH')) {
 }
 
 $section = $args['section'] ?? null;
-$page_slug = (string) ($args['page_slug'] ?? '');
 $index = (int) ($args['index'] ?? 0);
 
-if (! $section instanceof WP_Post || $page_slug === '') {
+if (! $section instanceof WP_Post) {
     return;
 }
 
 $section_slug = church_theme_get_section_anchor($section);
-$section_media = church_theme_get_section_media($page_slug, $section_slug);
-$elder_board = $section_slug === 'elder-board' ? church_theme_get_elder_board_cards($section, $section_media) : [];
-$has_elder_cards = ($elder_board['cards'] ?? []) !== [];
+$section_layout = church_theme_get_page_section_layout($section);
+$section_profiles = $section_layout === 'elder_board' ? church_theme_get_page_section_profiles($section) : [];
+$section_image = $section_layout === 'feature' ? church_theme_get_page_section_featured_image($section) : null;
+$has_elder_cards = $section_profiles !== [];
+$section_content = apply_filters('the_content', $section->post_content);
 ?>
 <section id="<?php echo esc_attr($section_slug); ?>" class="section<?php echo $index % 2 === 1 ? ' section--muted' : ''; ?>">
     <div class="wrap section-layout">
@@ -23,15 +24,18 @@ $has_elder_cards = ($elder_board['cards'] ?? []) !== [];
         </div>
 
         <?php if ($has_elder_cards) : ?>
-            <?php if (($elder_board['intro'] ?? '') !== '') : ?>
+            <?php if (trim(wp_strip_all_tags($section->post_content)) !== '') : ?>
                 <div class="elder-board-intro prose prose--wide">
-                    <?php echo wp_kses_post((string) $elder_board['intro']); ?>
+                    <?php echo $section_content; ?>
                 </div>
             <?php endif; ?>
 
             <div class="elder-board-grid">
-                <?php foreach ($elder_board['cards'] as $card) : ?>
-                    <?php $image = is_array($card['image'] ?? null) ? $card['image'] : null; ?>
+                <?php foreach ($section_profiles as $profile) : ?>
+                    <?php
+                    $image = church_theme_get_attachment_image_asset((int) ($profile['image_id'] ?? 0));
+                    $profile_content = church_theme_render_rich_text_fragment((string) ($profile['content'] ?? ''));
+                    ?>
                     <article class="card elder-card">
                         <div class="elder-card__media-frame">
                             <?php
@@ -44,46 +48,26 @@ $has_elder_cards = ($elder_board['cards'] ?? []) !== [];
                         </div>
 
                         <div class="elder-card__body">
-                            <?php if (($card['family'] ?? '') !== '') : ?>
-                                <p class="elder-card__family"><?php echo esc_html((string) $card['family']); ?></p>
+                            <?php if (($profile['family'] ?? '') !== '') : ?>
+                                <p class="elder-card__family"><?php echo esc_html((string) $profile['family']); ?></p>
                             <?php endif; ?>
 
-                            <h3><?php echo esc_html((string) $card['name']); ?></h3>
+                            <h3><?php echo esc_html((string) ($profile['name'] ?? '')); ?></h3>
 
-                            <div class="prose prose--compact elder-card__content">
-                                <?php echo wp_kses_post((string) $card['content']); ?>
-                            </div>
+                            <?php if ($profile_content !== '') : ?>
+                                <div class="prose prose--compact elder-card__content">
+                                    <?php echo $profile_content; ?>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     </article>
                 <?php endforeach; ?>
             </div>
-        <?php elseif (($section_media['layout'] ?? '') === 'gallery') : ?>
-            <div class="section-media-grid">
-                <?php foreach (($section_media['items'] ?? []) as $item) : ?>
-                    <?php if (! is_array($item)) : ?>
-                        <?php continue; ?>
-                    <?php endif; ?>
-                    <figure class="card person-card">
-                        <?php
-                        echo church_theme_render_static_image($item, [
-                            'class' => 'person-card__media',
-                            'sizes' => '(max-width: 720px) 100vw, (max-width: 1120px) 50vw, 33vw',
-                            'loading' => 'lazy',
-                        ]);
-                        ?>
-                        <figcaption class="person-card__caption"><?php echo esc_html((string) $item['caption']); ?></figcaption>
-                    </figure>
-                <?php endforeach; ?>
-            </div>
-
-            <article class="card section-card prose prose--wide">
-                <?php echo apply_filters('the_content', $section->post_content); ?>
-            </article>
-        <?php elseif (($section_media['layout'] ?? '') === 'feature' && is_array($section_media['item'] ?? null)) : ?>
+        <?php elseif ($section_layout === 'feature' && is_array($section_image)) : ?>
             <div class="section-story">
                 <figure class="card section-visual">
                     <?php
-                    echo church_theme_render_static_image($section_media['item'], [
+                    echo church_theme_render_static_image($section_image, [
                         'sizes' => '(max-width: 960px) 100vw, 42vw',
                         'loading' => 'lazy',
                     ]);
@@ -91,12 +75,12 @@ $has_elder_cards = ($elder_board['cards'] ?? []) !== [];
                 </figure>
 
                 <article class="card section-card prose prose--wide">
-                    <?php echo apply_filters('the_content', $section->post_content); ?>
+                    <?php echo $section_content; ?>
                 </article>
             </div>
         <?php else : ?>
             <article class="card section-card prose prose--wide">
-                <?php echo apply_filters('the_content', $section->post_content); ?>
+                <?php echo $section_content; ?>
             </article>
         <?php endif; ?>
     </div>

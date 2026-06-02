@@ -13,6 +13,7 @@ final class Church_Core
         Church_Core_Sermon_Sync_Admin::boot();
         Church_Core_Events::boot();
         Church_Core_Contact::boot();
+        Church_Core_Page_Sections::boot();
     }
 
     public static function activate(): void

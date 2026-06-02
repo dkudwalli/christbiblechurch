@@ -96,8 +96,20 @@ while (have_posts()) :
 
                 <?php if ($audio_url !== '') : ?>
                     <div class="audio-player card">
-                        <h2><?php esc_html_e('Listen', 'church-theme'); ?></h2>
-                        <?php echo wp_audio_shortcode(['src' => esc_url($audio_url)]); ?>
+                        <?php $audio_heading_id = 'sermon-audio-heading-' . $post_id; ?>
+                        <h2 id="<?php echo esc_attr($audio_heading_id); ?>"><?php esc_html_e('Listen', 'church-theme'); ?></h2>
+                        <audio class="sermon-audio" controls preload="none" aria-labelledby="<?php echo esc_attr($audio_heading_id); ?>">
+                            <source src="<?php echo esc_url($audio_url); ?>">
+                            <?php esc_html_e('Your browser does not support audio playback.', 'church-theme'); ?>
+                            <a href="<?php echo esc_url($audio_url); ?>" target="_blank" rel="noopener noreferrer">
+                                <?php esc_html_e('Open audio directly', 'church-theme'); ?>
+                            </a>
+                        </audio>
+                        <p class="audio-player__link">
+                            <a class="text-link" href="<?php echo esc_url($audio_url); ?>" target="_blank" rel="noopener noreferrer">
+                                <?php esc_html_e('Open audio directly', 'church-theme'); ?>
+                            </a>
+                        </p>
                     </div>
                 <?php endif; ?>
 

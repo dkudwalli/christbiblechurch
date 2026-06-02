@@ -36,7 +36,7 @@ $upcoming_events = church_theme_get_event_query(true, 3);
             </div>
         </div>
 
-        <aside class="card card--accent hero__card">
+        <div class="card card--accent hero__card">
             <p class="card__label"><?php esc_html_e('Gather With Us', 'church-theme'); ?></p>
             <?php if ($worship_location !== []) : ?>
                 <h2><?php echo esc_html($worship_location[0]); ?></h2>
@@ -50,7 +50,7 @@ $upcoming_events = church_theme_get_event_query(true, 3);
                     <?php endforeach; ?>
                 </ul>
             <?php endif; ?>
-        </aside>
+        </div>
     </div>
 </section>
 

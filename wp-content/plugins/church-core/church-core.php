@@ -26,6 +26,7 @@ require_once CHURCH_CORE_PATH . 'includes/class-church-core-sermon-cron.php';
 require_once CHURCH_CORE_PATH . 'includes/class-church-core-sermon-sync-admin.php';
 require_once CHURCH_CORE_PATH . 'includes/class-church-core-events.php';
 require_once CHURCH_CORE_PATH . 'includes/class-church-core-contact.php';
+require_once CHURCH_CORE_PATH . 'includes/class-church-core-page-sections.php';
 
 register_activation_hook(CHURCH_CORE_FILE, ['Church_Core', 'activate']);
 register_deactivation_hook(CHURCH_CORE_FILE, ['Church_Core', 'deactivate']);

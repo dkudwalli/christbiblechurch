@@ -257,6 +257,8 @@ for legacy_slug in about contact events what-we-teach sample-page; do
   fi
 done
 
+run_wp eval "if (class_exists('Church_Core_Page_Sections')) { Church_Core_Page_Sections::run_schema_upgrade_now(); }" >/dev/null
+
 run_wp option update show_on_front page
 run_wp option update page_on_front "${HOME_ID}"
 

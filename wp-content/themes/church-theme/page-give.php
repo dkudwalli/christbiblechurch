@@ -22,7 +22,7 @@ $contact_email = church_theme_get_mod('contact_email');
             <?php echo apply_filters('the_content', get_the_content()); ?>
         </article>
 
-        <aside class="card card--accent content-aside">
+        <div class="card card--accent content-aside">
             <p class="card__label"><?php esc_html_e('Questions', 'church-theme'); ?></p>
             <h2><?php esc_html_e('Need help with a transfer?', 'church-theme'); ?></h2>
             <p><?php esc_html_e('Reach out to the church if you need confirmation, updated details, or support with giving to Crossroad South Church.', 'church-theme'); ?></p>
@@ -40,7 +40,7 @@ $contact_email = church_theme_get_mod('contact_email');
                     </a>
                 <?php endif; ?>
             </div>
-        </aside>
+        </div>
     </div>
 </section>
 <?php

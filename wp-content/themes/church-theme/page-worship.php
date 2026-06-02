@@ -21,7 +21,7 @@ $worship_location = church_theme_split_lines(church_theme_get_mod('worship_locat
             </div>
         </div>
 
-        <aside class="card page-hero__panel">
+        <div class="card page-hero__panel">
             <p class="card__label"><?php esc_html_e('Gather With Us', 'church-theme'); ?></p>
             <?php if ($service_times !== []) : ?>
                 <ul class="stack-list">
@@ -37,7 +37,7 @@ $worship_location = church_theme_split_lines(church_theme_get_mod('worship_locat
                     <p><?php echo esc_html(implode(', ', $worship_location)); ?></p>
                 </div>
             <?php endif; ?>
-        </aside>
+        </div>
     </div>
 </section>
 

@@ -34,7 +34,11 @@ $footer_mission_line = church_theme_get_mod('footer_mission_line');
             <?php if ($worship_location !== []) : ?>
                 <div class="site-footer__column">
                     <p class="site-footer__label"><?php esc_html_e('Worship Location', 'church-theme'); ?></p>
-                    <p><?php echo esc_html(implode(', ', $worship_location)); ?></p>
+                    <p class="site-footer__lines">
+                        <?php foreach ($worship_location as $line) : ?>
+                            <span class="site-footer__line"><?php echo esc_html($line); ?></span>
+                        <?php endforeach; ?>
+                    </p>
                 </div>
             <?php endif; ?>
 
@@ -53,7 +57,11 @@ $footer_mission_line = church_theme_get_mod('footer_mission_line');
             <?php if ($communication_address !== []) : ?>
                 <div class="site-footer__column">
                     <p class="site-footer__label"><?php esc_html_e('Communication Address', 'church-theme'); ?></p>
-                    <p><?php echo esc_html(implode(', ', $communication_address)); ?></p>
+                    <p class="site-footer__lines">
+                        <?php foreach ($communication_address as $line) : ?>
+                            <span class="site-footer__line"><?php echo esc_html($line); ?></span>
+                        <?php endforeach; ?>
+                    </p>
                 </div>
             <?php endif; ?>
         </div>

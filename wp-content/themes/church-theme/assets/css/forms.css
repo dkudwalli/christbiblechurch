@@ -1,12 +1,13 @@
 .filter-bar label,
-.contact-form label {
+.contact-form__field {
   display: grid;
   gap: 0.45rem;
   color: var(--text);
 }
 
 .filter-field__label,
-.contact-form label > span:not(.screen-reader-text) {
+.contact-form__field > span:not(.screen-reader-text),
+.contact-form__legend {
   font-size: 0.92rem;
   font-weight: 700;
 }

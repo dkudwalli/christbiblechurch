@@ -591,118 +591,64 @@ function church_theme_get_brand_logo_asset(): array
     ];
 }
 
-function church_theme_get_elder_board_cards(WP_Post $section, array $section_media): array
+function church_theme_get_attachment_image_asset(int $attachment_id): ?array
 {
-    if (($section_media['layout'] ?? '') !== 'gallery') {
-        return [];
+    if ($attachment_id < 1) {
+        return null;
     }
 
-    $media_items = $section_media['items'] ?? [];
+    $image = wp_get_attachment_image_src($attachment_id, 'full');
 
-    if (! is_array($media_items) || $media_items === []) {
-        return [];
+    if (! is_array($image)) {
+        return null;
     }
 
-    $content = trim((string) $section->post_content);
-
-    if ($content === '') {
-        return [];
-    }
-
-    $heading_pattern = '/<h3\b[^>]*>(.*?)<\/h3>/is';
-    $match_count = preg_match_all($heading_pattern, $content, $heading_matches, PREG_OFFSET_CAPTURE);
-
-    if (! is_int($match_count) || $match_count < 1 || $match_count !== count($media_items)) {
-        return [];
-    }
-
-    $intro = trim(substr($content, 0, $heading_matches[0][0][1]));
-    $cards = [];
-
-    foreach ($heading_matches[0] as $index => $heading_match) {
-        $body_start = $heading_match[1] + strlen($heading_match[0]);
-        $body_end = $heading_matches[0][$index + 1][1] ?? strlen($content);
-        $body = trim(substr($content, $body_start, $body_end - $body_start));
-        $name = trim(wp_strip_all_tags($heading_matches[1][$index][0]));
-
-        if ($name === '' || $body === '') {
-            return [];
-        }
-
-        $cards[] = [
-            'name' => $name,
-            'content' => $body,
-            'family' => (string) ($media_items[$index]['caption'] ?? ''),
-            'image' => $media_items[$index],
-        ];
-    }
+    $attachment = get_post($attachment_id);
+    $alt = trim((string) get_post_meta($attachment_id, '_wp_attachment_image_alt', true));
+    $caption = $attachment instanceof WP_Post ? trim((string) $attachment->post_excerpt) : '';
 
     return [
-        'intro' => $intro,
-        'cards' => $cards,
+        'src' => (string) $image[0],
+        'alt' => $alt !== '' ? $alt : get_the_title($attachment_id),
+        'caption' => $caption,
+        'width' => (int) ($image[1] ?? 0),
+        'height' => (int) ($image[2] ?? 0),
+        'srcset' => (string) (wp_get_attachment_image_srcset($attachment_id, 'full') ?: ''),
     ];
 }
 
-function church_theme_get_section_media(string $page_slug, string $section_slug): array
+function church_theme_get_page_section_layout(WP_Post $section): string
 {
-    $catalog = [
-        'about-us' => [
-            'elder-board' => [
-                'layout' => 'gallery',
-                'items' => array_values(array_filter([
-                    church_theme_get_static_image(
-                        '/assets/images/crossroads/benji-rashmi.webp',
-                        'Benjamin and Rashmi of Crossroad South Church',
-                        'Benjamin & Rashmi',
-                        1300,
-                        975
-                    ),
-                    church_theme_get_static_image(
-                        '/assets/images/crossroads/tim-ruth.webp',
-                        'Timothy and Ruth of Crossroad South Church',
-                        'Timothy & Ruth',
-                        1300,
-                        975
-                    ),
-                    church_theme_get_static_image(
-                        '/assets/images/crossroads/kishore-shirley.webp',
-                        'Kishore and Shirley of Crossroad South Church',
-                        'Kishore & Shirley',
-                        1280,
-                        1280
-                    ),
-                ], 'is_array')),
-            ],
-        ],
-        'worship' => [
-            'womens-ministry' => [
-                'layout' => 'feature',
-                'item' => church_theme_get_static_image(
-                    '/assets/images/crossroads/women-ministry.webp',
-                    'Women of Crossroad South Church gathered for ministry',
-                    '',
-                    1280,
-                    960
-                ),
-            ],
-        ],
-    ];
+    if (! class_exists('Church_Core_Page_Sections')) {
+        return 'default';
+    }
 
-    $section_media = $catalog[$page_slug][$section_slug] ?? [];
+    return Church_Core_Page_Sections::get_layout($section->ID);
+}
 
-    if (! is_array($section_media)) {
+function church_theme_get_page_section_profiles(WP_Post $section): array
+{
+    if (! class_exists('Church_Core_Page_Sections')) {
         return [];
     }
 
-    if (($section_media['layout'] ?? '') === 'gallery' && ($section_media['items'] ?? []) === []) {
-        return [];
+    return Church_Core_Page_Sections::get_profiles($section->ID);
+}
+
+function church_theme_get_page_section_featured_image(WP_Post $section): ?array
+{
+    return church_theme_get_attachment_image_asset((int) get_post_thumbnail_id($section->ID));
+}
+
+function church_theme_render_rich_text_fragment(string $content): string
+{
+    $content = trim($content);
+
+    if ($content === '') {
+        return '';
     }
 
-    if (($section_media['layout'] ?? '') === 'feature' && ! is_array($section_media['item'] ?? null)) {
-        return [];
-    }
-
-    return $section_media;
+    return wpautop(wp_kses_post($content));
 }
 
 function church_theme_get_gallery_feature_media(): ?array
