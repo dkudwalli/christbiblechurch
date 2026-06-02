@@ -9,7 +9,7 @@ ADMIN_PASSWORD="${ADMIN_PASSWORD:-changeme123!}"
 ADMIN_EMAIL="${ADMIN_EMAIL:-hello@example.com}"
 
 run_wp() {
-  ${COMPOSE} run --rm wpcli "$@"
+  ${COMPOSE} run --no-deps --rm wpcli "$@"
 }
 
 find_page_id() {

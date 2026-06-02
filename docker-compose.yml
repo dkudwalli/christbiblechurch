@@ -45,8 +45,10 @@ services:
   wpcli:
     image: wordpress:cli-php8.2
     depends_on:
-      - db
-      - wordpress
+      db:
+        condition: service_healthy
+      wordpress:
+        condition: service_started
     environment:
       WORDPRESS_DB_HOST: db:3306
       WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME:-church}

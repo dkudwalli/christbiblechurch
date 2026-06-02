@@ -8,7 +8,7 @@ final class Church_Core_Page_Sections
     public const LAYOUT_META_KEY = 'church_section_layout';
     public const PROFILES_META_KEY = 'church_section_profiles';
 
-    private const SCHEMA_VERSION = '1';
+    private const SCHEMA_VERSION = '2';
     private const SCHEMA_VERSION_OPTION = 'church_core_section_schema_version';
     private const LEGACY_CONTENT_BACKUP_META_KEY = '_church_section_legacy_content_backup';
     private const ATTACHMENT_SOURCE_META_KEY = '_church_section_source_path';
@@ -211,28 +211,26 @@ final class Church_Core_Page_Sections
             return;
         }
 
-        $targets = [
-            self::get_target_page(['about-us/elder-board', 'elder-board']),
-            self::get_target_page(['worship/womens-ministry', 'womens-ministry']),
-        ];
+        $elder_board_page = self::get_target_page(['about-us/elder-board', 'elder-board']);
+        $womens_ministry_page = self::get_target_page(['worship/womens-ministry', 'womens-ministry']);
 
-        $has_target = false;
-
-        foreach ($targets as $target) {
-            if ($target instanceof WP_Post) {
-                $has_target = true;
-                break;
-            }
-        }
-
-        if (! $has_target) {
+        if (! ($elder_board_page instanceof WP_Post) && ! ($womens_ministry_page instanceof WP_Post)) {
             return;
         }
 
-        self::migrate_womens_ministry_section();
-        self::migrate_elder_board_section();
+        $womens_ministry_ready = true;
 
-        update_option(self::SCHEMA_VERSION_OPTION, self::SCHEMA_VERSION, false);
+        if ($womens_ministry_page instanceof WP_Post) {
+            $womens_ministry_ready = self::migrate_womens_ministry_section($womens_ministry_page);
+        }
+
+        if ($elder_board_page instanceof WP_Post) {
+            self::migrate_elder_board_section($elder_board_page);
+        }
+
+        if ($womens_ministry_ready) {
+            update_option(self::SCHEMA_VERSION_OPTION, self::SCHEMA_VERSION, false);
+        }
     }
 
     private static function render_profile_row(array $profile, int|string $index): void
@@ -404,43 +402,45 @@ final class Church_Core_Page_Sections
         return $sanitized;
     }
 
-    private static function migrate_womens_ministry_section(): void
+    private static function migrate_womens_ministry_section(WP_Post $page): bool
     {
-        $page = self::get_target_page(['worship/womens-ministry', 'womens-ministry']);
-
-        if (! $page instanceof WP_Post) {
-            return;
-        }
-
         if (! metadata_exists('post', $page->ID, self::LAYOUT_META_KEY)) {
             update_post_meta($page->ID, self::LAYOUT_META_KEY, self::LAYOUT_FEATURE);
         }
 
-        if (has_post_thumbnail($page->ID)) {
-            return;
+        if (self::is_womens_ministry_section_ready($page)) {
+            return true;
         }
 
         $image = self::get_legacy_feature_image_definition();
-        $attachment_id = self::import_legacy_image(
-            $image['path'],
-            $image['alt'],
-            __('Women\'s Ministry', 'church-core'),
-            $page->ID
-        );
+        $attachment_id = absint(get_post_thumbnail_id($page->ID));
 
-        if ($attachment_id > 0) {
+        if ($attachment_id < 1) {
+            $attachment_id = self::get_attachment_id_by_source((string) $image['path']);
+        }
+
+        if ($attachment_id < 1) {
+            $attachment_id = self::import_legacy_image(
+                (string) $image['path'],
+                (string) $image['alt'],
+                __('Women\'s Ministry', 'church-core'),
+                $page->ID
+            );
+        }
+
+        if ($attachment_id > 0 && absint(get_post_thumbnail_id($page->ID)) !== $attachment_id) {
             set_post_thumbnail($page->ID, $attachment_id);
         }
+
+        clean_post_cache($page->ID);
+
+        $page = get_post($page->ID);
+
+        return $page instanceof WP_Post && self::is_womens_ministry_section_ready($page);
     }
 
-    private static function migrate_elder_board_section(): void
+    private static function migrate_elder_board_section(WP_Post $page): void
     {
-        $page = self::get_target_page(['about-us/elder-board', 'elder-board']);
-
-        if (! $page instanceof WP_Post) {
-            return;
-        }
-
         $parsed = self::parse_legacy_elder_board_markup((string) $page->post_content);
         $profiles = self::get_profiles($page->ID);
         $has_layout = metadata_exists('post', $page->ID, self::LAYOUT_META_KEY);
@@ -660,6 +660,23 @@ final class Church_Core_Page_Sections
         }
 
         return absint($attachments[0]);
+    }
+
+    private static function is_womens_ministry_section_ready(WP_Post $page): bool
+    {
+        if (self::get_layout($page->ID) !== self::LAYOUT_FEATURE) {
+            return false;
+        }
+
+        if (absint(get_post_thumbnail_id($page->ID)) < 1) {
+            return false;
+        }
+
+        if (function_exists('church_theme_get_page_section_featured_image')) {
+            return is_array(church_theme_get_page_section_featured_image($page));
+        }
+
+        return false;
     }
 
     private static function parse_legacy_elder_board_markup(string $content): array
