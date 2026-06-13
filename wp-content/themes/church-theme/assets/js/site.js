@@ -1,6 +1,80 @@
 document.documentElement.classList.add("has-js");
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Section nav scrollspy
+  const sectionLinks = document.querySelectorAll(".section-nav__list a[href^='#']");
+  if (sectionLinks.length > 0) {
+    const scrollspyObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const id = entry.target.id;
+            sectionLinks.forEach((link) => {
+              link.classList.toggle("is-active", link.getAttribute("href") === "#" + id);
+            });
+          }
+        });
+      },
+      { rootMargin: "-20% 0px -70% 0px", threshold: 0 }
+    );
+    sectionLinks.forEach((link) => {
+      const target = document.querySelector(link.getAttribute("href"));
+      if (target) scrollspyObserver.observe(target);
+    });
+  }
+
+  // Filter bar loading state
+  const filterBar = document.querySelector(".filter-bar");
+  if (filterBar) {
+    filterBar.addEventListener("submit", () => {
+      const submitBtn = filterBar.querySelector("[type='submit']");
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.setAttribute("aria-busy", "true");
+      }
+    });
+  }
+
+  // Contact form client-side validation
+  const contactForm = document.querySelector(".contact-form");
+  if (contactForm) {
+    const requiredFields = contactForm.querySelectorAll("[required]");
+    requiredFields.forEach((field) => {
+      field.addEventListener("blur", () => {
+        const valid = field.checkValidity();
+        field.setAttribute("aria-invalid", valid ? "false" : "true");
+        let errorEl = field.parentElement.querySelector(".contact-form__error");
+        if (!valid) {
+          if (!errorEl) {
+            errorEl = document.createElement("span");
+            errorEl.className = "contact-form__error";
+            errorEl.setAttribute("role", "alert");
+            field.after(errorEl);
+          }
+          errorEl.textContent = field.validationMessage;
+        } else if (errorEl) {
+          errorEl.remove();
+        }
+      });
+    });
+
+    const preferredMethodInputs = contactForm.querySelectorAll(
+      "[name='contact_preferred_contact_method']"
+    );
+    const phoneField = contactForm.querySelector("#contact_phone");
+    if (phoneField && preferredMethodInputs.length > 0) {
+      preferredMethodInputs.forEach((input) => {
+        input.addEventListener("change", () => {
+          const needsPhone = input.value === "phone" && input.checked;
+          phoneField.required = needsPhone;
+          phoneField.setAttribute("aria-required", needsPhone ? "true" : "false");
+        });
+      });
+    }
+  }
+});
+
+document.addEventListener("DOMContentLoaded", () => {
   const toggle = document.querySelector("[data-nav-toggle]");
   const nav = document.querySelector("[data-nav]");
 

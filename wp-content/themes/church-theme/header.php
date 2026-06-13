@@ -31,7 +31,8 @@ if (! defined('ABSPATH')) {
         </a>
 
         <button class="site-nav__toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-menu">
-            <span><?php esc_html_e('Menu', 'church-theme'); ?></span>
+            <span class="site-nav__icon" aria-hidden="true"><span></span><span></span><span></span></span>
+            <span class="screen-reader-text"><?php esc_html_e('Menu', 'church-theme'); ?></span>
         </button>
 
         <nav class="site-nav" data-nav aria-label="<?php esc_attr_e('Primary navigation', 'church-theme'); ?>">

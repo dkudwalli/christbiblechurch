@@ -8,6 +8,18 @@ $event_location = church_theme_get_event_location($post_id);
 $event_preview = church_theme_get_event_notes_preview($post_id, 24);
 ?>
 <article class="card event-card">
+    <?php if (has_post_thumbnail($post_id)) : ?>
+        <a class="event-card__thumb" href="<?php echo esc_url(church_theme_get_event_url($post_id)); ?>" tabindex="-1" aria-hidden="true">
+            <?php
+            echo wp_get_attachment_image(
+                (int) get_post_thumbnail_id($post_id),
+                'medium',
+                false,
+                ['loading' => 'lazy', 'decoding' => 'async']
+            );
+            ?>
+        </a>
+    <?php endif; ?>
     <p class="eyebrow"><?php echo esc_html(church_theme_get_event_datetime($post_id)); ?></p>
     <h2><a href="<?php echo esc_url(church_theme_get_event_url($post_id)); ?>"><?php the_title(); ?></a></h2>
 

@@ -1,3 +1,40 @@
+/* === WEB FONTS === */
+@font-face {
+  font-family: "DM Sans";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('../fonts/dmsans-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: "DM Sans";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('../fonts/dmsans-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: Lora;
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('../fonts/lora-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: Lora;
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('../fonts/lora-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 :root {
   --bg: #f6f3ee;
   --bg-muted: #e9e5dc;
@@ -37,7 +74,7 @@ html {
 body {
   margin: 0;
   color: var(--text);
-  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  font-family: "DM Sans", "Avenir Next", "Segoe UI", sans-serif;
   line-height: 1.65;
   background:
     radial-gradient(circle at top left, rgba(31, 86, 99, 0.08), transparent 28%),
@@ -70,7 +107,7 @@ h1,
 h2,
 h3,
 h4 {
-  font-family: "Iowan Old Style", "Palatino Linotype", serif;
+  font-family: Lora, "Iowan Old Style", "Palatino Linotype", serif;
 }
 
 .site-header {
@@ -443,6 +480,8 @@ h4 {
 
 .section-heading h2 {
   margin: 0 0 0.7rem;
+  padding-left: 1rem;
+  border-left: 3px solid var(--highlight);
 }
 
 .summary-card h3,
@@ -526,10 +565,17 @@ button[type="submit"]:hover {
 .text-link {
   color: var(--accent-strong);
   font-weight: 700;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1.5px;
+  background-repeat: no-repeat;
+  background-position: left bottom;
+  transition: background-size 240ms ease;
+  text-decoration: none;
 }
 
 .text-link:hover {
   color: var(--accent-strong);
+  background-size: 100% 1.5px;
 }
 
 .sermon-meta {
@@ -773,6 +819,7 @@ textarea {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 300ms ease;
 }
 
 .gallery-card__meta {
@@ -821,6 +868,7 @@ textarea {
   background: rgba(255, 255, 255, 0.82);
   color: var(--accent-strong);
   font-weight: 700;
+  transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease;
 }
 
 .section-nav__list a:hover {
@@ -1224,6 +1272,8 @@ textarea {
 
 .site-footer__column {
   min-width: 0;
+  padding-left: 1rem;
+  border-left: 2px solid rgba(31, 86, 99, 0.14);
 }
 
 .site-footer__column p {
@@ -1343,13 +1393,16 @@ textarea {
   }
 
   .site-nav {
-    display: none;
+    display: block;
     grid-column: 1 / -1;
     justify-self: stretch;
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 280ms ease;
   }
 
   .site-nav.is-open {
-    display: block;
+    max-height: 600px;
     padding-bottom: 1rem;
   }
 
@@ -1494,4 +1547,178 @@ textarea {
   .map-frame iframe {
     min-height: 320px;
   }
+}
+
+/* === MOTION / INTERACTIONS === */
+.card {
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.card:not(.elder-card, .contact-panel--form, .single-sermon__summary, .single-sermon__actions, .single-sermon__meta-card):hover {
+  transform: translateY(-3px);
+  box-shadow: 0 24px 56px rgba(30, 37, 41, 0.14);
+}
+
+.button:active,
+button[type="submit"]:active {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
+.gallery-card:hover .gallery-card__media img {
+  transform: scale(1.04);
+}
+
+/* === HERO VISUAL TEXTURE === */
+.hero {
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(var(--accent-soft) 1px, transparent 1px);
+  background-size: 28px 28px;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.hero__card.card--accent {
+  border-top: 3px solid var(--highlight);
+}
+
+.site-footer__label {
+  color: var(--accent-secondary-strong);
+}
+
+/* === STICKY SECTION NAV === */
+.section-nav-band {
+  position: sticky;
+  top: 90px;
+  z-index: 30;
+  backdrop-filter: blur(12px);
+  background: rgba(246, 243, 238, 0.92);
+}
+
+.section-nav__list a.is-active {
+  border-color: rgba(31, 86, 99, 0.36);
+  background: rgba(31, 86, 99, 0.12);
+  color: var(--accent-strong);
+}
+
+/* === FILTER BAR LOADING STATE === */
+button[aria-busy="true"] {
+  position: relative;
+  color: transparent !important;
+  pointer-events: none;
+}
+
+button[aria-busy="true"]::after {
+  content: '';
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin: -0.55rem 0 0 -0.55rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: ct-spin 0.6s linear infinite;
+}
+
+@keyframes ct-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* === MOBILE NAV HAMBURGER ICON === */
+.site-nav__icon {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 22px;
+  flex-shrink: 0;
+}
+
+.site-nav__icon span {
+  display: block;
+  height: 2px;
+  background: currentColor;
+  border-radius: 2px;
+  transition: transform 240ms ease, opacity 180ms ease;
+  transform-origin: center;
+}
+
+[aria-expanded="true"] .site-nav__icon span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+[aria-expanded="true"] .site-nav__icon span:nth-child(2) {
+  opacity: 0;
+}
+
+[aria-expanded="true"] .site-nav__icon span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* === SERMON CARD THUMBNAIL === */
+.sermon-card__thumb {
+  display: block;
+  overflow: hidden;
+  border-radius: calc(var(--radius) - 4px);
+  margin: -0.25rem -0.25rem 0.75rem;
+  aspect-ratio: 16 / 9;
+}
+
+.sermon-card__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 300ms ease;
+}
+
+.sermon-card:hover .sermon-card__thumb img {
+  transform: scale(1.03);
+}
+
+/* === CONTACT FORM VALIDATION === */
+.contact-form__error {
+  display: block;
+  margin-top: 0.3rem;
+  color: #7d2222;
+  font-size: 0.875rem;
+}
+
+input[aria-invalid="true"],
+textarea[aria-invalid="true"],
+select[aria-invalid="true"] {
+  border-color: rgba(157, 55, 55, 0.5);
+  box-shadow: 0 0 0 2px rgba(157, 55, 55, 0.12);
+}
+
+/* === EVENT CARD THUMBNAIL === */
+.event-card__thumb {
+  display: block;
+  overflow: hidden;
+  border-radius: calc(var(--radius) - 4px);
+  margin: -0.25rem -0.25rem 0.75rem;
+  aspect-ratio: 16 / 9;
+}
+
+.event-card__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 300ms ease;
+}
+
+.event-card:hover .event-card__thumb img {
+  transform: scale(1.03);
+}
+
+/* === SERMON SINGLE WIDE VIDEO === */
+.video-frame--wide {
+  max-width: 1080px;
+  margin: 0 auto;
 }

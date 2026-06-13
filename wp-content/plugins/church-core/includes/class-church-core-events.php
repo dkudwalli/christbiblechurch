@@ -26,7 +26,7 @@ final class Church_Core_Events
             'public' => true,
             'show_in_rest' => true,
             'menu_icon' => 'dashicons-calendar-alt',
-            'supports' => ['title', 'editor'],
+            'supports' => ['title', 'editor', 'thumbnail'],
             'has_archive' => true,
             'rewrite' => ['slug' => 'events'],
             'menu_position' => 22,
@@ -58,7 +58,7 @@ final class Church_Core_Events
                     <th scope="row"><label for="church-core-event-start"><?php esc_html_e('Event Date & Time', 'church-core'); ?></label></th>
                     <td>
                         <input class="regular-text" type="datetime-local" id="church-core-event-start" name="event_start" value="<?php echo esc_attr(self::format_input_datetime($event_start)); ?>" step="60" required>
-                        <p class="description"><?php esc_html_e('Use the church site’s local time when entering the start date and time.', 'church-core'); ?></p>
+                        <p class="description"><?php esc_html_e('Use the church site\'s local time when entering the start date and time.', 'church-core'); ?></p>
                     </td>
                 </tr>
                 <tr>

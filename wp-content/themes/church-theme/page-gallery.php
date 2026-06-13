@@ -84,33 +84,46 @@ $gallery_feature = church_theme_get_gallery_feature_media();
                 </div>
             </article>
         <?php else : ?>
-            <article class="card content-placeholder gallery-state">
-                <p class="eyebrow"><?php esc_html_e('Instagram', 'church-theme'); ?></p>
-                <h2>
-                    <?php
-                    echo esc_html($instagram_feed['configured']
-                        ? __('Instagram updates are temporarily unavailable.', 'church-theme')
-                        : __('The live Instagram gallery will appear here once the church account is connected.', 'church-theme'));
-                    ?>
-                </h2>
-                <p>
-                    <?php
-                    echo esc_html($instagram_feed['configured']
-                        ? __('The gallery is configured, but Instagram did not return media right now. Check back later or use the direct profile link below.', 'church-theme')
-                        : __('This page is ready for an authenticated Instagram feed. Until the account access is added, the gallery stays in a safe fallback state.', 'church-theme'));
-                    ?>
-                </p>
+            <article class="card gallery-feed">
+                <div class="gallery-feed__header">
+                    <div>
+                        <p class="eyebrow"><?php esc_html_e('Church Life', 'church-theme'); ?></p>
+                        <h2><?php esc_html_e('A glimpse of our community.', 'church-theme'); ?></h2>
+                    </div>
 
-                <div class="callout__actions">
                     <?php if ($instagram_profile_url !== '') : ?>
-                        <a class="button" href="<?php echo esc_url($instagram_profile_url); ?>" target="_blank" rel="noreferrer noopener">
-                            <?php esc_html_e('Open Instagram', 'church-theme'); ?>
+                        <a class="text-link" href="<?php echo esc_url($instagram_profile_url); ?>" target="_blank" rel="noreferrer noopener">
+                            <?php esc_html_e('Follow on Instagram', 'church-theme'); ?>
                         </a>
                     <?php endif; ?>
+                </div>
 
-                    <a class="text-link" href="<?php echo esc_url(church_theme_get_page_url('contact-us')); ?>">
-                        <?php esc_html_e('Contact Us', 'church-theme'); ?>
-                    </a>
+                <div class="gallery-feed__grid">
+                    <?php
+                    $fallback_images = [
+                        ['/assets/images/crossroads/kishore-shirley.webp', __('Kishore and Shirley', 'church-theme')],
+                        ['/assets/images/crossroads/benji-rashmi.webp', __('Benji and Rashmi', 'church-theme')],
+                        ['/assets/images/crossroads/tim-ruth.webp', __('Tim and Ruth', 'church-theme')],
+                        ['/assets/images/crossroads/women-ministry.webp', __('Women\'s Ministry', 'church-theme')],
+                    ];
+                    foreach ($fallback_images as [$img_path, $img_alt]) :
+                        $img_asset = church_theme_get_static_image($img_path, $img_alt);
+                        if ($img_asset === null) {
+                            continue;
+                        }
+                    ?>
+                        <article class="gallery-card">
+                            <div class="gallery-card__media">
+                                <?php
+                                echo church_theme_render_static_image($img_asset, [ // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                                    'loading' => 'lazy',
+                                    'decoding' => 'async',
+                                    'sizes' => '(max-width: 720px) 50vw, 25vw',
+                                ]);
+                                ?>
+                            </div>
+                        </article>
+                    <?php endforeach; ?>
                 </div>
             </article>
         <?php endif; ?>

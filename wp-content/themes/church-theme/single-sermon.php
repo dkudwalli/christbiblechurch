@@ -39,29 +39,34 @@ while (have_posts()) :
         </div>
     </section>
 
+    <?php if ($youtube_url !== '') : ?>
+        <section class="section single-sermon-media-section">
+            <div class="wrap">
+                <div class="video-frame video-frame--wide">
+                    <?php
+                    $embed_html = wp_oembed_get($youtube_url);
+
+                    if ($embed_html) {
+                        echo $embed_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                    } else {
+                        ?>
+                        <div class="video-frame__fallback">
+                            <p><?php esc_html_e('Watch this sermon on YouTube.', 'church-theme'); ?></p>
+                            <a class="button button--secondary" href="<?php echo esc_url($youtube_url); ?>" target="_blank" rel="noopener noreferrer">
+                                <?php esc_html_e('Open Video', 'church-theme'); ?>
+                            </a>
+                        </div>
+                        <?php
+                    }
+                    ?>
+                </div>
+            </div>
+        </section>
+    <?php endif; ?>
+
     <section class="section">
         <div class="wrap single-sermon">
             <div class="single-sermon__content">
-                <?php if ($youtube_url !== '') : ?>
-                    <div class="video-frame">
-                        <?php
-                        $embed_html = wp_oembed_get($youtube_url);
-
-                        if ($embed_html) {
-                            echo $embed_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-                        } else {
-                            ?>
-                            <div class="video-frame__fallback">
-                                <p><?php esc_html_e('Watch this sermon on YouTube.', 'church-theme'); ?></p>
-                                <a class="button button--secondary" href="<?php echo esc_url($youtube_url); ?>" target="_blank" rel="noopener noreferrer">
-                                    <?php esc_html_e('Open Video', 'church-theme'); ?>
-                                </a>
-                            </div>
-                            <?php
-                        }
-                        ?>
-                    </div>
-                <?php endif; ?>
 
                 <?php if ($audio_url !== '') : ?>
                     <div class="audio-player card">

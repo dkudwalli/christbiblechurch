@@ -709,6 +709,19 @@ function church_theme_enqueue_assets(): void
 }
 add_action('wp_enqueue_scripts', 'church_theme_enqueue_assets');
 
+function church_theme_preload_fonts(): void
+{
+    $fonts = [
+        '/assets/fonts/dmsans-latin.woff2',
+        '/assets/fonts/lora-latin.woff2',
+    ];
+    foreach ($fonts as $font) {
+        $url = esc_url(get_template_directory_uri() . $font);
+        echo "<link rel=\"preload\" href=\"{$url}\" as=\"font\" type=\"font/woff2\" crossorigin>\n";
+    }
+}
+add_action('wp_head', 'church_theme_preload_fonts', 1);
+
 function church_theme_customize_register(WP_Customize_Manager $wp_customize): void
 {
     $sections = [
@@ -993,15 +1006,20 @@ function church_theme_get_sermon_excerpt_preview(int $post_id, int $word_limit =
 
 function church_theme_get_event_query(bool $upcoming, int $posts_per_page = -1): WP_Query
 {
+    $paginate = $posts_per_page !== -1;
+    // Use a custom query parameter so path-based WordPress paging (/page/2/) is not triggered,
+    // which avoids 404s when the main archive query doesn't know about this limit.
+    $current_page = $paginate ? max(1, (int) ($_GET['past_page'] ?? 1)) : 1; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
     return new WP_Query([
         'post_type' => 'event',
         'post_status' => 'publish',
         'posts_per_page' => $posts_per_page,
+        'paged' => $current_page,
         'meta_key' => 'event_start',
         'orderby' => 'meta_value',
         'meta_type' => 'DATETIME',
         'order' => $upcoming ? 'ASC' : 'DESC',
-        'no_found_rows' => true,
+        'no_found_rows' => ! $paginate,
         'meta_query' => [[
             'key' => 'event_start',
             'value' => current_time('mysql'),
