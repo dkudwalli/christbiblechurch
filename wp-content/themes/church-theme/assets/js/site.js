@@ -1,6 +1,42 @@
 document.documentElement.classList.add("has-js");
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Scroll-based UI updates (header shadow and back-to-top)
+  const header = document.querySelector(".site-header");
+  const backToTop = document.querySelector(".back-to-top");
+  let scrollTicking = false;
+
+  const handleScroll = () => {
+    const scrollY = window.scrollY;
+    if (header) {
+      header.classList.toggle("is-scrolled", scrollY > 10);
+    }
+    if (backToTop) {
+      backToTop.classList.toggle("is-visible", scrollY > 500);
+    }
+    scrollTicking = false;
+  };
+
+  if (header || backToTop) {
+    window.addEventListener(
+      "scroll",
+      () => {
+        if (!scrollTicking) {
+          window.requestAnimationFrame(handleScroll);
+          scrollTicking = true;
+        }
+      },
+      { passive: true }
+    );
+    handleScroll();
+  }
+
+  if (backToTop) {
+    backToTop.addEventListener("click", () => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  }
+
   // Scroll-triggered reveal animations
   const reveals = document.querySelectorAll(".reveal");
   if (reveals.length > 0) {
@@ -240,4 +276,59 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   syncViewportState();
+
+  // Lightbox implementation
+  const lightboxes = document.querySelectorAll(".js-lightbox");
+  if (lightboxes.length > 0) {
+    const dialog = document.createElement("dialog");
+    dialog.className = "lightbox";
+    dialog.innerHTML = `
+      <div class="lightbox__content">
+        <button class="lightbox__close" aria-label="Close" type="button">&times;</button>
+        <img class="lightbox__image" src="" alt="">
+        <a class="lightbox__link" href="" target="_blank" rel="noreferrer noopener">View on Instagram</a>
+      </div>
+    `;
+    document.body.appendChild(dialog);
+
+    const img = dialog.querySelector(".lightbox__image");
+    const link = dialog.querySelector(".lightbox__link");
+    const closeBtn = dialog.querySelector(".lightbox__close");
+
+    const closeLightbox = () => {
+      dialog.classList.remove("is-open");
+      // Wait for CSS transition to finish before actually closing
+      setTimeout(() => {
+        dialog.close();
+        img.src = "";
+      }, 300);
+    };
+
+    closeBtn.addEventListener("click", closeLightbox);
+    
+    dialog.addEventListener("click", (e) => {
+      if (e.target === dialog) {
+        closeLightbox();
+      }
+    });
+
+    lightboxes.forEach((trigger) => {
+      trigger.addEventListener("click", (e) => {
+        e.preventDefault();
+        const imageUrl = trigger.getAttribute("href");
+        const permalink = trigger.getAttribute("data-permalink");
+        
+        img.src = imageUrl;
+        if (permalink) {
+          link.href = permalink;
+          link.style.display = "block";
+        } else {
+          link.style.display = "none";
+        }
+        
+        dialog.showModal();
+        dialog.classList.add("is-open");
+      });
+    });
+  }
 });

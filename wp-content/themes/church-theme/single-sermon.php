@@ -147,6 +147,7 @@ while (have_posts()) :
         <section class="section">
             <div class="wrap">
                 <div class="section-heading reveal">
+                    <p class="eyebrow"><?php esc_html_e('Keep Listening', 'church-theme'); ?></p>
                     <h2><?php echo esc_html($related_section_title); ?></h2>
                 </div>
 

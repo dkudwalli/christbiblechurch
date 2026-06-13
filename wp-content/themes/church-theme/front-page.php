@@ -72,6 +72,7 @@ $upcoming_events = church_theme_get_event_query(true, 3);
 <section class="section section--muted">
     <div class="wrap">
         <div class="section-heading reveal">
+            <p class="eyebrow"><?php esc_html_e('Our Foundation', 'church-theme'); ?></p>
             <h2><?php esc_html_e('The priorities shaping Crossroad South Church.', 'church-theme'); ?></h2>
         </div>
 
@@ -100,6 +101,7 @@ $upcoming_events = church_theme_get_event_query(true, 3);
 <section class="section">
     <div class="wrap">
         <div class="section-heading reveal">
+            <p class="eyebrow"><?php esc_html_e('Recent Teaching', 'church-theme'); ?></p>
             <h2><?php echo esc_html(church_theme_get_mod('latest_sermon_heading')); ?></h2>
         </div>
 
@@ -143,6 +145,7 @@ $upcoming_events = church_theme_get_event_query(true, 3);
 <section class="section section--muted">
     <div class="wrap">
         <div class="section-heading reveal">
+            <p class="eyebrow"><?php esc_html_e('Community', 'church-theme'); ?></p>
             <h2><?php esc_html_e('Upcoming opportunities to gather.', 'church-theme'); ?></h2>
             <p class="page-hero__summary"><?php esc_html_e('See the next few church events at a glance, then head to the full Events page for more details and past gatherings.', 'church-theme'); ?></p>
         </div>

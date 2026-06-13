@@ -18,6 +18,7 @@ $past_events = church_theme_get_event_query(false, 9);
 <section class="section">
     <div class="wrap event-section">
         <div class="section-heading reveal">
+            <p class="eyebrow"><?php esc_html_e('Coming Up', 'church-theme'); ?></p>
             <h2><?php esc_html_e('Join us at the next gathering.', 'church-theme'); ?></h2>
         </div>
 
@@ -40,6 +41,7 @@ $past_events = church_theme_get_event_query(false, 9);
 <section class="section section--muted">
     <div class="wrap event-section">
         <div class="section-heading reveal">
+            <p class="eyebrow"><?php esc_html_e('Looking Back', 'church-theme'); ?></p>
             <h2><?php esc_html_e('Recent gatherings and meetings.', 'church-theme'); ?></h2>
         </div>
 

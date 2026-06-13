@@ -13,14 +13,27 @@ $contact_email = church_theme_get_mod('contact_email');
 <section class="page-hero">
     <div class="wrap">
         <h1><?php the_title(); ?></h1>
+        <p class="page-hero__summary"><?php esc_html_e('Supporting the ministry and mission of Crossroad South Church through faithful giving.', 'church-theme'); ?></p>
     </div>
 </section>
 
 <section class="section">
     <div class="wrap content-grid">
-        <article class="card prose prose--wide reveal">
-            <?php echo apply_filters('the_content', get_the_content()); ?>
-        </article>
+        <div class="give-content">
+            <article class="card give-scripture reveal">
+                <blockquote>
+                    <p><?php esc_html_e('Each of you should give what you have decided in your heart to give, not reluctantly or under compulsion, for God loves a cheerful giver.', 'church-theme'); ?></p>
+                    <footer>
+                        <cite><?php esc_html_e('2 Corinthians 9:7', 'church-theme'); ?></cite>
+                    </footer>
+                </blockquote>
+            </article>
+
+            <article class="card prose prose--wide reveal">
+                <p class="eyebrow"><?php esc_html_e('How to Give', 'church-theme'); ?></p>
+                <?php echo apply_filters('the_content', get_the_content()); ?>
+            </article>
+        </div>
 
         <div class="card card--accent content-aside reveal">
             <p class="card__label"><?php esc_html_e('Questions', 'church-theme'); ?></p>

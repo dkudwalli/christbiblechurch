@@ -55,6 +55,10 @@ a {
   scroll-margin-top: calc(var(--header-offset) + 1rem);
 }
 
+[id].section {
+  scroll-margin-top: calc(var(--header-offset) + 4rem);
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
