@@ -23,6 +23,17 @@ while (have_posts()) :
     ?>
     <section class="page-hero">
         <div class="wrap">
+            <nav aria-label="Breadcrumb" class="breadcrumbs" style="font-size: 0.85rem; font-weight: 600; margin-bottom: 1rem; color: var(--text-soft);">
+                <a href="<?php echo esc_url(home_url('/')); ?>" style="color: var(--accent-strong); text-decoration: none;">Home</a>
+                <span style="margin: 0 0.4rem; opacity: 0.5;">/</span>
+                <a href="<?php echo esc_url(church_theme_get_sermon_archive_url()); ?>" style="color: var(--accent-strong); text-decoration: none;">Sermons</a>
+                <?php if ($series_term) : ?>
+                    <span style="margin: 0 0.4rem; opacity: 0.5;">/</span>
+                    <a href="<?php echo esc_url(church_theme_get_sermon_term_url($series_term)); ?>" style="color: var(--accent-strong); text-decoration: none;"><?php echo esc_html($series_term->name); ?></a>
+                <?php endif; ?>
+                <span style="margin: 0 0.4rem; opacity: 0.5;">/</span>
+                <span aria-current="page"><?php echo esc_html(wp_trim_words(get_the_title(), 5)); ?></span>
+            </nav>
             <h1><?php the_title(); ?></h1>
             <p class="sermon-meta sermon-meta--hero">
                 <span><?php echo esc_html(church_theme_get_sermon_date($post_id)); ?></span>

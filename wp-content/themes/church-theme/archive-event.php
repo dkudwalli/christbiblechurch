@@ -10,6 +10,11 @@ $past_events = church_theme_get_event_query(false, 9);
 ?>
 <section class="page-hero">
     <div class="wrap">
+        <nav aria-label="Breadcrumb" class="breadcrumbs" style="font-size: 0.85rem; font-weight: 600; margin-bottom: 1rem; color: var(--text-soft);">
+            <a href="<?php echo esc_url(home_url('/')); ?>" style="color: var(--accent-strong); text-decoration: none;">Home</a>
+            <span style="margin: 0 0.4rem; opacity: 0.5;">/</span>
+            <span aria-current="page"><?php esc_html_e('Events', 'church-theme'); ?></span>
+        </nav>
         <h1><?php post_type_archive_title(); ?></h1>
         <p class="page-hero__summary"><?php esc_html_e('Find upcoming church events, online meetings, and recent gatherings from Crossroad South Church.', 'church-theme'); ?></p>
     </div>

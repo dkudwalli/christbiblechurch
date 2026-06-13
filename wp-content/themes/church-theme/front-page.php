@@ -160,9 +160,10 @@ $upcoming_events = church_theme_get_event_query(true, 3);
             </article>
             <?php wp_reset_postdata(); ?>
         <?php else : ?>
-            <article class="card reveal">
-                <h3><?php esc_html_e('Sermon migration is next.', 'church-theme'); ?></h3>
-                <p><?php esc_html_e('The Crossroads page structure is in place. The historic sermon archive will be imported in the next phase.', 'church-theme'); ?></p>
+            <article class="card reveal" style="text-align: center; padding: 4rem 2rem;">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 1rem; opacity: 0.3; color: var(--accent);"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                <h3><?php esc_html_e('We\'re preparing our sermon archive.', 'church-theme'); ?></h3>
+                <p><?php esc_html_e('Check back soon to watch and listen to recent teachings from Crossroad South Church.', 'church-theme'); ?></p>
             </article>
         <?php endif; ?>
     </div>
@@ -184,9 +185,10 @@ $upcoming_events = church_theme_get_event_query(true, 3);
                 <?php wp_reset_postdata(); ?>
             </div>
         <?php else : ?>
-            <article class="card content-placeholder reveal">
-                <h3><?php esc_html_e('Upcoming events will appear here soon.', 'church-theme'); ?></h3>
-                <p><?php esc_html_e('As new meetings, fellowships, and special gatherings are added, the next three upcoming events will show on this page.', 'church-theme'); ?></p>
+            <article class="card reveal" style="text-align: center; padding: 4rem 2rem;">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 1rem; opacity: 0.3; color: var(--accent);"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                <h3><?php esc_html_e('No upcoming events right now.', 'church-theme'); ?></h3>
+                <p><?php esc_html_e('As new meetings, fellowships, and special gatherings are scheduled, they will appear here.', 'church-theme'); ?></p>
             </article>
         <?php endif; ?>
 

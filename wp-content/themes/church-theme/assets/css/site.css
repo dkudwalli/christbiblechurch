@@ -1745,6 +1745,19 @@ button[type="submit"]:active {
   transform: scale(1.04);
 }
 
+/* === LOADING SKELETONS === */
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-muted) 25%, var(--bg) 50%, var(--bg-muted) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 /* === SCROLL-REVEAL ENTRANCE ANIMATIONS === */
 .reveal {
   opacity: 0;

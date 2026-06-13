@@ -34,6 +34,18 @@ if (is_wp_error($series_terms)) {
 ?>
 <section class="page-hero">
     <div class="wrap">
+        <nav aria-label="Breadcrumb" class="breadcrumbs" style="font-size: 0.85rem; font-weight: 600; margin-bottom: 1rem; color: var(--text-soft);">
+            <a href="<?php echo esc_url(home_url('/')); ?>" style="color: var(--accent-strong); text-decoration: none;">Home</a>
+            <?php if (is_tax('series') || is_tax('speaker')) : ?>
+                <span style="margin: 0 0.4rem; opacity: 0.5;">/</span>
+                <a href="<?php echo esc_url(church_theme_get_sermon_archive_url()); ?>" style="color: var(--accent-strong); text-decoration: none;">Sermons</a>
+                <span style="margin: 0 0.4rem; opacity: 0.5;">/</span>
+                <span aria-current="page"><?php echo esc_html($archive_context['title']); ?></span>
+            <?php else : ?>
+                <span style="margin: 0 0.4rem; opacity: 0.5;">/</span>
+                <span aria-current="page"><?php esc_html_e('Sermons', 'church-theme'); ?></span>
+            <?php endif; ?>
+        </nav>
         <h1><?php echo esc_html($archive_context['title']); ?></h1>
         <p class="page-hero__summary"><?php echo esc_html($archive_context['summary']); ?></p>
     </div>

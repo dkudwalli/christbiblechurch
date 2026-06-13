@@ -58,7 +58,7 @@ $gallery_feature = church_theme_get_gallery_feature_media();
                         $caption = trim((string) ($item['caption'] ?? ''));
                         ?>
                         <article class="gallery-card">
-                            <a class="gallery-card__media js-lightbox" href="<?php echo esc_url((string) $item['image_url']); ?>" data-permalink="<?php echo esc_url((string) $item['permalink']); ?>" aria-label="<?php esc_attr_e('View image in lightbox', 'church-theme'); ?>">
+                            <a class="gallery-card__media js-lightbox skeleton" href="<?php echo esc_url((string) $item['image_url']); ?>" data-permalink="<?php echo esc_url((string) $item['permalink']); ?>" aria-label="<?php esc_attr_e('View image in lightbox', 'church-theme'); ?>">
                                 <img src="<?php echo esc_url((string) $item['image_url']); ?>" alt="<?php echo esc_attr($caption !== '' ? $caption : __('Crossroad South Church Instagram post', 'church-theme')); ?>" loading="lazy" decoding="async">
                             </a>
 
@@ -113,7 +113,7 @@ $gallery_feature = church_theme_get_gallery_feature_media();
                         }
                     ?>
                         <article class="gallery-card">
-                            <div class="gallery-card__media">
+                            <div class="gallery-card__media skeleton">
                                 <?php
                                 echo church_theme_render_static_image($img_asset, [ // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                                     'loading' => 'lazy',
