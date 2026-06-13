@@ -46,11 +46,11 @@ get_template_part('template-parts/page', 'sections-body', [
     'nav_label' => __('Worship page sections', 'church-theme'),
     'cta' => [
         'eyebrow' => __('Questions', 'church-theme'),
-        'heading' => __('Need help before your first Sunday at Crossroads?', 'church-theme'),
+        'heading' => __('Need help before your first Sunday at Crossroad South Church?', 'church-theme'),
         'body' => __('Send a message if you want directions, more detail on age-group ministries, or help connecting with the church.', 'church-theme'),
         'primary_label' => __('Contact Us', 'church-theme'),
         'primary_url' => church_theme_get_page_url('contact-us'),
-        'secondary_label' => __('About Crossroads', 'church-theme'),
+        'secondary_label' => __('About Crossroad South', 'church-theme'),
         'secondary_url' => church_theme_get_page_url('about-us'),
     ],
 ]);

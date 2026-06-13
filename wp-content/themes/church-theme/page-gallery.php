@@ -111,7 +111,7 @@ $gallery_feature = church_theme_get_gallery_feature_media();
                         if ($img_asset === null) {
                             continue;
                         }
-                    ?>
+                        ?>
                         <article class="gallery-card">
                             <div class="gallery-card__media skeleton">
                                 <?php

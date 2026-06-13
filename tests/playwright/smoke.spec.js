@@ -63,17 +63,43 @@ test("mobile navigation opens and submenu controls expand", async ({ page }) => 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
 
-  await page.getByRole("button", { name: "Menu" }).click();
+  const menuToggle = page.locator("[data-nav-toggle]");
+
+  await expect(menuToggle).toHaveAccessibleName("Open main menu");
+  await menuToggle.click();
   await expect(page.locator("[data-nav]")).toHaveClass(/is-open/);
+  await expect(menuToggle).toHaveAttribute("aria-label", "Close main menu");
 
   const submenuToggle = page.locator(".site-nav__submenu-toggle").first();
 
   if ((await submenuToggle.count()) > 0) {
+    await expect(submenuToggle).toHaveAccessibleName(/Toggle .* submenu/);
     await submenuToggle.click();
     await expect(submenuToggle).toHaveAttribute("aria-expanded", "true");
     await page.keyboard.press("Escape");
     await expect(submenuToggle).toHaveAttribute("aria-expanded", "false");
   }
+});
+
+test("homepage reveal content remains readable without JavaScript", async ({ browser }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+
+  await page.goto("/");
+
+  const hiddenRevealCount = await page.evaluate(() => {
+    return [...document.querySelectorAll(".reveal")].filter((element) => {
+      const styles = window.getComputedStyle(element);
+
+      return styles.opacity === "0" || styles.visibility === "hidden";
+    }).length;
+  });
+
+  expect(hiddenRevealCount).toBe(0);
+  await expect(page.getByText("Our Foundation", { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Upcoming opportunities to gather." })).toBeVisible();
+
+  await context.close();
 });
 
 test("section navigation does not scroll targets underneath the sticky header", async ({ page }) => {
@@ -118,13 +144,14 @@ test("sermon filters expose visible labels and clear state", async ({ page }) =>
   await expect(page.getByRole("link", { name: "Clear filters" })).toBeVisible();
 });
 
-test("section pages use structured media layouts", async ({ page }) => {
+test("section pages render configured section layouts and section targets", async ({ page }) => {
   await page.goto("/about-us/");
   await expect(page.locator("#elder-board .elder-card").first()).toBeVisible();
   await expect(page.locator("#elder-board .section-media-grid")).toHaveCount(0);
 
   await page.goto("/worship/");
-  await expect(page.locator("#womens-ministry .section-visual img")).toBeVisible();
+  await expect(page.locator(".section-nav__list a[href='#womens-ministry']")).toBeVisible();
+  await expect(page.locator("#womens-ministry .section-card, #womens-ministry .section-story")).toBeVisible();
 });
 
 test("contact page renders a simplified four-field form and styled phone input", async ({ page }) => {
@@ -177,6 +204,15 @@ test("contact form preserves simplified field values on invalid submit", async (
   await expect(page.locator("#contact_email")).toHaveValue("visitor@example.com");
   await expect(page.locator("#contact_phone")).toHaveValue("+91 98765 43210");
   await expect(page.locator("#contact_message")).toHaveValue("");
+});
+
+test("contact page offers a direct Google Maps fallback action", async ({ page }) => {
+  await page.goto("/contact-us/");
+
+  const mapFallbackLink = page.getByRole("link", { name: "Open in Google Maps" });
+
+  await expect(mapFallbackLink).toBeVisible();
+  await expect(mapFallbackLink).toHaveAttribute("target", "_blank");
 });
 
 test("events archive and detail pages render expected states", async ({ page }) => {

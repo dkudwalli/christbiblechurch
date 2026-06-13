@@ -13,6 +13,7 @@ $service_times = church_theme_split_lines(church_theme_get_mod('service_times'))
 $worship_location = church_theme_split_lines(church_theme_get_mod('worship_location'));
 $communication_address = church_theme_split_lines(church_theme_get_mod('communication_address'));
 $map_embed_url = church_theme_get_mod('map_embed_url');
+$map_directions_url = church_theme_get_map_directions_url();
 $worship_location_name = $worship_location[0] ?? __('our worship hall', 'church-theme');
 $has_direct_actions = $contact_phone !== '' || $contact_email !== '';
 ?>
@@ -126,22 +127,42 @@ $has_direct_actions = $contact_phone !== '' || $contact_email !== '';
     </div>
 </section>
 
-<?php if ($map_embed_url !== '') : ?>
+<?php if ($map_embed_url !== '' || $map_directions_url !== '') : ?>
     <section class="section section--muted">
         <div class="wrap contact-map-section">
             <div class="section-heading contact-map-section__heading reveal">
                 <p class="eyebrow"><?php esc_html_e('Location', 'church-theme'); ?></p>
                 <h2><?php esc_html_e('Find the worship hall.', 'church-theme'); ?></h2>
                 <p class="page-hero__summary"><?php printf(esc_html__('We gather at %s each Sunday. Use the map below if you need help planning your route.', 'church-theme'), esc_html($worship_location_name)); ?></p>
+
+                <?php if ($map_directions_url !== '') : ?>
+                    <div class="contact-map-section__actions">
+                        <a class="button button--secondary" href="<?php echo esc_url($map_directions_url); ?>" target="_blank" rel="noopener noreferrer">
+                            <?php esc_html_e('Open in Google Maps', 'church-theme'); ?>
+                        </a>
+                    </div>
+                <?php endif; ?>
             </div>
 
             <div class="map-frame reveal">
-                <iframe
-                    src="<?php echo esc_url($map_embed_url); ?>"
-                    loading="lazy"
-                    referrerpolicy="no-referrer-when-downgrade"
-                    allowfullscreen
-                    title="<?php esc_attr_e('Church location map', 'church-theme'); ?>"></iframe>
+                <?php if ($map_embed_url !== '') : ?>
+                    <?php if ($map_directions_url !== '') : ?>
+                        <div class="map-frame__fallback">
+                            <p><?php esc_html_e('If the embedded map does not appear, open the church location directly in Google Maps.', 'church-theme'); ?></p>
+                        </div>
+                    <?php endif; ?>
+
+                    <iframe
+                        src="<?php echo esc_url($map_embed_url); ?>"
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"
+                        allowfullscreen
+                        title="<?php esc_attr_e('Church location map', 'church-theme'); ?>"></iframe>
+                <?php else : ?>
+                    <div class="map-frame__placeholder">
+                        <p><?php esc_html_e('The map embed is unavailable right now. Use the Google Maps link above for directions to the worship hall.', 'church-theme'); ?></p>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </section>

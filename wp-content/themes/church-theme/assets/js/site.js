@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const prefersReduced = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
-    if (prefersReduced) {
+    if (prefersReduced || typeof IntersectionObserver !== "function") {
       reveals.forEach((el) => el.classList.add("is-visible"));
     } else {
       const revealObserver = new IntersectionObserver(
@@ -60,6 +60,19 @@ document.addEventListener("DOMContentLoaded", () => {
       reveals.forEach((el) => revealObserver.observe(el));
     }
   }
+
+  const mapFrameIframes = document.querySelectorAll(".map-frame iframe");
+  mapFrameIframes.forEach((frame) => {
+    const mapFrame = frame.closest(".map-frame");
+
+    if (!mapFrame) {
+      return;
+    }
+
+    frame.addEventListener("load", () => {
+      mapFrame.classList.add("is-loaded");
+    });
+  });
 
   // Section nav scrollspy
   const sectionLinks = document.querySelectorAll(".section-nav__list a[href^='#']");
@@ -131,10 +144,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const desktopNavQuery = window.matchMedia("(min-width: 961px)");
   const submenuControls = [];
+  const toggleAssistiveText = toggle.querySelector(".screen-reader-text");
+  const openMenuLabel = "Open main menu";
+  const closeMenuLabel = "Close main menu";
 
   const setNavState = (isOpen) => {
     nav.classList.toggle("is-open", isOpen);
     toggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    toggle.setAttribute("aria-label", isOpen ? closeMenuLabel : openMenuLabel);
+    if (toggleAssistiveText) {
+      toggleAssistiveText.textContent = isOpen ? closeMenuLabel : openMenuLabel;
+    }
   };
 
   const setSubmenuState = (control, isOpen) => {
@@ -187,11 +207,11 @@ document.addEventListener("DOMContentLoaded", () => {
     button.className = "site-nav__submenu-toggle";
     button.setAttribute("aria-controls", submenuId);
     button.setAttribute("aria-expanded", "false");
-    button.setAttribute("aria-label", `Toggle submenu for ${label}`);
+    button.setAttribute("aria-label", `Toggle ${label} submenu`);
 
     const assistiveText = document.createElement("span");
     assistiveText.className = "screen-reader-text";
-    assistiveText.textContent = `Toggle submenu for ${label}`;
+    assistiveText.textContent = `Toggle ${label} submenu`;
 
     button.appendChild(assistiveText);
     link.after(button);

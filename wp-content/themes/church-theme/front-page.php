@@ -25,7 +25,7 @@ $upcoming_events = church_theme_get_event_query(true, 3);
                 <?php endif; ?>
 
                 <a class="text-link" href="<?php echo esc_url(church_theme_get_page_url('about-us')); ?>">
-                    <?php esc_html_e('Learn more about Crossroads', 'church-theme'); ?>
+                    <?php esc_html_e('Learn about Crossroad South', 'church-theme'); ?>
                 </a>
             </div>
         </div>

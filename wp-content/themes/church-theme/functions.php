@@ -17,7 +17,7 @@ function church_theme_defaults(): array
         'footer_mission_line' => "Exalting the Triune God.\nEdifying Believers.\nEvangelizing the Unreached.",
         'vision_statement' => 'To be a platform for individuals and families living in South Bengaluru to meet Jesus Christ and grow in Christian discipleship as a way of life.',
         'core_values_summary' => 'Breaking down barriers, gospel-centered living, deep biblical conviction, and missional engagement.',
-        'footer_invite' => '',
+        'footer_invite' => 'Reach out before Sunday if you need directions, details about children’s ministry, or help planning your first visit.',
         'contact_phone' => '+919663065363',
         'contact_email' => 'crossroadsouthchurch@gmail.com',
         'map_embed_url' => 'https://www.google.com/maps?q=Mother+Theresa+Hall,+Don+Bosco+Skill+Mission,+Kothanur+Dinne+Road,+Bengaluru+560076&output=embed',
@@ -47,6 +47,17 @@ function church_theme_split_lines(string $value): array
 function church_theme_phone_href(string $value): string
 {
     return preg_replace('/[^0-9+]/', '', $value) ?: '';
+}
+
+function church_theme_get_map_directions_url(): string
+{
+    $location = implode(', ', church_theme_split_lines(church_theme_get_mod('worship_location')));
+
+    if ($location === '') {
+        return '';
+    }
+
+    return 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($location);
 }
 
 function church_theme_get_instagram_profile_url(): string

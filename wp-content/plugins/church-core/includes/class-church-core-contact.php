@@ -243,5 +243,4 @@ final class Church_Core_Contact
             echo esc_html((string) get_post_meta($post_id, 'contact_phone', true) ?: '—');
         }
     }
-
 }
