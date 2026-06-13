@@ -23,19 +23,19 @@ while (have_posts()) :
     <section class="section">
         <div class="wrap">
             <div class="event-detail">
-                <section class="event-meta-grid" aria-label="<?php esc_attr_e('Event details', 'church-theme'); ?>">
-                    <article class="card event-meta-card">
+                <section class="event-meta-grid reveal-stagger" aria-label="<?php esc_attr_e('Event details', 'church-theme'); ?>">
+                    <article class="card event-meta-card reveal">
                         <p class="eyebrow"><?php esc_html_e('Date & Time', 'church-theme'); ?></p>
                         <h2><?php echo esc_html(church_theme_get_event_datetime($post_id)); ?></h2>
                     </article>
 
-                    <article class="card event-meta-card">
+                    <article class="card event-meta-card reveal">
                         <p class="eyebrow"><?php esc_html_e('Location', 'church-theme'); ?></p>
                         <h2><?php echo esc_html($event_location !== '' ? $event_location : __('Location to be announced', 'church-theme')); ?></h2>
                     </article>
                 </section>
 
-                <article class="card event-summary">
+                <article class="card event-summary reveal">
                     <p class="eyebrow"><?php esc_html_e('Notes', 'church-theme'); ?></p>
                     <?php if ($has_notes) : ?>
                         <div class="prose prose--wide">
@@ -46,7 +46,7 @@ while (have_posts()) :
                     <?php endif; ?>
                 </article>
 
-                <article class="card event-actions">
+                <article class="card event-actions reveal">
                     <div>
                         <p class="eyebrow"><?php esc_html_e('More Events', 'church-theme'); ?></p>
                         <h2><?php esc_html_e('See everything on the events page.', 'church-theme'); ?></h2>

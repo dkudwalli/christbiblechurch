@@ -1,6 +1,30 @@
 document.documentElement.classList.add("has-js");
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Scroll-triggered reveal animations
+  const reveals = document.querySelectorAll(".reveal");
+  if (reveals.length > 0) {
+    const prefersReduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    if (prefersReduced) {
+      reveals.forEach((el) => el.classList.add("is-visible"));
+    } else {
+      const revealObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("is-visible");
+              revealObserver.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.15 }
+      );
+      reveals.forEach((el) => revealObserver.observe(el));
+    }
+  }
+
   // Section nav scrollspy
   const sectionLinks = document.querySelectorAll(".section-nav__list a[href^='#']");
   if (sectionLinks.length > 0) {

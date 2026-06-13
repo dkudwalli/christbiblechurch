@@ -1498,6 +1498,30 @@ button[type="submit"]:active {
   transform: scale(1.04);
 }
 
+/* === SCROLL-REVEAL ENTRANCE ANIMATIONS === */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 600ms ease, transform 600ms ease;
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger children inside grids */
+.reveal-stagger > .reveal:nth-child(2) { transition-delay: 80ms; }
+.reveal-stagger > .reveal:nth-child(3) { transition-delay: 160ms; }
+.reveal-stagger > .reveal:nth-child(4) { transition-delay: 240ms; }
+.reveal-stagger > .reveal:nth-child(5) { transition-delay: 320ms; }
+.reveal-stagger > .reveal:nth-child(6) { transition-delay: 400ms; }
+
+/* Cards that are also reveal targets: compose hover lift with reveal */
+.card.reveal.is-visible:not(.elder-card, .contact-panel--form, .single-sermon__summary, .single-sermon__actions, .single-sermon__meta-card):hover {
+  transform: translateY(-3px);
+}
+
 /* === HERO VISUAL TEXTURE === */
 .hero {
   position: relative;

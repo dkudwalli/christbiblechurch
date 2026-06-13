@@ -50,12 +50,12 @@ $upcoming_events = church_theme_get_event_query(true, 3);
 
 <section class="section section--muted">
     <div class="wrap">
-        <div class="section-heading">
+        <div class="section-heading reveal">
             <h2><?php esc_html_e('The priorities shaping Crossroad South Church.', 'church-theme'); ?></h2>
         </div>
 
-        <div class="summary-grid">
-            <article class="card summary-card">
+        <div class="summary-grid reveal-stagger">
+            <article class="card summary-card reveal">
                 <p class="card__label"><?php esc_html_e('Mission', 'church-theme'); ?></p>
                 <h3><?php esc_html_e('Exalt, Edify, Evangelize', 'church-theme'); ?></h3>
                 <p><?php echo esc_html(church_theme_get_mod('mission_statement')); ?></p>
@@ -78,14 +78,14 @@ $upcoming_events = church_theme_get_event_query(true, 3);
 
 <section class="section">
     <div class="wrap">
-        <div class="section-heading">
+        <div class="section-heading reveal">
             <h2><?php echo esc_html(church_theme_get_mod('latest_sermon_heading')); ?></h2>
         </div>
 
         <?php if ($latest_sermon->have_posts()) : ?>
             <?php $latest_sermon->the_post(); ?>
             <?php $series_term = church_theme_get_sermon_primary_term(get_the_ID(), 'series'); ?>
-            <article class="card sermon-feature">
+            <article class="card sermon-feature reveal">
                 <div>
                     <h3><?php the_title(); ?></h3>
                     <p class="sermon-meta">
@@ -111,7 +111,7 @@ $upcoming_events = church_theme_get_event_query(true, 3);
             </article>
             <?php wp_reset_postdata(); ?>
         <?php else : ?>
-            <article class="card">
+            <article class="card reveal">
                 <h3><?php esc_html_e('Sermon migration is next.', 'church-theme'); ?></h3>
                 <p><?php esc_html_e('The Crossroads page structure is in place. The historic sermon archive will be imported in the next phase.', 'church-theme'); ?></p>
             </article>
@@ -121,26 +121,26 @@ $upcoming_events = church_theme_get_event_query(true, 3);
 
 <section class="section section--muted">
     <div class="wrap">
-        <div class="section-heading">
+        <div class="section-heading reveal">
             <h2><?php esc_html_e('Upcoming opportunities to gather.', 'church-theme'); ?></h2>
             <p class="page-hero__summary"><?php esc_html_e('See the next few church events at a glance, then head to the full Events page for more details and past gatherings.', 'church-theme'); ?></p>
         </div>
 
         <?php if ($upcoming_events->have_posts()) : ?>
-            <div class="event-grid">
+            <div class="event-grid reveal-stagger">
                 <?php while ($upcoming_events->have_posts()) : $upcoming_events->the_post(); ?>
                     <?php get_template_part('template-parts/event', 'card'); ?>
                 <?php endwhile; ?>
                 <?php wp_reset_postdata(); ?>
             </div>
         <?php else : ?>
-            <article class="card content-placeholder">
+            <article class="card content-placeholder reveal">
                 <h3><?php esc_html_e('Upcoming events will appear here soon.', 'church-theme'); ?></h3>
                 <p><?php esc_html_e('As new meetings, fellowships, and special gatherings are added, the next three upcoming events will show on this page.', 'church-theme'); ?></p>
             </article>
         <?php endif; ?>
 
-        <div class="callout__actions event-archive__actions">
+        <div class="callout__actions event-archive__actions reveal">
             <a class="button" href="<?php echo esc_url(church_theme_get_event_archive_url()); ?>">
                 <?php esc_html_e('View All Events', 'church-theme'); ?>
             </a>
@@ -149,7 +149,7 @@ $upcoming_events = church_theme_get_event_query(true, 3);
 </section>
 
 <section class="section section--muted">
-    <div class="wrap callout">
+    <div class="wrap callout reveal">
         <div>
             <p class="eyebrow"><?php esc_html_e('Visit', 'church-theme'); ?></p>
             <h2><?php esc_html_e('Questions before Sunday?', 'church-theme'); ?></h2>

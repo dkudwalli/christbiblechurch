@@ -7,7 +7,7 @@ $post_id = get_the_ID();
 $event_location = church_theme_get_event_location($post_id);
 $event_preview = church_theme_get_event_notes_preview($post_id, 24);
 ?>
-<article class="card event-card">
+<article class="card event-card reveal">
     <?php if (has_post_thumbnail($post_id)) : ?>
         <a class="event-card__thumb" href="<?php echo esc_url(church_theme_get_event_url($post_id)); ?>" tabindex="-1" aria-hidden="true">
             <?php

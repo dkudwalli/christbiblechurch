@@ -9,7 +9,7 @@ $speaker_term = church_theme_get_sermon_primary_term($post_id, 'speaker');
 $scripture = (string) get_post_meta($post_id, 'scripture_reference', true);
 $youtube_id = (string) get_post_meta($post_id, 'youtube_video_id', true);
 ?>
-<article class="card sermon-card">
+<article class="card sermon-card reveal">
     <?php if ($youtube_id !== '') : ?>
         <a class="sermon-card__thumb" href="<?php echo esc_url(church_theme_get_sermon_url($post_id)); ?>" tabindex="-1" aria-hidden="true">
             <img

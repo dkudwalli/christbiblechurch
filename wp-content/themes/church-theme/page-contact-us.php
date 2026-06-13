@@ -27,7 +27,7 @@ $has_direct_actions = $contact_phone !== '' || $contact_email !== '';
 
 <section class="section">
     <div class="wrap contact-page">
-        <article class="card card--accent visit-note">
+        <article class="card card--accent visit-note reveal">
             <div class="visit-note__copy">
                 <p class="card__label"><?php esc_html_e('Plan Your Visit', 'church-theme'); ?></p>
                 <h2><?php esc_html_e('Tell us what would make your first Sunday easier.', 'church-theme'); ?></h2>
@@ -62,7 +62,7 @@ $has_direct_actions = $contact_phone !== '' || $contact_email !== '';
         </article>
 
         <div class="contact-grid">
-            <article class="card contact-panel contact-panel--details">
+            <article class="card contact-panel contact-panel--details reveal">
                 <div class="contact-panel__header">
                     <p class="eyebrow"><?php esc_html_e('Visit and Connect', 'church-theme'); ?></p>
                     <h2><?php esc_html_e('Ways to reach us before Sunday.', 'church-theme'); ?></h2>
@@ -107,7 +107,7 @@ $has_direct_actions = $contact_phone !== '' || $contact_email !== '';
                 </dl>
             </article>
 
-            <article class="card contact-panel contact-panel--form">
+            <article class="card contact-panel contact-panel--form reveal">
                 <div class="contact-panel__header">
                     <p class="eyebrow"><?php esc_html_e('Visitor Contact', 'church-theme'); ?></p>
                     <h2><?php echo esc_html(church_theme_get_mod('contact_form_heading')); ?></h2>
@@ -129,13 +129,13 @@ $has_direct_actions = $contact_phone !== '' || $contact_email !== '';
 <?php if ($map_embed_url !== '') : ?>
     <section class="section section--muted">
         <div class="wrap contact-map-section">
-            <div class="section-heading contact-map-section__heading">
+            <div class="section-heading contact-map-section__heading reveal">
                 <p class="eyebrow"><?php esc_html_e('Location', 'church-theme'); ?></p>
                 <h2><?php esc_html_e('Find the worship hall.', 'church-theme'); ?></h2>
                 <p class="page-hero__summary"><?php printf(esc_html__('We gather at %s each Sunday. Use the map below if you need help planning your route.', 'church-theme'), esc_html($worship_location_name)); ?></p>
             </div>
 
-            <div class="map-frame">
+            <div class="map-frame reveal">
                 <iframe
                     src="<?php echo esc_url($map_embed_url); ?>"
                     loading="lazy"

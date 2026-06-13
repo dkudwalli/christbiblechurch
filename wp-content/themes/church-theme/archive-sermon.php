@@ -84,7 +84,7 @@ if (is_wp_error($series_terms)) {
 </section>
 
 <section class="section">
-    <div class="wrap sermon-grid">
+    <div class="wrap sermon-grid reveal-stagger">
         <?php if (have_posts()) : ?>
             <?php while (have_posts()) : the_post(); ?>
                 <?php get_template_part('template-parts/sermon', 'card'); ?>

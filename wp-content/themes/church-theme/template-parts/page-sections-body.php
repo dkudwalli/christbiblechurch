@@ -31,7 +31,7 @@ $cta = is_array($args['cta'] ?? null) ? $args['cta'] : [];
 
 <?php if ($cta !== []) : ?>
     <section class="section">
-        <div class="wrap callout">
+        <div class="wrap callout reveal">
             <div>
                 <?php if (($cta['eyebrow'] ?? '') !== '') : ?>
                     <p class="eyebrow"><?php echo esc_html($cta['eyebrow']); ?></p>

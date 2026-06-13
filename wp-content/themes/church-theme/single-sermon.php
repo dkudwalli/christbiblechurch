@@ -42,7 +42,7 @@ while (have_posts()) :
     <?php if ($youtube_url !== '') : ?>
         <section class="section single-sermon-media-section">
             <div class="wrap">
-                <div class="video-frame video-frame--wide">
+                <div class="video-frame video-frame--wide reveal">
                     <?php
                     $embed_html = wp_oembed_get($youtube_url);
 
@@ -69,7 +69,7 @@ while (have_posts()) :
             <div class="single-sermon__content">
 
                 <?php if ($audio_url !== '') : ?>
-                    <div class="audio-player card">
+                    <div class="audio-player card reveal">
                         <?php $audio_heading_id = 'sermon-audio-heading-' . $post_id; ?>
                         <h2 id="<?php echo esc_attr($audio_heading_id); ?>"><?php esc_html_e('Listen', 'church-theme'); ?></h2>
                         <audio class="sermon-audio" controls preload="none" aria-labelledby="<?php echo esc_attr($audio_heading_id); ?>">
@@ -87,8 +87,8 @@ while (have_posts()) :
                     </div>
                 <?php endif; ?>
 
-                <section class="single-sermon__meta-grid" aria-label="<?php esc_attr_e('Sermon details', 'church-theme'); ?>">
-                    <article class="card single-sermon__meta-card">
+                <section class="single-sermon__meta-grid reveal-stagger" aria-label="<?php esc_attr_e('Sermon details', 'church-theme'); ?>">
+                    <article class="card single-sermon__meta-card reveal">
                         <p class="eyebrow"><?php esc_html_e('Date', 'church-theme'); ?></p>
                         <h2><?php echo esc_html(church_theme_get_sermon_date($post_id)); ?></h2>
                     </article>
@@ -116,7 +116,7 @@ while (have_posts()) :
                 </section>
 
                 <?php if ($has_summary) : ?>
-                    <article class="card single-sermon__summary">
+                    <article class="card single-sermon__summary reveal">
                         <p class="eyebrow"><?php esc_html_e('Summary Notes', 'church-theme'); ?></p>
                         <div class="prose prose--wide">
                             <?php echo apply_filters('the_content', $summary_content); ?>
@@ -129,7 +129,7 @@ while (have_posts()) :
                     </article>
                 <?php endif; ?>
 
-                <article class="card single-sermon__actions">
+                <article class="card single-sermon__actions reveal">
                     <div>
                         <p class="eyebrow"><?php esc_html_e('Explore', 'church-theme'); ?></p>
                         <h2><?php esc_html_e('Keep Listening', 'church-theme'); ?></h2>
@@ -146,11 +146,11 @@ while (have_posts()) :
     <?php if ($related_sermons->have_posts()) : ?>
         <section class="section">
             <div class="wrap">
-                <div class="section-heading">
+                <div class="section-heading reveal">
                     <h2><?php echo esc_html($related_section_title); ?></h2>
                 </div>
 
-                <div class="sermon-grid">
+                <div class="sermon-grid reveal-stagger">
                     <?php while ($related_sermons->have_posts()) : $related_sermons->the_post(); ?>
                         <?php get_template_part('template-parts/sermon', 'card'); ?>
                     <?php endwhile; ?>
