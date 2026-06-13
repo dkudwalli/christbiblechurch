@@ -109,7 +109,27 @@ $upcoming_events = church_theme_get_event_query(true, 3);
             <?php $latest_sermon->the_post(); ?>
             <?php $series_term = church_theme_get_sermon_primary_term(get_the_ID(), 'series'); ?>
             <article class="card sermon-feature reveal">
-                <div>
+                <?php $youtube_id = (string) get_post_meta(get_the_ID(), 'youtube_video_id', true); ?>
+                <?php if ($youtube_id !== '') : ?>
+                    <div class="sermon-feature__media">
+                        <iframe 
+                            src="<?php echo esc_url('https://www.youtube.com/embed/' . $youtube_id); ?>" 
+                            title="<?php esc_attr_e('YouTube video player', 'church-theme'); ?>" 
+                            frameborder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                            allowfullscreen
+                            loading="lazy"
+                            style="width: 100%; aspect-ratio: 16/9; border-radius: 8px;">
+                        </iframe>
+                    </div>
+                <?php else : ?>
+                    <!-- Fallback if no video ID is present -->
+                    <div class="sermon-feature__media" style="background: var(--bg-muted); border-radius: 8px; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center;">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.3"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                    </div>
+                <?php endif; ?>
+
+                <div class="sermon-feature__content" style="display: flex; flex-direction: column; justify-content: center;">
                     <h3><?php the_title(); ?></h3>
                     <p class="sermon-meta">
                         <span><?php echo esc_html(church_theme_get_sermon_date(get_the_ID())); ?></span>
@@ -121,15 +141,15 @@ $upcoming_events = church_theme_get_event_query(true, 3);
                         <?php endif; ?>
                     </p>
                     <p><?php echo esc_html(church_theme_get_sermon_excerpt_preview(get_the_ID())); ?></p>
-                </div>
 
-                <div class="sermon-feature__actions">
-                    <a class="button button--secondary" href="<?php echo esc_url(church_theme_get_sermon_url(get_the_ID())); ?>">
-                        <?php esc_html_e('Watch or Listen', 'church-theme'); ?>
-                    </a>
-                    <a class="text-link" href="<?php echo esc_url(church_theme_get_sermon_archive_url()); ?>">
-                        <?php esc_html_e('Browse all sermons', 'church-theme'); ?>
-                    </a>
+                    <div class="sermon-feature__actions" style="margin-top: 1rem;">
+                        <a class="button button--secondary" href="<?php echo esc_url(church_theme_get_sermon_url(get_the_ID())); ?>">
+                            <?php esc_html_e('Watch or Listen', 'church-theme'); ?>
+                        </a>
+                        <a class="text-link" href="<?php echo esc_url(church_theme_get_sermon_archive_url()); ?>">
+                            <?php esc_html_e('Browse all sermons', 'church-theme'); ?>
+                        </a>
+                    </div>
                 </div>
             </article>
             <?php wp_reset_postdata(); ?>
