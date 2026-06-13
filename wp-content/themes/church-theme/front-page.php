@@ -54,13 +54,19 @@ $upcoming_events = church_theme_get_event_query(true, 3);
                 <p class="card__label"><?php esc_html_e('Gather With Us', 'church-theme'); ?></p>
                 <?php if ($worship_location !== []) : ?>
                     <h2><?php echo esc_html($worship_location[0]); ?></h2>
-                    <p class="hero__card-copy"><?php echo esc_html(implode(', ', $worship_location)); ?></p>
+                    <p class="hero__card-copy">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: -2px; margin-right: 4px; opacity: 0.8;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                        <?php echo esc_html(implode(', ', $worship_location)); ?>
+                    </p>
                 <?php endif; ?>
 
                 <?php if ($service_times !== []) : ?>
                     <ul class="stack-list">
                         <?php foreach ($service_times as $time) : ?>
-                            <li><?php echo esc_html($time); ?></li>
+                            <li>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: -3px; margin-right: 6px; opacity: 0.8;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                <?php echo esc_html($time); ?>
+                            </li>
                         <?php endforeach; ?>
                     </ul>
                 <?php endif; ?>
