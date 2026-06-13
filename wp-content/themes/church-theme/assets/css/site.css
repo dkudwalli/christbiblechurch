@@ -1254,10 +1254,10 @@ textarea {
 }
 
 .site-footer__brand {
-  display: grid;
-  gap: 0.9rem;
-  grid-template-columns: auto 1fr;
-  align-items: start;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: flex-start;
 }
 
 .site-footer__title {
@@ -1285,9 +1285,19 @@ textarea {
   display: block;
 }
 
+.site-footer__mission {
+  margin: 0;
+}
+
+.site-footer__mission-line {
+  display: block;
+  line-height: 1.8;
+}
+
 .site-footer__column a {
   color: var(--accent-strong);
   font-weight: 600;
+  overflow-wrap: break-word;
 }
 
 .site-footer__column a:hover {

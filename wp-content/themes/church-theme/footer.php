@@ -22,11 +22,17 @@ $footer_mission_line = church_theme_get_mod('footer_mission_line');
             ]);
             ?>
             <div class="site-footer__brand-copy">
-                <p class="site-footer__title"><?php bloginfo('name'); ?></p>
                 <?php if ($footer_mission_line !== '') : ?>
-                    <p class="site-footer__copy"><?php echo esc_html($footer_mission_line); ?></p>
+                    <p class="site-footer__copy site-footer__mission">
+                        <?php foreach (church_theme_split_lines($footer_mission_line) as $line) : ?>
+                            <span class="site-footer__mission-line"><?php echo esc_html($line); ?></span>
+                        <?php endforeach; ?>
+                    </p>
                 <?php endif; ?>
-                <p class="site-footer__copy"><?php echo esc_html(church_theme_get_mod('footer_invite')); ?></p>
+                <?php $footer_invite = church_theme_get_mod('footer_invite'); ?>
+                <?php if ($footer_invite !== '') : ?>
+                    <p class="site-footer__copy"><?php echo esc_html($footer_invite); ?></p>
+                <?php endif; ?>
             </div>
         </div>
 
