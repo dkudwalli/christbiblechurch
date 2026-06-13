@@ -26,7 +26,6 @@ final class Church_Core_Page_Sections
         add_action('save_post_page', [__CLASS__, 'save_meta']);
         add_action('admin_enqueue_scripts', [__CLASS__, 'enqueue_admin_assets']);
         add_action('init', [__CLASS__, 'maybe_run_schema_upgrade']);
-        add_action('admin_init', [__CLASS__, 'maybe_run_schema_upgrade']);
     }
 
     public static function enable_page_thumbnails(): void

@@ -2,6 +2,8 @@ services:
   db:
     image: mysql:8.0
     restart: unless-stopped
+    # Credentials use ${VAR:-default} syntax. The defaults (church/church/root) work out of the box.
+    # To override, set the matching variables in .env — docker compose loads it automatically.
     environment:
       MYSQL_DATABASE: ${WORDPRESS_DB_NAME:-church}
       MYSQL_USER: ${WORDPRESS_DB_USER:-church}

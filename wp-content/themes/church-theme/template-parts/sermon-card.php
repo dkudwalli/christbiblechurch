@@ -3,13 +3,14 @@ if (! defined('ABSPATH')) {
     exit;
 }
 
-$series_term = church_theme_get_sermon_primary_term(get_the_ID(), 'series');
-$speaker_term = church_theme_get_sermon_primary_term(get_the_ID(), 'speaker');
-$scripture = (string) get_post_meta(get_the_ID(), 'scripture_reference', true);
+$post_id = get_the_ID();
+$series_term = church_theme_get_sermon_primary_term($post_id, 'series');
+$speaker_term = church_theme_get_sermon_primary_term($post_id, 'speaker');
+$scripture = (string) get_post_meta($post_id, 'scripture_reference', true);
 ?>
 <article class="card sermon-card">
-    <p class="eyebrow"><?php echo esc_html(church_theme_get_sermon_date(get_the_ID())); ?></p>
-    <h2><a href="<?php echo esc_url(church_theme_get_sermon_url(get_the_ID())); ?>"><?php the_title(); ?></a></h2>
+    <p class="eyebrow"><?php echo esc_html(church_theme_get_sermon_date($post_id)); ?></p>
+    <h2><a href="<?php echo esc_url(church_theme_get_sermon_url($post_id)); ?>"><?php the_title(); ?></a></h2>
 
     <p class="sermon-meta">
         <?php if ($series_term) : ?>
@@ -23,9 +24,9 @@ $scripture = (string) get_post_meta(get_the_ID(), 'scripture_reference', true);
         <?php endif; ?>
     </p>
 
-    <p><?php echo esc_html(wp_trim_words(get_the_excerpt() ?: wp_strip_all_tags(get_the_content()), 24)); ?></p>
+    <p><?php echo esc_html(church_theme_get_sermon_excerpt_preview($post_id)); ?></p>
 
-    <a class="text-link" href="<?php echo esc_url(church_theme_get_sermon_url(get_the_ID())); ?>">
+    <a class="text-link" href="<?php echo esc_url(church_theme_get_sermon_url($post_id)); ?>">
         <?php esc_html_e('Open sermon', 'church-theme'); ?>
     </a>
 </article>

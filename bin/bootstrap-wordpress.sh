@@ -73,8 +73,8 @@ if ! run_wp core is-installed >/dev/null 2>&1; then
 fi
 
 echo "Activating theme and plugin..."
-run_wp theme activate church-theme
-run_wp plugin activate church-core
+run_wp theme activate church-theme || { echo "ERROR: church-theme activation failed — is the theme present in wp-content/themes/?"; exit 1; }
+run_wp plugin activate church-core || { echo "ERROR: church-core activation failed — is the plugin present in wp-content/plugins/?"; exit 1; }
 run_wp option update blogname "${SITE_TITLE}"
 run_wp option update blogdescription 'Exalting the Triune God, Edifying Believers, Evangelizing the Unreached.'
 run_wp option update home "${SITE_URL}"

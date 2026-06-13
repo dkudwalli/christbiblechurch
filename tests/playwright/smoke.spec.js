@@ -317,3 +317,69 @@ test("hero and side panels do not expose nested complementary landmarks", async 
     expect(violations, `Unexpected complementary landmark violation on ${path}`).toEqual([]);
   }
 });
+
+test("series taxonomy page renders sermon cards", async ({ page }) => {
+  await page.goto("/sermons/");
+
+  const seriesLinks = page.locator(".sermon-card .sermon-meta a[href*='/series/']");
+  const seriesCount = await seriesLinks.count();
+
+  if (seriesCount === 0) {
+    test.skip(true, "No sermons with a series term were rendered on the archive page.");
+  }
+
+  const href = await seriesLinks.first().getAttribute("href");
+  expect(href).toBeTruthy();
+
+  await page.goto(href);
+  await expect(page.locator("main#main-content")).toBeVisible();
+  await expect(page.locator("h1").first()).toBeVisible();
+  await expect(page.locator(".sermon-card").first()).toBeVisible();
+});
+
+test("speaker taxonomy page renders sermon cards", async ({ page }) => {
+  await page.goto("/sermons/");
+
+  const firstSermonLink = page.locator(".sermon-card h2 a").first();
+
+  if ((await firstSermonLink.count()) === 0) {
+    test.skip(true, "No sermons were rendered on the archive page.");
+  }
+
+  const sermonHref = await firstSermonLink.getAttribute("href");
+  await page.goto(sermonHref);
+
+  const speakerCard = page.locator(".single-sermon__meta-card").filter({ hasText: "Preacher" });
+
+  if ((await speakerCard.count()) === 0) {
+    test.skip(true, "No speaker term found on the first sermon.");
+  }
+
+  const speakerName = await speakerCard.locator("h2").textContent();
+
+  if (!speakerName) {
+    test.skip(true, "Speaker name could not be read.");
+  }
+
+  const slug = speakerName.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  await page.goto(`/speaker/${slug}/`);
+
+  await expect(page.locator("main#main-content")).toBeVisible();
+  await expect(page.locator("h1").first()).toBeVisible();
+  await expect(page.locator(".sermon-card").first()).toBeVisible();
+});
+
+test("contact form success path shows confirmation and clears form", async ({ page }) => {
+  await page.goto("/contact-us/");
+
+  await page.locator("#contact_name").fill("Playwright Test");
+  await page.locator("#contact_email").fill("test@example.com");
+  await page.locator("#contact_inquiry_type").selectOption({ index: 1 });
+  await page.locator("label[for='contact_preferred_contact_method_email']").click();
+  await page.locator("#contact_message").fill("This is an automated smoke test submission.");
+
+  await page.locator(".contact-form button[type='submit']").click();
+
+  await expect(page.locator(".contact-form__notice.is-success")).toBeVisible({ timeout: 8000 });
+  await expect(page.locator("#contact_name")).toHaveValue("");
+});

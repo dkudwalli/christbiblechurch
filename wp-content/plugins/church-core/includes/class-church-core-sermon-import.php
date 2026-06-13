@@ -175,26 +175,16 @@ final class Church_Core_Sermon_Import
             exit;
         }
 
-        $file = $_FILES['sermon_csv'];
-        $file_name = isset($file['name']) ? strtolower((string) $file['name']) : '';
-        $file_error = isset($file['error']) ? (int) $file['error'] : UPLOAD_ERR_NO_FILE;
-        $tmp_name = isset($file['tmp_name']) ? (string) $file['tmp_name'] : '';
+        $validated = self::validate_upload($_FILES['sermon_csv']);
 
-        if ($file_error !== UPLOAD_ERR_OK || $tmp_name === '') {
-            $result['errors'][] = __('The uploaded CSV file could not be processed.', 'church-core');
+        if (is_wp_error($validated)) {
+            $result['errors'][] = $validated->get_error_message();
             self::persist_result($result);
             wp_safe_redirect(self::get_import_page_url());
             exit;
         }
 
-        if (! str_ends_with($file_name, '.csv')) {
-            $result['errors'][] = __('Upload a file with a .csv extension.', 'church-core');
-            self::persist_result($result);
-            wp_safe_redirect(self::get_import_page_url());
-            exit;
-        }
-
-        $parsed = self::read_csv_rows($tmp_name);
+        $parsed = self::read_csv_rows($validated['tmp_name']);
 
         if (($parsed['errors'] ?? []) !== []) {
             $result['errors'] = array_merge($result['errors'], $parsed['errors']);
@@ -225,138 +215,7 @@ final class Church_Core_Sermon_Import
         $seen_duplicate_keys = [];
 
         foreach ($rows as $row_data) {
-            $line_number = (int) ($row_data['line_number'] ?? 0);
-            $raw_row = isset($row_data['values']) && is_array($row_data['values']) ? $row_data['values'] : [];
-
-            if (count($raw_row) !== $column_count) {
-                $result['skipped']++;
-                $result['errors'][] = sprintf(
-                    __('Line %1$d: Expected %2$d columns but found %3$d.', 'church-core'),
-                    $line_number,
-                    $column_count,
-                    count($raw_row)
-                );
-                continue;
-            }
-
-            $row = self::normalize_row($raw_row);
-            $validation_errors = self::validate_row($row);
-
-            if ($validation_errors !== []) {
-                $result['skipped']++;
-
-                foreach ($validation_errors as $message) {
-                    $result['errors'][] = sprintf(__('Line %1$d: %2$s', 'church-core'), $line_number, $message);
-                }
-
-                continue;
-            }
-
-            $duplicate_key = self::find_duplicate_key($row);
-
-            if (isset($seen_duplicate_keys[$duplicate_key])) {
-                $result['skipped']++;
-                $result['errors'][] = sprintf(
-                    __('Line %1$d: Duplicate row in this CSV. The same sermon already appeared on line %2$d.', 'church-core'),
-                    $line_number,
-                    (int) $seen_duplicate_keys[$duplicate_key]
-                );
-                continue;
-            }
-
-            $seen_duplicate_keys[$duplicate_key] = $line_number;
-
-            $existing_post_id = self::find_existing_sermon($row);
-
-            if ($existing_post_id !== null) {
-                $result['skipped']++;
-                $result['errors'][] = sprintf(
-                    __('Line %1$d: A matching sermon already exists (post ID %2$d). Imports do not update existing sermons.', 'church-core'),
-                    $line_number,
-                    $existing_post_id
-                );
-                continue;
-            }
-
-            $term_ids = [];
-
-            foreach (['speaker', 'series'] as $taxonomy) {
-                if ($row[$taxonomy] === '') {
-                    continue;
-                }
-
-                $term_id = self::resolve_term_id($taxonomy, $row[$taxonomy]);
-
-                if (is_wp_error($term_id)) {
-                    $result['skipped']++;
-                    $result['errors'][] = sprintf(
-                        __('Line %1$d: %2$s', 'church-core'),
-                        $line_number,
-                        $term_id->get_error_message()
-                    );
-                    continue 2;
-                }
-
-                $term_ids[$taxonomy] = [$term_id];
-            }
-
-            $post_data = [
-                'post_type' => 'sermon',
-                'post_status' => 'publish',
-                'post_title' => $row['title'],
-                'post_excerpt' => $row['excerpt'],
-                'post_content' => $row['summary_notes'],
-                'post_author' => get_current_user_id(),
-            ];
-
-            if ($row['slug'] !== '') {
-                $post_data['post_name'] = $row['slug'];
-            }
-
-            $post_id = wp_insert_post($post_data, true);
-
-            if (is_wp_error($post_id)) {
-                $result['skipped']++;
-                $result['errors'][] = sprintf(
-                    __('Line %1$d: %2$s', 'church-core'),
-                    $line_number,
-                    $post_id->get_error_message()
-                );
-                continue;
-            }
-
-            foreach ($term_ids as $taxonomy => $ids) {
-                $set_terms = wp_set_object_terms($post_id, $ids, $taxonomy, false);
-
-                if (is_wp_error($set_terms)) {
-                    wp_delete_post($post_id, true);
-                    $result['skipped']++;
-                    $result['errors'][] = sprintf(
-                        __('Line %1$d: %2$s', 'church-core'),
-                        $line_number,
-                        $set_terms->get_error_message()
-                    );
-                    continue 2;
-                }
-            }
-
-            update_post_meta($post_id, 'sermon_date', $row['sermon_date']);
-
-            foreach (['scripture_reference', 'youtube_url', 'audio_url'] as $meta_key) {
-                if ($row[$meta_key] === '') {
-                    continue;
-                }
-
-                update_post_meta($post_id, $meta_key, $row[$meta_key]);
-            }
-
-            $youtube_video_id = Church_Core_Youtube_Client::extract_video_id_from_url($row['youtube_url']);
-
-            if ($youtube_video_id !== '') {
-                update_post_meta($post_id, 'youtube_video_id', $youtube_video_id);
-            }
-
-            $result['imported']++;
+            self::process_row($row_data, $result, $column_count, $seen_duplicate_keys);
         }
 
         self::persist_result($result);
@@ -658,28 +517,171 @@ final class Church_Core_Sermon_Import
         return $post_id > 0 ? $post_id : null;
     }
 
-    private static function resolve_term_id(string $taxonomy, string $term_name)
+    private static function validate_upload(array $file): WP_Error|array
     {
-        $existing = term_exists($term_name, $taxonomy);
+        $file_name = isset($file['name']) ? strtolower((string) $file['name']) : '';
+        $file_error = isset($file['error']) ? (int) $file['error'] : UPLOAD_ERR_NO_FILE;
+        $tmp_name = isset($file['tmp_name']) ? (string) $file['tmp_name'] : '';
 
-        if (is_array($existing) && isset($existing['term_id'])) {
-            return (int) $existing['term_id'];
+        if ($file_error !== UPLOAD_ERR_OK || $tmp_name === '') {
+            return new WP_Error('church_core_upload', __('The uploaded CSV file could not be processed.', 'church-core'));
         }
 
-        if (is_string($existing) || is_int($existing)) {
-            return (int) $existing;
+        if (! str_ends_with($file_name, '.csv')) {
+            return new WP_Error('church_core_upload', __('Upload a file with a .csv extension.', 'church-core'));
         }
 
-        $inserted = wp_insert_term($term_name, $taxonomy);
+        return ['tmp_name' => $tmp_name, 'name' => $file_name];
+    }
 
-        if (is_wp_error($inserted)) {
+    private static function process_row(array $row_data, array &$result, int $column_count, array &$seen_duplicate_keys): void
+    {
+        $line_number = (int) ($row_data['line_number'] ?? 0);
+        $raw_row = isset($row_data['values']) && is_array($row_data['values']) ? $row_data['values'] : [];
+
+        if (count($raw_row) !== $column_count) {
+            $result['skipped']++;
+            $result['errors'][] = sprintf(
+                __('Line %1$d: Expected %2$d columns but found %3$d.', 'church-core'),
+                $line_number,
+                $column_count,
+                count($raw_row)
+            );
+            return;
+        }
+
+        $row = self::normalize_row($raw_row);
+        $validation_errors = self::validate_row($row);
+
+        if ($validation_errors !== []) {
+            $result['skipped']++;
+
+            foreach ($validation_errors as $message) {
+                $result['errors'][] = sprintf(__('Line %1$d: %2$s', 'church-core'), $line_number, $message);
+            }
+
+            return;
+        }
+
+        $duplicate_key = self::find_duplicate_key($row);
+
+        if (isset($seen_duplicate_keys[$duplicate_key])) {
+            $result['skipped']++;
+            $result['errors'][] = sprintf(
+                __('Line %1$d: Duplicate row in this CSV. The same sermon already appeared on line %2$d.', 'church-core'),
+                $line_number,
+                (int) $seen_duplicate_keys[$duplicate_key]
+            );
+            return;
+        }
+
+        $seen_duplicate_keys[$duplicate_key] = $line_number;
+
+        $existing_post_id = self::find_existing_sermon($row);
+
+        if ($existing_post_id !== null) {
+            $result['skipped']++;
+            $result['errors'][] = sprintf(
+                __('Line %1$d: A matching sermon already exists (post ID %2$d). Imports do not update existing sermons.', 'church-core'),
+                $line_number,
+                $existing_post_id
+            );
+            return;
+        }
+
+        $term_ids = [];
+
+        foreach (['speaker', 'series'] as $taxonomy) {
+            if ($row[$taxonomy] === '') {
+                continue;
+            }
+
+            $term_id = self::resolve_term_id($taxonomy, $row[$taxonomy]);
+
+            if (is_wp_error($term_id)) {
+                $result['skipped']++;
+                $result['errors'][] = sprintf(
+                    __('Line %1$d: %2$s', 'church-core'),
+                    $line_number,
+                    $term_id->get_error_message()
+                );
+                return;
+            }
+
+            $term_ids[$taxonomy] = [$term_id];
+        }
+
+        $post_data = [
+            'post_type' => 'sermon',
+            'post_status' => 'publish',
+            'post_title' => $row['title'],
+            'post_excerpt' => $row['excerpt'],
+            'post_content' => $row['summary_notes'],
+            'post_author' => get_current_user_id(),
+        ];
+
+        if ($row['slug'] !== '') {
+            $post_data['post_name'] = $row['slug'];
+        }
+
+        $post_id = wp_insert_post($post_data, true);
+
+        if (is_wp_error($post_id)) {
+            $result['skipped']++;
+            $result['errors'][] = sprintf(
+                __('Line %1$d: %2$s', 'church-core'),
+                $line_number,
+                $post_id->get_error_message()
+            );
+            return;
+        }
+
+        foreach ($term_ids as $taxonomy => $ids) {
+            $set_terms = wp_set_object_terms($post_id, $ids, $taxonomy, false);
+
+            if (is_wp_error($set_terms)) {
+                wp_delete_post($post_id, true);
+                $result['skipped']++;
+                $result['errors'][] = sprintf(
+                    __('Line %1$d: %2$s', 'church-core'),
+                    $line_number,
+                    $set_terms->get_error_message()
+                );
+                return;
+            }
+        }
+
+        update_post_meta($post_id, 'sermon_date', $row['sermon_date']);
+
+        foreach (['scripture_reference', 'youtube_url', 'audio_url'] as $meta_key) {
+            if ($row[$meta_key] === '') {
+                continue;
+            }
+
+            update_post_meta($post_id, $meta_key, $row[$meta_key]);
+        }
+
+        $youtube_video_id = Church_Core_Youtube_Client::extract_video_id_from_url($row['youtube_url']);
+
+        if ($youtube_video_id !== '') {
+            update_post_meta($post_id, 'youtube_video_id', $youtube_video_id);
+        }
+
+        $result['imported']++;
+    }
+
+    private static function resolve_term_id(string $taxonomy, string $term_name): int|WP_Error
+    {
+        $term_id = Church_Core_Term_Helper::ensure_term($term_name, $taxonomy);
+
+        if (is_wp_error($term_id)) {
             return new WP_Error(
                 'church_core_sermon_import_term',
-                sprintf(__('Could not create the %1$s term "%2$s": %3$s', 'church-core'), $taxonomy, $term_name, $inserted->get_error_message())
+                sprintf(__('Could not create the %1$s term "%2$s": %3$s', 'church-core'), $taxonomy, $term_name, $term_id->get_error_message())
             );
         }
 
-        return (int) $inserted['term_id'];
+        return $term_id;
     }
 
     private static function persist_result(array $result): void

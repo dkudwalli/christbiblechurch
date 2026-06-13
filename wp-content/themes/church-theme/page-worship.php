@@ -7,7 +7,6 @@ get_header();
 
 the_post();
 
-$page_slug = (string) get_post_field('post_name', get_the_ID());
 $sections = church_theme_get_child_sections(get_the_ID());
 $service_times = church_theme_split_lines(church_theme_get_mod('service_times'));
 $worship_location = church_theme_split_lines(church_theme_get_mod('worship_location'));
@@ -41,46 +40,20 @@ $worship_location = church_theme_split_lines(church_theme_get_mod('worship_locat
     </div>
 </section>
 
-<?php if ($sections !== []) : ?>
-    <section class="section section--muted section-nav-band">
-        <div class="wrap">
-            <?php
-            get_template_part('template-parts/section', 'nav', [
-                'sections' => $sections,
-                'label' => __('Worship page sections', 'church-theme'),
-            ]);
-            ?>
-        </div>
-    </section>
-
-    <?php foreach ($sections as $index => $section) : ?>
-        <?php
-        get_template_part('template-parts/page', 'section', [
-            'section' => $section,
-            'page_slug' => $page_slug,
-            'index' => $index,
-        ]);
-        ?>
-    <?php endforeach; ?>
-<?php endif; ?>
-
-<section class="section">
-    <div class="wrap callout">
-        <div>
-            <p class="eyebrow"><?php esc_html_e('Questions', 'church-theme'); ?></p>
-            <h2><?php esc_html_e('Need help before your first Sunday at Crossroads?', 'church-theme'); ?></h2>
-            <p><?php esc_html_e('Send a message if you want directions, more detail on age-group ministries, or help connecting with the church.', 'church-theme'); ?></p>
-        </div>
-
-        <div class="callout__actions">
-            <a class="button" href="<?php echo esc_url(church_theme_get_page_url('contact-us')); ?>">
-                <?php esc_html_e('Contact Us', 'church-theme'); ?>
-            </a>
-            <a class="text-link" href="<?php echo esc_url(church_theme_get_page_url('about-us')); ?>">
-                <?php esc_html_e('About Crossroads', 'church-theme'); ?>
-            </a>
-        </div>
-    </div>
-</section>
+<?php
+get_template_part('template-parts/page', 'sections-body', [
+    'sections' => $sections,
+    'nav_label' => __('Worship page sections', 'church-theme'),
+    'cta' => [
+        'eyebrow' => __('Questions', 'church-theme'),
+        'heading' => __('Need help before your first Sunday at Crossroads?', 'church-theme'),
+        'body' => __('Send a message if you want directions, more detail on age-group ministries, or help connecting with the church.', 'church-theme'),
+        'primary_label' => __('Contact Us', 'church-theme'),
+        'primary_url' => church_theme_get_page_url('contact-us'),
+        'secondary_label' => __('About Crossroads', 'church-theme'),
+        'secondary_url' => church_theme_get_page_url('about-us'),
+    ],
+]);
+?>
 <?php
 get_footer();

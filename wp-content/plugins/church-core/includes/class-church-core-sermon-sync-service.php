@@ -7,74 +7,6 @@ final class Church_Core_Sermon_Sync_Service
 {
     private const CONTENT_WORD_LIMIT = 400;
     private const EXCERPT_WORD_LIMIT = 40;
-    private const SCRIPTURE_BOOK_ALIASES = [
-        'Genesis' => ['Genesis', 'Gen', 'Ge', 'Gn'],
-        'Exodus' => ['Exodus', 'Exod', 'Exo', 'Ex'],
-        'Leviticus' => ['Leviticus', 'Lev', 'Le', 'Lv'],
-        'Numbers' => ['Numbers', 'Num', 'Nu', 'Nm', 'Nb'],
-        'Deuteronomy' => ['Deuteronomy', 'Deut', 'Deu', 'Dt'],
-        'Joshua' => ['Joshua', 'Josh', 'Jos', 'Jsh'],
-        'Judges' => ['Judges', 'Judg', 'Jdg', 'Jdgs'],
-        'Ruth' => ['Ruth', 'Rth', 'Ru'],
-        '1 Samuel' => ['1 Samuel', '1 Sam', '1Sa', '1 Sa'],
-        '2 Samuel' => ['2 Samuel', '2 Sam', '2Sa', '2 Sa'],
-        '1 Kings' => ['1 Kings', '1 Kgs', '1 Ki', '1Ki', '1 Kngs'],
-        '2 Kings' => ['2 Kings', '2 Kgs', '2 Ki', '2Ki', '2 Kngs'],
-        '1 Chronicles' => ['1 Chronicles', '1 Chron', '1 Chr', '1Ch', '1 Chrn'],
-        '2 Chronicles' => ['2 Chronicles', '2 Chron', '2 Chr', '2Ch', '2 Chrn'],
-        'Ezra' => ['Ezra', 'Ezr'],
-        'Nehemiah' => ['Nehemiah', 'Neh', 'Ne'],
-        'Esther' => ['Esther', 'Esth', 'Est'],
-        'Job' => ['Job'],
-        'Psalms' => ['Psalms', 'Psalm', 'Psalm', 'Psalms', 'Ps'],
-        'Proverbs' => ['Proverbs', 'Prov', 'Pro', 'Prv', 'Pr'],
-        'Ecclesiastes' => ['Ecclesiastes', 'Eccles', 'Eccl', 'Ecc', 'Qoh'],
-        'Song of Solomon' => ['Song of Solomon', 'Song of Songs', 'Song', 'SOS', 'Canticles'],
-        'Isaiah' => ['Isaiah', 'Isa'],
-        'Jeremiah' => ['Jeremiah', 'Jer'],
-        'Lamentations' => ['Lamentations', 'Lam'],
-        'Ezekiel' => ['Ezekiel', 'Ezek', 'Eze', 'Ezk'],
-        'Daniel' => ['Daniel', 'Dan', 'Da', 'Dn'],
-        'Hosea' => ['Hosea', 'Hos', 'Ho'],
-        'Joel' => ['Joel', 'Joe', 'Jl'],
-        'Amos' => ['Amos', 'Am'],
-        'Obadiah' => ['Obadiah', 'Obad', 'Ob'],
-        'Jonah' => ['Jonah', 'Jon'],
-        'Micah' => ['Micah', 'Mic'],
-        'Nahum' => ['Nahum', 'Nah'],
-        'Habakkuk' => ['Habakkuk', 'Hab'],
-        'Zephaniah' => ['Zephaniah', 'Zeph', 'Zep'],
-        'Haggai' => ['Haggai', 'Hag', 'Hg'],
-        'Zechariah' => ['Zechariah', 'Zech', 'Zec'],
-        'Malachi' => ['Malachi', 'Mal'],
-        'Matthew' => ['Matthew', 'Matt', 'Mt'],
-        'Mark' => ['Mark', 'Mrk', 'Mk', 'Mr'],
-        'Luke' => ['Luke', 'Luk', 'Lk'],
-        'John' => ['John', 'Jn', 'Jhn'],
-        'Acts' => ['Acts', 'Act', 'Ac'],
-        'Romans' => ['Romans', 'Rom', 'Ro', 'Rm'],
-        '1 Corinthians' => ['1 Corinthians', '1 Cor', '1Co', '1 Co'],
-        '2 Corinthians' => ['2 Corinthians', '2 Cor', '2Co', '2 Co'],
-        'Galatians' => ['Galatians', 'Gal', 'Ga'],
-        'Ephesians' => ['Ephesians', 'Eph'],
-        'Philippians' => ['Philippians', 'Phil', 'Php', 'Pp'],
-        'Colossians' => ['Colossians', 'Col', 'Colos', 'Coloss'],
-        '1 Thessalonians' => ['1 Thessalonians', '1 Thess', '1 Thes', '1Th', '1 Th'],
-        '2 Thessalonians' => ['2 Thessalonians', '2 Thess', '2 Thes', '2Th', '2 Th'],
-        '1 Timothy' => ['1 Timothy', '1 Tim', '1Ti', '1 Ti'],
-        '2 Timothy' => ['2 Timothy', '2 Tim', '2Ti', '2 Ti'],
-        'Titus' => ['Titus', 'Tit'],
-        'Philemon' => ['Philemon', 'Phlm', 'Phm', 'Pm'],
-        'Hebrews' => ['Hebrews', 'Heb'],
-        'James' => ['James', 'Jas', 'Jm'],
-        '1 Peter' => ['1 Peter', '1 Pet', '1Pe', '1 Pt'],
-        '2 Peter' => ['2 Peter', '2 Pet', '2Pe', '2 Pt'],
-        '1 John' => ['1 John', '1 Jn', '1Jn', '1 Jhn'],
-        '2 John' => ['2 John', '2 Jn', '2Jn', '2 Jhn'],
-        '3 John' => ['3 John', '3 Jn', '3Jn', '3 Jhn'],
-        'Jude' => ['Jude', 'Jud'],
-        'Revelation' => ['Revelation', 'Rev', 'Re', 'Revelations'],
-    ];
 
     private Church_Core_Youtube_Client $youtube_client;
 
@@ -111,7 +43,7 @@ final class Church_Core_Sermon_Sync_Service
                 continue;
             }
 
-            $scripture_reference = $this->extract_scripture_reference_from_title((string) $video['title']);
+            $scripture_reference = Church_Core_Scripture_Extractor::from_title((string) $video['title']);
 
             $existing_post_id = $this->find_existing_post_by_video_id((string) $video['video_id']);
 
@@ -295,34 +227,20 @@ final class Church_Core_Sermon_Sync_Service
             );
         }
 
-        $existing_term = term_exists($speaker_name, 'speaker');
+        $term_id = Church_Core_Term_Helper::ensure_term($speaker_name, 'speaker');
 
-        if (is_array($existing_term) && isset($existing_term['term_id'])) {
-            $cached_term_id = (int) $existing_term['term_id'];
-
-            return $cached_term_id;
-        }
-
-        if (is_string($existing_term) || is_int($existing_term)) {
-            $cached_term_id = (int) $existing_term;
-
-            return $cached_term_id;
-        }
-
-        $inserted_term = wp_insert_term($speaker_name, 'speaker');
-
-        if (is_wp_error($inserted_term)) {
+        if (is_wp_error($term_id)) {
             return new WP_Error(
                 'church_core_sermon_sync_speaker_insert_failed',
                 sprintf(
                     __('Could not create the default speaker term "%1$s": %2$s', 'church-core'),
                     $speaker_name,
-                    $inserted_term->get_error_message()
+                    $term_id->get_error_message()
                 )
             );
         }
 
-        $cached_term_id = (int) $inserted_term['term_id'];
+        $cached_term_id = $term_id;
 
         return $cached_term_id;
     }
@@ -372,58 +290,6 @@ final class Church_Core_Sermon_Sync_Service
         return rtrim(implode(' ', array_slice($words, 0, $max_words)), " \t\n\r\0\x0B,.;:-") . '...';
     }
 
-    private function extract_scripture_reference_from_title(string $title): string
-    {
-        $title = html_entity_decode(trim($title), ENT_QUOTES, get_bloginfo('charset') ?: 'UTF-8');
-
-        if ($title === '') {
-            return '';
-        }
-
-        $pattern = sprintf(
-            '/(?<![A-Za-z])(?P<book>%1$s)\.?\s*(?P<chapter>\d{1,3})\s*:\s*(?P<verse>\d{1,3})(?:(?P<separator>\s*[-–—]\s*)(?:(?P<end_chapter>\d{1,3})\s*:\s*)?(?P<end_verse>\d{1,3}))?/iu',
-            $this->get_scripture_book_pattern()
-        );
-
-        if (preg_match($pattern, $title, $matches) !== 1) {
-            return '';
-        }
-
-        $book_name = $this->expand_scripture_book_name((string) $matches['book']);
-
-        if ($book_name === '') {
-            return '';
-        }
-
-        $separator = isset($matches['separator']) && $matches['separator'] !== ''
-            ? preg_replace('/\s+/u', '', (string) $matches['separator'])
-            : '';
-
-        $reference = (string) $matches['chapter'] . ':' . (string) $matches['verse'];
-
-        if (isset($matches['end_verse']) && $matches['end_verse'] !== '') {
-            $separator = $separator !== '' ? $separator : '-';
-            $reference .= $separator;
-
-            if (isset($matches['end_chapter']) && $matches['end_chapter'] !== '') {
-                $reference .= (string) $matches['end_chapter'] . ':';
-            }
-
-            $reference .= (string) $matches['end_verse'];
-        }
-
-        $scripture_reference = $book_name . ' ' . $reference;
-        $scripture_reference = sanitize_text_field($scripture_reference);
-        $scripture_reference = (string) apply_filters(
-            'church_core_sermon_sync_extract_scripture_reference',
-            $scripture_reference,
-            $title,
-            $matches
-        );
-
-        return sanitize_text_field(trim($scripture_reference));
-    }
-
     private function maybe_backfill_scripture_reference(int $post_id, string $scripture_reference): bool
     {
         if ($scripture_reference === '') {
@@ -437,82 +303,6 @@ final class Church_Core_Sermon_Sync_Service
         update_post_meta($post_id, 'scripture_reference', $scripture_reference);
 
         return true;
-    }
-
-    private function expand_scripture_book_name(string $book_name): string
-    {
-        $normalized_book = $this->normalize_scripture_book_alias($book_name);
-        $alias_map = $this->get_scripture_book_alias_map();
-
-        return isset($alias_map[$normalized_book]) ? $alias_map[$normalized_book] : '';
-    }
-
-    private function get_scripture_book_alias_map(): array
-    {
-        static $alias_map = null;
-
-        if (is_array($alias_map)) {
-            return $alias_map;
-        }
-
-        $alias_map = [];
-
-        foreach (self::SCRIPTURE_BOOK_ALIASES as $canonical_name => $aliases) {
-            $alias_map[$this->normalize_scripture_book_alias($canonical_name)] = $canonical_name;
-
-            foreach ($aliases as $alias) {
-                $alias_map[$this->normalize_scripture_book_alias($alias)] = $canonical_name;
-            }
-        }
-
-        return $alias_map;
-    }
-
-    private function get_scripture_book_pattern(): string
-    {
-        static $pattern = null;
-
-        if (is_string($pattern) && $pattern !== '') {
-            return $pattern;
-        }
-
-        $aliases = [];
-
-        foreach (self::SCRIPTURE_BOOK_ALIASES as $canonical_name => $book_aliases) {
-            $aliases[$canonical_name] = $canonical_name;
-
-            foreach ($book_aliases as $alias) {
-                $aliases[$alias] = $alias;
-            }
-        }
-
-        $aliases = array_values($aliases);
-
-        usort(
-            $aliases,
-            static function (string $left, string $right): int {
-                return strlen($right) <=> strlen($left);
-            }
-        );
-
-        $pattern_parts = [];
-
-        foreach ($aliases as $alias) {
-            $pattern_parts[] = str_replace('\ ', '\s*', preg_quote($alias, '/'));
-        }
-
-        $pattern = '(?:' . implode('|', $pattern_parts) . ')';
-
-        return $pattern;
-    }
-
-    private function normalize_scripture_book_alias(string $book_name): string
-    {
-        $book_name = strtolower($book_name);
-        $book_name = preg_replace('/\.+/u', '', $book_name) ?: $book_name;
-        $book_name = preg_replace('/\s+/u', '', $book_name) ?: $book_name;
-
-        return preg_replace('/[^a-z0-9]/u', '', $book_name) ?: '';
     }
 
     private function find_existing_post_by_video_id(string $video_id): int
@@ -572,21 +362,14 @@ final class Church_Core_Sermon_Sync_Service
             'posts_per_page' => -1,
             'fields' => 'ids',
             'meta_query' => [
-                [
-                    'key' => 'youtube_url',
-                    'value' => '',
-                    'compare' => '!=',
-                ]
+                ['key' => 'youtube_url', 'compare' => 'EXISTS'],
+                ['key' => 'youtube_video_id', 'compare' => 'NOT EXISTS'],
             ],
         ]);
 
         $backfilled = 0;
 
         foreach ($post_ids as $post_id) {
-            if ((string) get_post_meta((int) $post_id, 'youtube_video_id', true) !== '') {
-                continue;
-            }
-
             $youtube_url = (string) get_post_meta((int) $post_id, 'youtube_url', true);
             $video_id = Church_Core_Youtube_Client::extract_video_id_from_url($youtube_url);
 

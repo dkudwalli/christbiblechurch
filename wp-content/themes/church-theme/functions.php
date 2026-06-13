@@ -974,6 +974,23 @@ function church_theme_get_event_notes_preview(int $post_id, int $word_limit = 26
     return wp_trim_words($content, $word_limit);
 }
 
+function church_theme_get_sermon_excerpt_preview(int $post_id, int $word_limit = 24): string
+{
+    $content = (string) get_post_field('post_excerpt', $post_id);
+
+    if ($content === '') {
+        $content = wp_strip_all_tags(strip_shortcodes((string) get_post_field('post_content', $post_id)));
+    }
+
+    $content = trim(preg_replace('/\s+/', ' ', $content) ?: '');
+
+    if ($content === '') {
+        return '';
+    }
+
+    return wp_trim_words($content, $word_limit);
+}
+
 function church_theme_get_event_query(bool $upcoming, int $posts_per_page = -1): WP_Query
 {
     return new WP_Query([
@@ -992,6 +1009,54 @@ function church_theme_get_event_query(bool $upcoming, int $posts_per_page = -1):
             'type' => 'DATETIME',
         ]],
     ]);
+}
+
+function church_theme_get_latest_sermon_query(int $limit = 1): WP_Query
+{
+    return new WP_Query([
+        'post_type' => 'sermon',
+        'posts_per_page' => $limit,
+        'meta_key' => 'sermon_date',
+        'orderby' => 'meta_value',
+        'order' => 'DESC',
+        'no_found_rows' => true,
+    ]);
+}
+
+function church_theme_get_related_sermon_query(int $post_id, int $limit = 3): array
+{
+    $series_term = church_theme_get_sermon_primary_term($post_id, 'series');
+    $base_args = [
+        'post_type' => 'sermon',
+        'posts_per_page' => $limit,
+        'post__not_in' => [$post_id],
+        'meta_key' => 'sermon_date',
+        'orderby' => 'meta_value',
+        'order' => 'DESC',
+        'no_found_rows' => true,
+    ];
+
+    if ($series_term) {
+        $series_args = $base_args;
+        $series_args['tax_query'] = [[
+            'taxonomy' => 'series',
+            'field' => 'term_id',
+            'terms' => [$series_term->term_id],
+        ]];
+        $series_query = new WP_Query($series_args);
+
+        if ($series_query->have_posts()) {
+            return [
+                'query' => $series_query,
+                'title' => sprintf(__('More in %s', 'church-theme'), $series_term->name),
+            ];
+        }
+    }
+
+    return [
+        'query' => new WP_Query($base_args),
+        'title' => __('Recent Sermons', 'church-theme'),
+    ];
 }
 
 function church_theme_get_sermon_audio_url(int $post_id): string

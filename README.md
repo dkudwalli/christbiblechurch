@@ -31,7 +31,7 @@ The initial scope matches the approved MVP:
 ## Local Setup
 
 1. Copy `.env.example` to `.env`.
-2. Adjust the admin credentials and site title if needed.
+2. Adjust the admin credentials and site title if needed. `docker-compose.yml` uses `${VAR:-default}` syntax — `.env` overrides those defaults; editing only `docker-compose.yml` has no effect on the running containers.
 3. Start and bootstrap the site:
 
 ```bash

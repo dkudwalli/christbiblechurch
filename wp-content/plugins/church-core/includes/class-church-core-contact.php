@@ -47,7 +47,7 @@ final class Church_Core_Contact
         ?>
         <div class="contact-form-shell">
             <?php if ($status === 'success') : ?>
-                <p id="<?php echo esc_attr($notice_id); ?>" class="contact-form__notice" role="status" aria-live="polite"><?php esc_html_e('Thanks for reaching out. Your message has been received.', 'church-core'); ?></p>
+                <p id="<?php echo esc_attr($notice_id); ?>" class="contact-form__notice is-success" role="status" aria-live="polite"><?php esc_html_e('Thanks for reaching out. Your message has been received.', 'church-core'); ?></p>
             <?php elseif ($status === 'invalid') : ?>
                 <p id="<?php echo esc_attr($notice_id); ?>" class="contact-form__notice is-error" role="alert" aria-live="assertive"><?php esc_html_e('Please complete the required fields and try again.', 'church-core'); ?></p>
             <?php elseif ($status === 'error') : ?>
@@ -202,7 +202,11 @@ final class Church_Core_Contact
             $message,
         ]);
 
-        wp_mail($recipient, $subject, $body, ['Reply-To: ' . $name . ' <' . $email . '>']);
+        $sent = wp_mail($recipient, $subject, $body, ['Reply-To: ' . $name . ' <' . $email . '>']);
+
+        if (! $sent) {
+            error_log('church-core: wp_mail failed for contact submission ID ' . $post_id);
+        }
 
         self::redirect_with_status($redirect, 'success');
     }

@@ -17,40 +17,9 @@ while (have_posts()) :
     $has_media = $youtube_url !== '' || $audio_url !== '';
     $speaker_term = church_theme_get_sermon_primary_term($post_id, 'speaker');
     $series_term = church_theme_get_sermon_primary_term($post_id, 'series');
-    $related_section_title = __('Recent Sermons', 'church-theme');
-    $related_query_args = [
-        'post_type' => 'sermon',
-        'posts_per_page' => 3,
-        'post__not_in' => [$post_id],
-        'meta_key' => 'sermon_date',
-        'orderby' => 'meta_value',
-        'order' => 'DESC',
-    ];
-
-    if ($series_term) {
-        $related_query_args['tax_query'] = [[
-            'taxonomy' => 'series',
-            'field' => 'term_id',
-            'terms' => [$series_term->term_id],
-        ]];
-    }
-
-    $related_sermons = new WP_Query($related_query_args);
-
-    if ($series_term && $related_sermons->have_posts()) {
-        $related_section_title = sprintf(__('More in %s', 'church-theme'), $series_term->name);
-    }
-
-    if ($series_term && ! $related_sermons->have_posts()) {
-        $related_sermons = new WP_Query([
-            'post_type' => 'sermon',
-            'posts_per_page' => 3,
-            'post__not_in' => [$post_id],
-            'meta_key' => 'sermon_date',
-            'orderby' => 'meta_value',
-            'order' => 'DESC',
-        ]);
-    }
+    $related = church_theme_get_related_sermon_query($post_id);
+    $related_sermons = $related['query'];
+    $related_section_title = $related['title'];
     ?>
     <section class="page-hero">
         <div class="wrap">

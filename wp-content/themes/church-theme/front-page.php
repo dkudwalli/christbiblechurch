@@ -8,13 +8,7 @@ get_header();
 $hero_url = church_theme_resolve_url(church_theme_get_mod('hero_primary_url'));
 $service_times = church_theme_split_lines(church_theme_get_mod('service_times'));
 $worship_location = church_theme_split_lines(church_theme_get_mod('worship_location'));
-$latest_sermon = new WP_Query([
-    'post_type' => 'sermon',
-    'posts_per_page' => 1,
-    'meta_key' => 'sermon_date',
-    'orderby' => 'meta_value',
-    'order' => 'DESC',
-]);
+$latest_sermon = church_theme_get_latest_sermon_query();
 $upcoming_events = church_theme_get_event_query(true, 3);
 ?>
 <section class="hero">
@@ -103,7 +97,7 @@ $upcoming_events = church_theme_get_event_query(true, 3);
                             <span><?php echo esc_html((string) get_post_meta(get_the_ID(), 'scripture_reference', true)); ?></span>
                         <?php endif; ?>
                     </p>
-                    <p><?php echo esc_html(wp_trim_words(get_the_excerpt() ?: wp_strip_all_tags(get_the_content()), 28)); ?></p>
+                    <p><?php echo esc_html(church_theme_get_sermon_excerpt_preview(get_the_ID())); ?></p>
                 </div>
 
                 <div class="sermon-feature__actions">

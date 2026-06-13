@@ -17,7 +17,7 @@ get_header();
             <?php while (have_posts()) : the_post(); ?>
                 <article class="card">
                     <h2><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h2>
-                    <p><?php echo esc_html(wp_trim_words(get_the_excerpt() ?: wp_strip_all_tags(get_the_content()), 24)); ?></p>
+                    <p><?php echo esc_html(church_theme_get_sermon_excerpt_preview(get_the_ID())); ?></p>
                 </article>
             <?php endwhile; ?>
         <?php else : ?>
