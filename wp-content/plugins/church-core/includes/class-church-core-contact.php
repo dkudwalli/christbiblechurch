@@ -39,10 +39,6 @@ final class Church_Core_Contact
         $has_notice = in_array($status, ['success', 'invalid', 'error'], true);
         $notice_id = 'church-contact-form-notice';
         $notice_attr = $has_notice ? ' aria-describedby="' . esc_attr($notice_id) . '"' : '';
-        $inquiry_type_options = self::get_inquiry_type_options();
-        $preferred_contact_method_options = self::get_preferred_contact_method_options();
-        $selected_inquiry_type = self::sanitize_choice((string) ($form_state['contact_inquiry_type'] ?? ''), $inquiry_type_options);
-        $selected_preferred_contact_method = self::sanitize_choice((string) ($form_state['contact_preferred_contact_method'] ?? ''), $preferred_contact_method_options);
         ob_start();
         ?>
         <div class="contact-form-shell">
@@ -70,47 +66,9 @@ final class Church_Core_Contact
                     </label>
                 </div>
 
-                <div class="contact-form__row">
-                    <label class="contact-form__field" for="contact_inquiry_type">
-                        <span><?php esc_html_e('What can we help with?', 'church-core'); ?></span>
-                        <select id="contact_inquiry_type" name="contact_inquiry_type" required<?php echo $notice_attr; ?>>
-                            <option value=""><?php esc_html_e('Select an option', 'church-core'); ?></option>
-                            <?php foreach ($inquiry_type_options as $value => $label) : ?>
-                                <option value="<?php echo esc_attr($value); ?>" <?php selected($selected_inquiry_type, $value); ?>>
-                                    <?php echo esc_html($label); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </label>
-
-                    <fieldset class="contact-form__field-group"<?php echo $notice_attr; ?>>
-                        <legend class="contact-form__legend"><?php esc_html_e('Preferred Contact Method', 'church-core'); ?></legend>
-                        <div class="contact-form__choice-group">
-                            <?php $is_first_option = true; ?>
-                            <?php foreach ($preferred_contact_method_options as $value => $label) : ?>
-                                <?php $field_id = 'contact_preferred_contact_method_' . $value; ?>
-                                <label class="contact-form__choice" for="<?php echo esc_attr($field_id); ?>">
-                                    <input
-                                        id="<?php echo esc_attr($field_id); ?>"
-                                        type="radio"
-                                        name="contact_preferred_contact_method"
-                                        value="<?php echo esc_attr($value); ?>"
-                                        <?php checked($selected_preferred_contact_method, $value); ?>
-                                        <?php echo $is_first_option ? 'required' : ''; ?>
-                                    >
-                                    <span><?php echo esc_html($label); ?></span>
-                                </label>
-                                <?php $is_first_option = false; ?>
-                            <?php endforeach; ?>
-                        </div>
-                        <p class="contact-form__helper"><?php esc_html_e('Choose how you would like us to follow up. If you prefer a phone call, include a phone number below.', 'church-core'); ?></p>
-                    </fieldset>
-                </div>
-
                 <label class="contact-form__field contact-form__field--full" for="contact_phone">
-                    <span><?php esc_html_e('Phone', 'church-core'); ?></span>
+                    <span><?php esc_html_e('Phone Number', 'church-core'); ?></span>
                     <input id="contact_phone" type="tel" name="contact_phone" value="<?php echo esc_attr((string) ($form_state['contact_phone'] ?? '')); ?>" autocomplete="tel"<?php echo $notice_attr; ?>>
-                    <small class="contact-form__helper"><?php esc_html_e('Required only if you want us to call you back.', 'church-core'); ?></small>
                 </label>
 
                 <label class="contact-form__field contact-form__field--full" for="contact_message">
@@ -147,27 +105,18 @@ final class Church_Core_Contact
         $email_input = isset($_POST['contact_email']) ? sanitize_text_field(wp_unslash($_POST['contact_email'])) : '';
         $email = sanitize_email($email_input);
         $phone = isset($_POST['contact_phone']) ? sanitize_text_field(wp_unslash($_POST['contact_phone'])) : '';
-        $inquiry_type = isset($_POST['contact_inquiry_type']) ? self::sanitize_choice(wp_unslash((string) $_POST['contact_inquiry_type']), self::get_inquiry_type_options()) : '';
-        $preferred_contact_method = isset($_POST['contact_preferred_contact_method']) ? self::sanitize_choice(wp_unslash((string) $_POST['contact_preferred_contact_method']), self::get_preferred_contact_method_options()) : '';
         $message = isset($_POST['contact_message']) ? sanitize_textarea_field(wp_unslash($_POST['contact_message'])) : '';
         $state = [
             'contact_name' => $name,
             'contact_email' => $email_input,
             'contact_phone' => $phone,
-            'contact_inquiry_type' => $inquiry_type,
-            'contact_preferred_contact_method' => $preferred_contact_method,
             'contact_message' => $message,
         ];
-
-        $requires_phone = $preferred_contact_method === 'phone';
 
         if (
             $name === ''
             || $message === ''
-            || $inquiry_type === ''
-            || $preferred_contact_method === ''
             || ! is_email($email_input)
-            || ($requires_phone && $phone === '')
         ) {
             self::redirect_with_status($redirect, 'invalid', $state);
         }
@@ -181,8 +130,6 @@ final class Church_Core_Contact
                 'contact_name' => $name,
                 'contact_email' => $email,
                 'contact_phone' => $phone,
-                'contact_inquiry_type' => $inquiry_type,
-                'contact_preferred_contact_method' => $preferred_contact_method,
             ],
         ], true);
 
@@ -195,8 +142,6 @@ final class Church_Core_Contact
         $body = implode("\n\n", [
             'Name: ' . $name,
             'Email: ' . $email,
-            'Inquiry Type: ' . self::get_choice_label($inquiry_type, self::get_inquiry_type_options(), __('Not provided', 'church-core')),
-            'Preferred Contact Method: ' . self::get_choice_label($preferred_contact_method, self::get_preferred_contact_method_options(), __('Not provided', 'church-core')),
             'Phone: ' . ($phone ?: 'Not provided'),
             'Message:',
             $message,
@@ -280,8 +225,6 @@ final class Church_Core_Contact
             $updated_columns[$key] = $label;
 
             if ($key === 'title') {
-                $updated_columns['contact_inquiry_type'] = __('Inquiry Type', 'church-core');
-                $updated_columns['contact_preferred_contact_method'] = __('Preferred Contact', 'church-core');
                 $updated_columns['contact_email'] = __('Email', 'church-core');
                 $updated_columns['contact_phone'] = __('Phone', 'church-core');
             }
@@ -292,16 +235,6 @@ final class Church_Core_Contact
 
     public static function render_submission_column(string $column, int $post_id): void
     {
-        if ($column === 'contact_inquiry_type') {
-            $inquiry_type = self::sanitize_choice((string) get_post_meta($post_id, 'contact_inquiry_type', true), self::get_inquiry_type_options());
-            echo esc_html(self::get_choice_label($inquiry_type, self::get_inquiry_type_options(), '—'));
-        }
-
-        if ($column === 'contact_preferred_contact_method') {
-            $preferred_contact_method = self::sanitize_choice((string) get_post_meta($post_id, 'contact_preferred_contact_method', true), self::get_preferred_contact_method_options());
-            echo esc_html(self::get_choice_label($preferred_contact_method, self::get_preferred_contact_method_options(), '—'));
-        }
-
         if ($column === 'contact_email') {
             echo esc_html((string) get_post_meta($post_id, 'contact_email', true) ?: '—');
         }
@@ -311,35 +244,4 @@ final class Church_Core_Contact
         }
     }
 
-    private static function get_inquiry_type_options(): array
-    {
-        return [
-            'first_visit' => __('Planning a First Visit', 'church-core'),
-            'directions_location' => __('Directions or Location Help', 'church-core'),
-            'children_ministry' => __('Children’s Ministry', 'church-core'),
-            'service_times_worship' => __('Service Times or Worship Questions', 'church-core'),
-            'general_question' => __('General Question', 'church-core'),
-            'other' => __('Other', 'church-core'),
-        ];
-    }
-
-    private static function get_preferred_contact_method_options(): array
-    {
-        return [
-            'email' => __('Email', 'church-core'),
-            'phone' => __('Phone Call', 'church-core'),
-        ];
-    }
-
-    private static function sanitize_choice(string $value, array $options): string
-    {
-        $sanitized_value = sanitize_key($value);
-
-        return array_key_exists($sanitized_value, $options) ? $sanitized_value : '';
-    }
-
-    private static function get_choice_label(string $value, array $options, string $fallback): string
-    {
-        return $options[$value] ?? $fallback;
-    }
 }

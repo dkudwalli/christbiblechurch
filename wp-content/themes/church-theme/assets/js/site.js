@@ -58,19 +58,6 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
 
-    const preferredMethodInputs = contactForm.querySelectorAll(
-      "[name='contact_preferred_contact_method']"
-    );
-    const phoneField = contactForm.querySelector("#contact_phone");
-    if (phoneField && preferredMethodInputs.length > 0) {
-      preferredMethodInputs.forEach((input) => {
-        input.addEventListener("change", () => {
-          const needsPhone = input.value === "phone" && input.checked;
-          phoneField.required = needsPhone;
-          phoneField.setAttribute("aria-required", needsPhone ? "true" : "false");
-        });
-      });
-    }
   }
 });
 

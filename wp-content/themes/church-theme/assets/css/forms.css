@@ -6,8 +6,7 @@
 }
 
 .filter-field__label,
-.contact-form__field > span:not(.screen-reader-text),
-.contact-form__legend {
+.contact-form__field > span:not(.screen-reader-text) {
   font-size: 0.92rem;
   font-weight: 700;
 }

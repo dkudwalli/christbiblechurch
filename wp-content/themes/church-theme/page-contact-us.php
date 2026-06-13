@@ -111,7 +111,7 @@ $has_direct_actions = $contact_phone !== '' || $contact_email !== '';
                 <div class="contact-panel__header">
                     <p class="eyebrow"><?php esc_html_e('Visitor Contact', 'church-theme'); ?></p>
                     <h2><?php echo esc_html(church_theme_get_mod('contact_form_heading')); ?></h2>
-                    <p class="contact-panel__intro"><?php esc_html_e('Choose what you need help with and tell us how you would like us to follow up.', 'church-theme'); ?></p>
+                    <p class="contact-panel__intro"><?php esc_html_e('Share your name, email, and message, and add a phone number if you would like a call back.', 'church-theme'); ?></p>
                 </div>
 
                 <?php

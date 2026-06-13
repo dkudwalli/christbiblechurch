@@ -127,43 +127,56 @@ test("section pages use structured media layouts", async ({ page }) => {
   await expect(page.locator("#womens-ministry .section-visual img")).toBeVisible();
 });
 
-test("contact page renders visitor intake fields and a full-width phone field", async ({ page }) => {
+test("contact page renders a simplified four-field form and styled phone input", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1200 });
   await page.goto("/contact-us/");
 
-  await expect(page.locator("#contact_inquiry_type")).toBeVisible();
-  await expect(page.getByText("Preferred Contact Method", { exact: true })).toBeVisible();
+  await expect(page.locator("#contact_name")).toBeVisible();
+  await expect(page.locator("#contact_email")).toBeVisible();
+  await expect(page.locator("#contact_phone")).toBeVisible();
+  await expect(page.locator("#contact_message")).toBeVisible();
+  await expect(page.getByText("Phone Number", { exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "Email the Church" })).toBeVisible();
+  await expect(page.locator("#contact_inquiry_type")).toHaveCount(0);
+  await expect(page.locator("[name='contact_preferred_contact_method']")).toHaveCount(0);
 
-  const widths = await page.evaluate(() => {
-    const nameField = document.querySelector("#contact_name");
+  const fieldMetrics = await page.evaluate(() => {
+    const emailField = document.querySelector("#contact_email");
     const phoneField = document.querySelector("#contact_phone");
+    const emailStyles = emailField ? window.getComputedStyle(emailField) : null;
+    const phoneStyles = phoneField ? window.getComputedStyle(phoneField) : null;
 
     return {
-      name: nameField?.getBoundingClientRect().width ?? 0,
-      phone: phoneField?.getBoundingClientRect().width ?? 0
+      emailWidth: emailField?.getBoundingClientRect().width ?? 0,
+      phoneWidth: phoneField?.getBoundingClientRect().width ?? 0,
+      emailBorderTopWidth: emailStyles?.borderTopWidth ?? "",
+      phoneBorderTopWidth: phoneStyles?.borderTopWidth ?? "",
+      emailBorderRadius: emailStyles?.borderRadius ?? "",
+      phoneBorderRadius: phoneStyles?.borderRadius ?? ""
     };
   });
 
-  expect(widths.phone).toBeGreaterThan(widths.name * 1.5);
+  expect(fieldMetrics.phoneWidth).toBeGreaterThan(fieldMetrics.emailWidth * 1.5);
+  expect(fieldMetrics.phoneBorderTopWidth).toBe("1px");
+  expect(fieldMetrics.phoneBorderTopWidth).toBe(fieldMetrics.emailBorderTopWidth);
+  expect(fieldMetrics.phoneBorderRadius).toBe(fieldMetrics.emailBorderRadius);
 });
 
-test("contact form preserves values and enforces phone for phone follow-up", async ({ page }) => {
+test("contact form preserves simplified field values on invalid submit", async ({ page }) => {
   await page.goto("/contact-us/");
 
   await page.locator("#contact_name").fill("Playwright Visitor");
   await page.locator("#contact_email").fill("visitor@example.com");
-  await page.locator("#contact_inquiry_type").selectOption("first_visit");
-  await page.locator("label[for='contact_preferred_contact_method_phone']").click();
+  await page.locator("#contact_phone").fill("+91 98765 43210");
   await page.locator("#contact_message").fill("Testing preserved form state.");
+  await page.locator("#contact_message").fill("");
   await page.locator(".contact-form").evaluate((form) => form.submit());
 
   await expect(page.locator(".contact-form__notice.is-error")).toBeVisible();
   await expect(page.locator("#contact_name")).toHaveValue("Playwright Visitor");
   await expect(page.locator("#contact_email")).toHaveValue("visitor@example.com");
-  await expect(page.locator("#contact_inquiry_type")).toHaveValue("first_visit");
-  await expect(page.locator("#contact_preferred_contact_method_phone")).toBeChecked();
-  await expect(page.locator("#contact_message")).toHaveValue("Testing preserved form state.");
+  await expect(page.locator("#contact_phone")).toHaveValue("+91 98765 43210");
+  await expect(page.locator("#contact_message")).toHaveValue("");
 });
 
 test("events archive and detail pages render expected states", async ({ page }) => {
@@ -374,12 +387,11 @@ test("contact form success path shows confirmation and clears form", async ({ pa
 
   await page.locator("#contact_name").fill("Playwright Test");
   await page.locator("#contact_email").fill("test@example.com");
-  await page.locator("#contact_inquiry_type").selectOption({ index: 1 });
-  await page.locator("label[for='contact_preferred_contact_method_email']").click();
   await page.locator("#contact_message").fill("This is an automated smoke test submission.");
 
   await page.locator(".contact-form button[type='submit']").click();
 
   await expect(page.locator(".contact-form__notice.is-success")).toBeVisible({ timeout: 8000 });
   await expect(page.locator("#contact_name")).toHaveValue("");
+  await expect(page.locator("#contact_phone")).toHaveValue("");
 });
