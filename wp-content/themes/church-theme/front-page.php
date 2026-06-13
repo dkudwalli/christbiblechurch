@@ -30,20 +30,41 @@ $upcoming_events = church_theme_get_event_query(true, 3);
             </div>
         </div>
 
-        <div class="card card--accent hero__card">
-            <p class="card__label"><?php esc_html_e('Gather With Us', 'church-theme'); ?></p>
-            <?php if ($worship_location !== []) : ?>
-                <h2><?php echo esc_html($worship_location[0]); ?></h2>
-                <p class="hero__card-copy"><?php echo esc_html(implode(', ', $worship_location)); ?></p>
+        <div class="hero__aside">
+            <?php
+            $hero_community_image = church_theme_get_static_image(
+                '/assets/images/crossroads/retreat.webp',
+                __('The Crossroad South Church community at a recent retreat', 'church-theme')
+            );
+            ?>
+            <?php if ($hero_community_image !== null) : ?>
+                <figure class="hero__media">
+                    <?php
+                    echo church_theme_render_static_image($hero_community_image, [
+                        'loading' => 'eager',
+                        'fetchpriority' => 'high',
+                        'decoding' => 'sync',
+                        'sizes' => '(max-width: 960px) 100vw, 48vw',
+                    ]);
+                    ?>
+                </figure>
             <?php endif; ?>
 
-            <?php if ($service_times !== []) : ?>
-                <ul class="stack-list">
-                    <?php foreach ($service_times as $time) : ?>
-                        <li><?php echo esc_html($time); ?></li>
-                    <?php endforeach; ?>
-                </ul>
-            <?php endif; ?>
+            <div class="card card--accent hero__card">
+                <p class="card__label"><?php esc_html_e('Gather With Us', 'church-theme'); ?></p>
+                <?php if ($worship_location !== []) : ?>
+                    <h2><?php echo esc_html($worship_location[0]); ?></h2>
+                    <p class="hero__card-copy"><?php echo esc_html(implode(', ', $worship_location)); ?></p>
+                <?php endif; ?>
+
+                <?php if ($service_times !== []) : ?>
+                    <ul class="stack-list">
+                        <?php foreach ($service_times as $time) : ?>
+                            <li><?php echo esc_html($time); ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
 </section>
