@@ -215,6 +215,32 @@ test("contact page offers a direct Google Maps fallback action", async ({ page }
   await expect(mapFallbackLink).toHaveAttribute("target", "_blank");
 });
 
+test("homepage surfaces the red-led heritage palette in primary actions and structural surfaces", async ({ page }) => {
+  await page.goto("/");
+
+  const themePalette = await page.evaluate(() => {
+    const rootStyles = window.getComputedStyle(document.documentElement);
+    const primaryAction = document.querySelector(".hero .button");
+    const footer = document.querySelector(".site-footer");
+
+    return {
+      accent: rootStyles.getPropertyValue("--accent").trim(),
+      accentStrong: rootStyles.getPropertyValue("--accent-strong").trim(),
+      bg: rootStyles.getPropertyValue("--bg").trim(),
+      surfaceDark: rootStyles.getPropertyValue("--surface-dark").trim(),
+      primaryActionBackground: primaryAction ? window.getComputedStyle(primaryAction).backgroundColor : null,
+      footerBackground: footer ? window.getComputedStyle(footer).backgroundColor : null
+    };
+  });
+
+  expect(themePalette.accent).toBe("#d62630");
+  expect(themePalette.accentStrong).toBe("#a61b23");
+  expect(themePalette.bg).toBe("#fbf4ee");
+  expect(themePalette.surfaceDark).toBe("#2c252e");
+  expect(themePalette.primaryActionBackground).toBe("rgb(214, 38, 48)");
+  expect(themePalette.footerBackground).toBe("rgb(44, 37, 46)");
+});
+
 test("events archive and detail pages render expected states", async ({ page }) => {
   await page.goto("/events/");
 
