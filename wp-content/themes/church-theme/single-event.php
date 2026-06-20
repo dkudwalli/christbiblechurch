@@ -12,20 +12,20 @@ while (have_posts()) :
     $event_location = church_theme_get_event_location($post_id);
     $event_notes = get_the_content();
     $has_notes = trim(wp_strip_all_tags($event_notes)) !== '';
+
+    $breadcrumb_items = [
+        ['label' => __('Home', 'church-theme'), 'url' => home_url('/')],
+        ['label' => __('Events', 'church-theme'), 'url' => church_theme_get_event_archive_url()],
+        ['label' => wp_trim_words(get_the_title(), 5)],
+    ];
     ?>
-    <section class="page-hero">
-        <div class="wrap">
-            <nav aria-label="Breadcrumb" class="breadcrumbs" style="font-size: 0.85rem; font-weight: 600; margin-bottom: 1rem; color: var(--text-soft);">
-                <a href="<?php echo esc_url(home_url('/')); ?>" style="color: var(--accent-strong); text-decoration: none;">Home</a>
-                <span style="margin: 0 0.4rem; opacity: 0.5;">/</span>
-                <a href="<?php echo esc_url(church_theme_get_event_archive_url()); ?>" style="color: var(--accent-strong); text-decoration: none;">Events</a>
-                <span style="margin: 0 0.4rem; opacity: 0.5;">/</span>
-                <span aria-current="page"><?php echo esc_html(wp_trim_words(get_the_title(), 5)); ?></span>
-            </nav>
-            <h1><?php the_title(); ?></h1>
-            <p class="page-hero__summary"><?php echo esc_html(church_theme_get_event_datetime($post_id)); ?></p>
-        </div>
-    </section>
+    <?php
+    get_template_part('template-parts/page-hero', null, [
+        'title' => get_the_title(),
+        'breadcrumbs' => $breadcrumb_items,
+        'summary' => church_theme_get_event_datetime($post_id),
+    ]);
+    ?>
 
     <section class="section">
         <div class="wrap">

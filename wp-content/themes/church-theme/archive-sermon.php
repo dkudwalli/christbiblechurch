@@ -31,25 +31,24 @@ if (is_wp_error($speakers)) {
 if (is_wp_error($series_terms)) {
     $series_terms = [];
 }
+
+$breadcrumb_items = [
+    ['label' => __('Home', 'church-theme'), 'url' => home_url('/')],
+];
+if (is_tax('series') || is_tax('speaker')) {
+    $breadcrumb_items[] = ['label' => __('Sermons', 'church-theme'), 'url' => church_theme_get_sermon_archive_url()];
+    $breadcrumb_items[] = ['label' => $archive_context['title']];
+} else {
+    $breadcrumb_items[] = ['label' => __('Sermons', 'church-theme')];
+}
 ?>
-<section class="page-hero">
-    <div class="wrap">
-        <nav aria-label="Breadcrumb" class="breadcrumbs" style="font-size: 0.85rem; font-weight: 600; margin-bottom: 1rem; color: var(--text-soft);">
-            <a href="<?php echo esc_url(home_url('/')); ?>" style="color: var(--accent-strong); text-decoration: none;">Home</a>
-            <?php if (is_tax('series') || is_tax('speaker')) : ?>
-                <span style="margin: 0 0.4rem; opacity: 0.5;">/</span>
-                <a href="<?php echo esc_url(church_theme_get_sermon_archive_url()); ?>" style="color: var(--accent-strong); text-decoration: none;">Sermons</a>
-                <span style="margin: 0 0.4rem; opacity: 0.5;">/</span>
-                <span aria-current="page"><?php echo esc_html($archive_context['title']); ?></span>
-            <?php else : ?>
-                <span style="margin: 0 0.4rem; opacity: 0.5;">/</span>
-                <span aria-current="page"><?php esc_html_e('Sermons', 'church-theme'); ?></span>
-            <?php endif; ?>
-        </nav>
-        <h1><?php echo esc_html($archive_context['title']); ?></h1>
-        <p class="page-hero__summary"><?php echo esc_html($archive_context['summary']); ?></p>
-    </div>
-</section>
+<?php
+get_template_part('template-parts/page-hero', null, [
+    'title' => $archive_context['title'],
+    'breadcrumbs' => $breadcrumb_items,
+    'summary' => $archive_context['summary'],
+]);
+?>
 
 <section class="section section--muted">
     <div class="wrap">

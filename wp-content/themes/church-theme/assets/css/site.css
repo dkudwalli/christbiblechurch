@@ -397,6 +397,30 @@ h4 {
   font-size: 1.04rem;
 }
 
+.inline-icon {
+  vertical-align: -2px;
+  margin-right: 4px;
+  opacity: 0.8;
+}
+
+.breadcrumbs {
+  margin-bottom: 1rem;
+  color: var(--text-soft);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.breadcrumbs a {
+  color: var(--accent-strong);
+  text-decoration: none;
+}
+
+.breadcrumbs > * + *::before {
+  content: "/";
+  margin: 0 0.4rem;
+  opacity: 0.5;
+}
+
 .hero__actions,
 .callout__actions,
 .content-aside__actions,

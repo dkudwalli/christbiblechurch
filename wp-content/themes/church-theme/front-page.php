@@ -55,7 +55,7 @@ $upcoming_events = church_theme_get_event_query(true, 3);
                 <?php if ($worship_location !== []) : ?>
                     <h2><?php echo esc_html($worship_location[0]); ?></h2>
                     <p class="hero__card-copy">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: -2px; margin-right: 4px; opacity: 0.8;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                        <?php echo church_theme_icon('location'); ?>
                         <?php echo esc_html(implode(', ', $worship_location)); ?>
                     </p>
                 <?php endif; ?>
@@ -64,7 +64,7 @@ $upcoming_events = church_theme_get_event_query(true, 3);
                     <ul class="stack-list">
                         <?php foreach ($service_times as $time) : ?>
                             <li>
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: -3px; margin-right: 6px; opacity: 0.8;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                <?php echo church_theme_icon('clock'); ?>
                                 <?php echo esc_html($time); ?>
                             </li>
                         <?php endforeach; ?>
@@ -177,14 +177,7 @@ $upcoming_events = church_theme_get_event_query(true, 3);
             <p class="page-hero__summary"><?php esc_html_e('See the next few church events at a glance, then head to the full Events page for more details and past gatherings.', 'church-theme'); ?></p>
         </div>
 
-        <?php if ($upcoming_events->have_posts()) : ?>
-            <div class="event-grid reveal-stagger">
-                <?php while ($upcoming_events->have_posts()) : $upcoming_events->the_post(); ?>
-                    <?php get_template_part('template-parts/event', 'card'); ?>
-                <?php endwhile; ?>
-                <?php wp_reset_postdata(); ?>
-            </div>
-        <?php else : ?>
+        <?php if (! church_theme_render_post_grid($upcoming_events, ['template-parts/event', 'card'], 'event-grid reveal-stagger')) : ?>
             <article class="card reveal" style="text-align: center; padding: 4rem 2rem;">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 1rem; opacity: 0.3; color: var(--accent);"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                 <h3><?php esc_html_e('No upcoming events right now.', 'church-theme'); ?></h3>

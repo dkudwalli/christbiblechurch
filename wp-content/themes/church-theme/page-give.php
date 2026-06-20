@@ -10,12 +10,12 @@ the_post();
 $contact_phone = church_theme_get_mod('contact_phone');
 $contact_email = church_theme_get_mod('contact_email');
 ?>
-<section class="page-hero">
-    <div class="wrap">
-        <h1><?php the_title(); ?></h1>
-        <p class="page-hero__summary"><?php esc_html_e('Supporting the ministry and mission of Crossroad South Church through faithful giving.', 'church-theme'); ?></p>
-    </div>
-</section>
+<?php
+get_template_part('template-parts/page-hero', null, [
+    'title' => get_the_title(),
+    'summary' => __('Supporting the ministry and mission of Crossroad South Church through faithful giving.', 'church-theme'),
+]);
+?>
 
 <section class="section">
     <div class="wrap content-grid">

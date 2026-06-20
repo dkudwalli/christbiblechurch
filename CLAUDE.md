@@ -45,7 +45,7 @@ docker compose config               # validate compose file
 
 ### Custom Theme: `wp-content/themes/church-theme/`
 
-Page templates follow WordPress naming conventions (`front-page.php`, `page-about-us.php`, `single-sermon.php`, `archive-sermon.php`, `taxonomy-series.php`, etc.). Reusable template pieces live in `template-parts/` (`sermon-card.php`, `event-card.php`, `page-section.php`, `section-nav.php`).
+Page templates follow WordPress naming conventions (`front-page.php`, `page-about-us.php`, `page-worship.php`, `page-gallery.php`, `page-give.php`, `single-sermon.php`, `archive-sermon.php`, `single-event.php`, `archive-event.php`, `taxonomy-series.php`, etc.). Reusable template pieces live in `template-parts/` (`sermon-card.php`, `event-card.php`, `page-section.php`, `page-sections-body.php`, `section-nav.php`).
 
 Theme settings use WordPress Customizer via `get_theme_mod()` / `church_theme_get_mod()` (defined in `functions.php`). All configurable strings (hero copy, service times, contact details, Instagram credentials) come from Customizer mods with defaults defined in `church_theme_defaults()`.
 
@@ -53,19 +53,21 @@ CSS is split into `assets/css/site.css`, `forms.css`, and `accessibility.css`. N
 
 ### Custom Plugin: `wp-content/plugins/church-core/`
 
-Bootstrapped in `church-core.php`; each subsystem is a `final class` with a static `boot()` method called from `Church_Core::boot()`:
+`church-core.php` requires every class, then `Church_Core::boot()` calls the static `boot()` on the top-level subsystems (`Sermons`, `Sermon_Import`, `Sermon_Cron`, `Sermon_Sync_Admin`, `Events`, `Contact`, `Page_Sections`). The remaining classes are stateless helpers/services invoked by those subsystems — they have no `boot()` and are called statically.
 
-| Class | Responsibility |
-|---|---|
-| `Church_Core_Sermons` | `sermon` CPT, `series` / `speaker` taxonomies, sermon meta fields |
-| `Church_Core_Sermon_Import` | Creates WP posts from normalized sermon data |
-| `Church_Core_Sermon_Sync_Service` | Orchestrates YouTube → sermon sync logic |
-| `Church_Core_Sermon_Cron` | WP-Cron schedule for weekly auto-sync |
-| `Church_Core_Sermon_Sync_Admin` | Admin UI under `Sermons > YouTube Sync` |
-| `Church_Core_Youtube_Client` | YouTube Data API v3 calls (channels, playlistItems, videos) |
-| `Church_Core_Contact` | `[church_contact_form]` shortcode, CSRF nonce, honeypot, `wp_mail()` |
-| `Church_Core_Events` | `event` CPT |
-| `Church_Core_Page_Sections` | Per-page section layout meta (`church_section_layout`, `church_section_profiles`) stored as post meta on child pages of About Us and Worship |
+| Class | Booted | Responsibility |
+|---|---|---|
+| `Church_Core_Sermons` | ✓ | `sermon` CPT, `series` / `speaker` taxonomies, sermon meta fields |
+| `Church_Core_Sermon_Import` | ✓ | Creates WP posts from normalized sermon data |
+| `Church_Core_Sermon_Cron` | ✓ | WP-Cron schedule for weekly auto-sync |
+| `Church_Core_Sermon_Sync_Admin` | ✓ | Admin UI under `Sermons > YouTube Sync` |
+| `Church_Core_Contact` | ✓ | `[church_contact_form]` shortcode, CSRF nonce, honeypot, `wp_mail()` |
+| `Church_Core_Events` | ✓ | `event` CPT |
+| `Church_Core_Page_Sections` | ✓ | Per-page section layout meta (`church_section_layout`, `church_section_profiles`) stored as post meta on child pages of About Us and Worship |
+| `Church_Core_Sermon_Sync_Service` | | Orchestrates YouTube → sermon sync logic |
+| `Church_Core_Youtube_Client` | | YouTube Data API v3 calls (channels, playlistItems, videos) |
+| `Church_Core_Scripture_Extractor` | | `from_title()` — parses a scripture reference (e.g. `Mark 8:22-26`) out of a YouTube video title; maps book aliases |
+| `Church_Core_Term_Helper` | | `ensure_term()` — find-or-create a `series`/`speaker` term during sync/import |
 
 ### Page Section System
 
@@ -78,7 +80,12 @@ Bootstrapped in `church-core.php`; each subsystem is a `final class` with a stat
 
 ### Route Shims
 
-Committed PHP redirect shims at `sermons/`, `series/`, `speaker/`, `contact/`, `about/` delegate to the WordPress root `index.php`. These provide a file-based fallback when Hostinger/Apache routing doesn't pass pretty URLs into WordPress.
+A file-based fallback for when Hostinger/Apache routing doesn't pass pretty URLs into WordPress. Committed route directories sit at the repo root, each holding an `index.php` shim:
+
+- **Page/post routes** (`about/`, `about-us/`, `contact/`, `contact-us/`, `events/`, `gallery/`, `give/`, `worship/`, `sermons/`, `series/`, `speaker/`, and individual sermon subdirs like `sermons/<slug>/`) simply `require` the WordPress root `index.php`, letting WP resolve the URL normally.
+- **Taxonomy term routes** (`series/<term>/`, `speaker/<term>/`) instead `require` the root `taxonomy-route-shim.php` and call `church_route_shim_boot_taxonomy($taxonomy, $slug)`, which forces the taxonomy/term query vars and boots WordPress directly.
+
+These directories are committed snapshots of published URLs — when adding a sermon, series, or speaker, add the matching shim directory so the file-based fallback stays in sync.
 
 ### Content Model
 
@@ -99,6 +106,7 @@ Taxonomies: `series` (hierarchical), `speaker` (non-hierarchical).
 - All PHP files guard with `if (! defined('ABSPATH')) { exit; }` at the top
 - CSS linted via `stylelint-config-standard`
 - Smoke tests use Playwright + axe-core for accessibility checks on public pages
+- CI (`.github/workflows/frontend-quality.yml`) runs on every push/PR: `npm run lint`, then bootstraps WordPress and runs `npm run test:smoke`. Run `npm run lint` locally before pushing to match the gate.
 
 ### Deployment Notes
 

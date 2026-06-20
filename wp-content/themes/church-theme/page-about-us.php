@@ -9,14 +9,12 @@ the_post();
 
 $sections = church_theme_get_child_sections(get_the_ID());
 ?>
-<section class="page-hero">
-    <div class="wrap">
-        <h1><?php the_title(); ?></h1>
-        <div class="page-hero__summary prose prose--compact">
-            <?php echo apply_filters('the_content', get_the_content()); ?>
-        </div>
-    </div>
-</section>
+<?php
+get_template_part('template-parts/page-hero', null, [
+    'title' => get_the_title(),
+    'content_html' => apply_filters('the_content', get_the_content()),
+]);
+?>
 
 <?php
 get_template_part('template-parts/page', 'sections-body', [

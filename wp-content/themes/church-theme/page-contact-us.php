@@ -17,14 +17,12 @@ $map_directions_url = church_theme_get_map_directions_url();
 $worship_location_name = $worship_location[0] ?? __('our worship hall', 'church-theme');
 $has_direct_actions = $contact_phone !== '' || $contact_email !== '';
 ?>
-<section class="page-hero">
-    <div class="wrap">
-        <h1><?php the_title(); ?></h1>
-        <div class="page-hero__summary prose prose--compact">
-            <?php echo apply_filters('the_content', get_the_content()); ?>
-        </div>
-    </div>
-</section>
+<?php
+get_template_part('template-parts/page-hero', null, [
+    'title' => get_the_title(),
+    'content_html' => apply_filters('the_content', get_the_content()),
+]);
+?>
 
 <section class="section">
     <div class="wrap contact-page">
@@ -73,35 +71,35 @@ $has_direct_actions = $contact_phone !== '' || $contact_email !== '';
                 <dl class="detail-list detail-list--contact">
                     <?php if ($contact_email !== '') : ?>
                         <div class="detail-list__item">
-                            <dt><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: -2px; margin-right: 4px; opacity: 0.8;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg><?php esc_html_e('Email', 'church-theme'); ?></dt>
+                            <dt><?php echo church_theme_icon('envelope', ['size' => 14]); ?><?php esc_html_e('Email', 'church-theme'); ?></dt>
                             <dd><a href="mailto:<?php echo esc_attr($contact_email); ?>"><?php echo esc_html($contact_email); ?></a></dd>
                         </div>
                     <?php endif; ?>
 
                     <?php if ($contact_phone !== '') : ?>
                         <div class="detail-list__item">
-                            <dt><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: -2px; margin-right: 4px; opacity: 0.8;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg><?php esc_html_e('Phone', 'church-theme'); ?></dt>
+                            <dt><?php echo church_theme_icon('phone', ['size' => 14]); ?><?php esc_html_e('Phone', 'church-theme'); ?></dt>
                             <dd><a href="tel:<?php echo esc_attr(church_theme_phone_href($contact_phone)); ?>"><?php echo esc_html($contact_phone); ?></a></dd>
                         </div>
                     <?php endif; ?>
 
                     <?php if ($service_times !== []) : ?>
                         <div class="detail-list__item">
-                            <dt><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: -2px; margin-right: 4px; opacity: 0.8;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><?php esc_html_e('Service Times', 'church-theme'); ?></dt>
+                            <dt><?php echo church_theme_icon('clock', ['size' => 14]); ?><?php esc_html_e('Service Times', 'church-theme'); ?></dt>
                             <dd><?php echo esc_html(implode(' | ', $service_times)); ?></dd>
                         </div>
                     <?php endif; ?>
 
                     <?php if ($worship_location !== []) : ?>
                         <div class="detail-list__item">
-                            <dt><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: -2px; margin-right: 4px; opacity: 0.8;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg><?php esc_html_e('Worship Location', 'church-theme'); ?></dt>
+                            <dt><?php echo church_theme_icon('location', ['size' => 14]); ?><?php esc_html_e('Worship Location', 'church-theme'); ?></dt>
                             <dd><?php echo esc_html(implode(', ', $worship_location)); ?></dd>
                         </div>
                     <?php endif; ?>
 
                     <?php if ($communication_address !== []) : ?>
                         <div class="detail-list__item">
-                            <dt><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: -2px; margin-right: 4px; opacity: 0.8;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><?php esc_html_e('Communication Address', 'church-theme'); ?></dt>
+                            <dt><?php echo church_theme_icon('address', ['size' => 14]); ?><?php esc_html_e('Communication Address', 'church-theme'); ?></dt>
                             <dd><?php echo esc_html(implode(', ', $communication_address)); ?></dd>
                         </div>
                     <?php endif; ?>

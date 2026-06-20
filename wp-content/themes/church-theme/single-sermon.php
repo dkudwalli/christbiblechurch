@@ -20,20 +20,19 @@ while (have_posts()) :
     $related = church_theme_get_related_sermon_query($post_id);
     $related_sermons = $related['query'];
     $related_section_title = $related['title'];
+
+    $breadcrumb_items = [
+        ['label' => __('Home', 'church-theme'), 'url' => home_url('/')],
+        ['label' => __('Sermons', 'church-theme'), 'url' => church_theme_get_sermon_archive_url()],
+    ];
+    if ($series_term) {
+        $breadcrumb_items[] = ['label' => $series_term->name, 'url' => church_theme_get_sermon_term_url($series_term)];
+    }
+    $breadcrumb_items[] = ['label' => wp_trim_words(get_the_title(), 5)];
     ?>
     <section class="page-hero">
         <div class="wrap">
-            <nav aria-label="Breadcrumb" class="breadcrumbs" style="font-size: 0.85rem; font-weight: 600; margin-bottom: 1rem; color: var(--text-soft);">
-                <a href="<?php echo esc_url(home_url('/')); ?>" style="color: var(--accent-strong); text-decoration: none;">Home</a>
-                <span style="margin: 0 0.4rem; opacity: 0.5;">/</span>
-                <a href="<?php echo esc_url(church_theme_get_sermon_archive_url()); ?>" style="color: var(--accent-strong); text-decoration: none;">Sermons</a>
-                <?php if ($series_term) : ?>
-                    <span style="margin: 0 0.4rem; opacity: 0.5;">/</span>
-                    <a href="<?php echo esc_url(church_theme_get_sermon_term_url($series_term)); ?>" style="color: var(--accent-strong); text-decoration: none;"><?php echo esc_html($series_term->name); ?></a>
-                <?php endif; ?>
-                <span style="margin: 0 0.4rem; opacity: 0.5;">/</span>
-                <span aria-current="page"><?php echo esc_html(wp_trim_words(get_the_title(), 5)); ?></span>
-            </nav>
+            <?php get_template_part('template-parts/breadcrumb', null, ['items' => $breadcrumb_items]); ?>
             <h1><?php the_title(); ?></h1>
             <p class="sermon-meta sermon-meta--hero">
                 <span><?php echo esc_html(church_theme_get_sermon_date($post_id)); ?></span>
@@ -162,12 +161,7 @@ while (have_posts()) :
                     <h2><?php echo esc_html($related_section_title); ?></h2>
                 </div>
 
-                <div class="sermon-grid reveal-stagger">
-                    <?php while ($related_sermons->have_posts()) : $related_sermons->the_post(); ?>
-                        <?php get_template_part('template-parts/sermon', 'card'); ?>
-                    <?php endwhile; ?>
-                    <?php wp_reset_postdata(); ?>
-                </div>
+                <?php church_theme_render_post_grid($related_sermons, ['template-parts/sermon', 'card'], 'sermon-grid reveal-stagger'); ?>
             </div>
         </section>
     <?php endif; ?>
