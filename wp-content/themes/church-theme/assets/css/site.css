@@ -669,7 +669,7 @@ button[type="submit"]:hover {
 }
 
 .sermon-meta span + span::before {
-  content: "•";
+  content: "•" / "";
   margin-right: 0.7rem;
   color: var(--highlight);
 }
@@ -994,7 +994,7 @@ select {
 
 .section-layout {
   display: grid;
-  gap: 1.5rem;
+  gap: 2rem;
 }
 
 .event-section {
@@ -1004,6 +1004,23 @@ select {
 
 .section-card {
   max-width: none;
+  padding: 2rem 2.25rem;
+}
+
+.section-card .prose,
+.section-story .prose {
+  font-size: 1.08rem;
+}
+
+.section-card blockquote,
+.section-story blockquote {
+  margin: 1.4rem 0;
+  padding-left: 1.2rem;
+  border-left: 3px solid var(--highlight);
+  font-size: 1.18rem;
+  font-style: italic;
+  line-height: 1.7;
+  color: var(--text);
 }
 
 .contact-page {
@@ -1363,6 +1380,41 @@ select {
   color: var(--accent-strong);
 }
 
+.give-qr {
+  text-align: center;
+}
+
+.give-qr__frame {
+  display: inline-block;
+  margin: 1rem 0;
+  padding: 1rem;
+  background: #fff;
+  border-radius: 12px;
+}
+
+.give-qr__image {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+}
+
+.give-qr__hint {
+  margin: 0 0 1rem;
+  font-size: 0.95rem;
+  color: var(--text-soft);
+}
+
+.give-qr__steps {
+  max-width: 16rem;
+  margin: 0 auto;
+  padding-left: 1.2rem;
+  text-align: left;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--text);
+}
+
 .site-footer {
   padding: 3rem 0 0;
   background: var(--surface-dark);
@@ -1494,7 +1546,7 @@ select {
 .site-footer__copyright {
   margin: 0;
   font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .back-to-top {

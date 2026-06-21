@@ -629,6 +629,40 @@ function church_theme_get_attachment_image_asset(int $attachment_id): ?array
     ];
 }
 
+/**
+ * Resolve a sermon card's thumbnail image: a per-sermon featured image when set
+ * (lets the church differentiate cards), otherwise the YouTube thumbnail.
+ *
+ * Returns ['src', 'width', 'height', 'srcset'] or null. For display in the
+ * sermon card grid only — single-sermon and front-page render the video player.
+ */
+function church_theme_get_sermon_card_image(int $post_id): ?array
+{
+    if ($post_id > 0 && has_post_thumbnail($post_id)) {
+        $asset = church_theme_get_attachment_image_asset((int) get_post_thumbnail_id($post_id));
+        if (is_array($asset) && ! empty($asset['src'])) {
+            return [
+                'src' => (string) $asset['src'],
+                'width' => (int) ($asset['width'] ?? 0),
+                'height' => (int) ($asset['height'] ?? 0),
+                'srcset' => (string) ($asset['srcset'] ?? ''),
+            ];
+        }
+    }
+
+    $video_id = (string) get_post_meta($post_id, 'youtube_video_id', true);
+    if ($video_id !== '') {
+        return [
+            'src' => 'https://i.ytimg.com/vi/' . rawurlencode($video_id) . '/hqdefault.jpg',
+            'width' => 480,
+            'height' => 360,
+            'srcset' => '',
+        ];
+    }
+
+    return null;
+}
+
 function church_theme_get_page_section_layout(WP_Post $section): string
 {
     if (! class_exists('Church_Core_Page_Sections')) {

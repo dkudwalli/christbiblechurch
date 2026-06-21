@@ -7,18 +7,22 @@ $post_id = get_the_ID();
 $series_term = church_theme_get_sermon_primary_term($post_id, 'series');
 $speaker_term = church_theme_get_sermon_primary_term($post_id, 'speaker');
 $scripture = (string) get_post_meta($post_id, 'scripture_reference', true);
-$youtube_id = (string) get_post_meta($post_id, 'youtube_video_id', true);
+$card_image = church_theme_get_sermon_card_image($post_id);
 ?>
 <article class="card sermon-card reveal">
-    <?php if ($youtube_id !== '') : ?>
+    <?php if ($card_image !== null) : ?>
         <a class="sermon-card__thumb" href="<?php echo esc_url(church_theme_get_sermon_url($post_id)); ?>" tabindex="-1" aria-hidden="true">
             <img
-                src="<?php echo esc_url('https://i.ytimg.com/vi/' . $youtube_id . '/hqdefault.jpg'); ?>"
+                src="<?php echo esc_url($card_image['src']); ?>"
+                <?php if ($card_image['srcset'] !== '') : ?>
+                srcset="<?php echo esc_attr($card_image['srcset']); ?>"
+                sizes="(max-width: 600px) 100vw, 360px"
+                <?php endif; ?>
                 alt=""
                 loading="lazy"
                 decoding="async"
-                width="480"
-                height="360">
+                width="<?php echo (int) $card_image['width']; ?>"
+                height="<?php echo (int) $card_image['height']; ?>">
         </a>
     <?php endif; ?>
     <p class="eyebrow"><?php echo esc_html(church_theme_get_sermon_date($post_id)); ?></p>

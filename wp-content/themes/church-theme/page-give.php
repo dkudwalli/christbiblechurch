@@ -43,18 +43,23 @@ get_template_part('template-parts/page-hero', null, [
             );
             ?>
             <?php if ($qr_image !== null) : ?>
-                <article class="card reveal" style="text-align: center;">
-                    <p class="eyebrow" style="margin-bottom: 1rem;"><?php esc_html_e('Scan to Give', 'church-theme'); ?></p>
-                    <div style="background: white; padding: 1rem; border-radius: 8px; display: inline-block; margin-bottom: 1rem;">
+                <article class="card give-qr reveal">
+                    <p class="eyebrow"><?php esc_html_e('Scan to Give', 'church-theme'); ?></p>
+                    <div class="give-qr__frame">
                         <?php
                         echo church_theme_render_static_image($qr_image, [
+                            'class' => 'give-qr__image',
                             'loading' => 'lazy',
                             'decoding' => 'async',
-                            'style' => 'width: 100%; max-width: 200px; height: auto; display: block;',
                         ]);
                         ?>
                     </div>
-                    <p style="font-size: 0.9rem; color: var(--text-soft);"><?php esc_html_e('Use your preferred UPI app to scan and give directly.', 'church-theme'); ?></p>
+                    <p class="give-qr__hint"><?php esc_html_e('Scan with any UPI app to give directly.', 'church-theme'); ?></p>
+                    <ol class="give-qr__steps">
+                        <li><?php esc_html_e('Open any UPI app', 'church-theme'); ?></li>
+                        <li><?php esc_html_e('Scan this code', 'church-theme'); ?></li>
+                        <li><?php esc_html_e('Enter the amount and pay', 'church-theme'); ?></li>
+                    </ol>
                 </article>
             <?php endif; ?>
 
