@@ -1,63 +1,44 @@
 /* === WEB FONTS === */
 @font-face {
-  font-family: "DM Sans";
+  font-family: "Space Grotesk";
   font-style: normal;
-  font-weight: 400 700;
+  font-weight: 300 700;
   font-display: swap;
-  src: url('../fonts/dmsans-latin-ext.woff2') format('woff2');
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  src: url('../fonts/spacegrotesk-latin.woff2') format('woff2');
 }
 
 @font-face {
-  font-family: "DM Sans";
+  font-family: Inter;
   font-style: normal;
-  font-weight: 400 700;
+  font-weight: 100 900;
   font-display: swap;
-  src: url('../fonts/dmsans-latin.woff2') format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
-@font-face {
-  font-family: Lora;
-  font-style: normal;
-  font-weight: 400 700;
-  font-display: swap;
-  src: url('../fonts/lora-latin-ext.woff2') format('woff2');
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
-}
-
-@font-face {
-  font-family: Lora;
-  font-style: normal;
-  font-weight: 400 700;
-  font-display: swap;
-  src: url('../fonts/lora-latin.woff2') format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  src: url('../fonts/inter-latin.woff2') format('woff2');
 }
 
 :root {
-  --bg-rgb: 251, 244, 238;
-  --surface-dark-rgb: 44, 37, 46;
-  --accent-rgb: 214, 38, 48;
-  --bg: #fbf4ee;
-  --bg-muted: #f1e5dc;
-  --surface: #fffaf6;
+  --bg-rgb: 246, 243, 236;
+  --surface-dark-rgb: 0, 57, 85;
+  --accent-rgb: 199, 60, 41;
+  --bg: #f6f3ec;
+  --bg-muted: #ece6d9;
+  --surface: #fcfaf5;
   --surface-strong: #ffffff;
-  --surface-dark: #2c252e;
-  --line: rgba(var(--surface-dark-rgb), 0.12);
-  --line-strong: rgba(var(--surface-dark-rgb), 0.22);
-  --text: #261f23;
-  --text-soft: #6a5d63;
-  --text-inverse: #fff7f3;
-  --accent: #d62630;
-  --accent-strong: #a61b23;
+  --surface-dark: #003955;
+  --line: rgba(var(--surface-dark-rgb), 0.14);
+  --line-strong: rgba(var(--surface-dark-rgb), 0.24);
+  --text: #14242c;
+  --text-soft: #5a6b73;
+  --text-inverse: #f6f3ec;
+  --accent: #c73c29;
+  --accent-strong: #a8331f;
+  --accent-bright: #ee5a43;
   --accent-soft: rgba(var(--accent-rgb), 0.12);
-  --accent-secondary: #9c7841;
-  --accent-secondary-strong: #6f4f27;
-  --accent-secondary-soft: rgba(156, 120, 65, 0.16);
-  --highlight: #cc9a3b;
-  --highlight-soft: rgba(204, 154, 59, 0.18);
-  --shadow: 0 18px 48px rgba(var(--surface-dark-rgb), 0.11);
+  --accent-secondary: #4f7a26;
+  --accent-secondary-strong: #3c5e1c;
+  --accent-secondary-soft: rgba(128, 175, 68, 0.18);
+  --highlight: #f0c041;
+  --highlight-soft: rgba(240, 192, 65, 0.18);
+  --shadow: 0 18px 48px rgba(var(--surface-dark-rgb), 0.14);
   --radius: 24px;
   --radius-sm: 18px;
   --control-height: 54px;
@@ -77,11 +58,11 @@ html {
 body {
   margin: 0;
   color: var(--text);
-  font-family: "DM Sans", "Avenir Next", "Segoe UI", sans-serif;
+  font-family: Inter, "Segoe UI", system-ui, sans-serif;
   line-height: 1.65;
   background:
-    radial-gradient(circle at top left, rgba(var(--accent-rgb), 0.08), transparent 28%),
-    linear-gradient(180deg, #fffaf6 0%, var(--bg) 100%);
+    radial-gradient(circle at top left, rgba(var(--accent-rgb), 0.06), transparent 28%),
+    linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
 }
 
 img,
@@ -110,7 +91,8 @@ h1,
 h2,
 h3,
 h4 {
-  font-family: Lora, "Iowan Old Style", "Palatino Linotype", serif;
+  font-family: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  letter-spacing: -0.02em;
 }
 
 .site-header {
@@ -118,7 +100,7 @@ h4 {
   top: 0;
   z-index: 40;
   backdrop-filter: blur(18px);
-  background: rgba(255, 249, 244, 0.94);
+  background: rgba(252, 250, 245, 0.94);
   border-bottom: 1px solid var(--line);
   transition: box-shadow 250ms ease, border-bottom-color 250ms ease;
 }
@@ -172,6 +154,9 @@ h4 {
 .site-footer__mark {
   max-width: min(220px, 52vw);
   max-height: 78px;
+  background: var(--bg);
+  padding: 0.5rem 0.7rem;
+  border-radius: 10px;
 }
 
 .site-footer__copy,
@@ -248,7 +233,7 @@ h4 {
   padding: 0.6rem;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
-  background: rgba(255, 249, 244, 0.98);
+  background: rgba(252, 250, 245, 0.98);
   box-shadow: 0 16px 40px rgba(34, 27, 25, 0.12);
   opacity: 0;
   visibility: hidden;
@@ -384,11 +369,17 @@ h4 {
 .card__label,
 .site-footer__label {
   margin: 0;
-  color: var(--accent-secondary-strong);
+  color: var(--accent);
   font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+}
+
+.eyebrow::before {
+  content: "+";
+  margin-right: 0.45rem;
+  font-weight: 700;
 }
 
 .hero__summary,
@@ -1974,6 +1965,8 @@ button[type="submit"]:active {
 .hero {
   position: relative;
   overflow: hidden;
+  background: var(--surface-dark);
+  color: var(--text-inverse);
 }
 
 .hero::before {
@@ -2020,6 +2013,27 @@ button[type="submit"]:active {
 
 .hero__content {
   align-self: center;
+}
+
+/* === HERO — Wayfinding navy ground (base .hero bg/color set in HERO VISUAL TEXTURE) === */
+.hero h1 {
+  color: var(--text-inverse);
+}
+
+.hero .hero__summary {
+  color: rgba(246, 243, 236, 0.86);
+}
+
+.hero .hero__meta {
+  color: rgba(246, 243, 236, 0.82);
+}
+
+.hero .hero__actions .text-link {
+  color: var(--text-inverse);
+}
+
+.hero .eyebrow {
+  color: var(--highlight);
 }
 
 /* === STICKY SECTION NAV === */

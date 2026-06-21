@@ -215,7 +215,7 @@ test("contact page offers a direct Google Maps fallback action", async ({ page }
   await expect(mapFallbackLink).toHaveAttribute("target", "_blank");
 });
 
-test("homepage surfaces the red-led heritage palette in primary actions and structural surfaces", async ({ page }) => {
+test("homepage surfaces the navy-led Wayfinding palette in primary actions and structural surfaces", async ({ page }) => {
   await page.goto("/");
 
   const themePalette = await page.evaluate(() => {
@@ -233,12 +233,12 @@ test("homepage surfaces the red-led heritage palette in primary actions and stru
     };
   });
 
-  expect(themePalette.accent).toBe("#d62630");
-  expect(themePalette.accentStrong).toBe("#a61b23");
-  expect(themePalette.bg).toBe("#fbf4ee");
-  expect(themePalette.surfaceDark).toBe("#2c252e");
-  expect(themePalette.primaryActionBackground).toBe("rgb(214, 38, 48)");
-  expect(themePalette.footerBackground).toBe("rgb(44, 37, 46)");
+  expect(themePalette.accent).toBe("#c73c29");
+  expect(themePalette.accentStrong).toBe("#a8331f");
+  expect(themePalette.bg).toBe("#f6f3ec");
+  expect(themePalette.surfaceDark).toBe("#003955");
+  expect(themePalette.primaryActionBackground).toBe("rgb(199, 60, 41)");
+  expect(themePalette.footerBackground).toBe("rgb(0, 57, 85)");
 });
 
 test("events archive and detail pages render expected states", async ({ page }) => {

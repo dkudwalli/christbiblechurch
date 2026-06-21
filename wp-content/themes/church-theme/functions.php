@@ -827,8 +827,8 @@ add_action('wp_enqueue_scripts', 'church_theme_enqueue_assets');
 function church_theme_preload_fonts(): void
 {
     $fonts = [
-        '/assets/fonts/dmsans-latin.woff2',
-        '/assets/fonts/lora-latin.woff2',
+        '/assets/fonts/inter-latin.woff2',
+        '/assets/fonts/spacegrotesk-latin.woff2',
     ];
     foreach ($fonts as $font) {
         $url = esc_url(get_template_directory_uri() . $font);
