@@ -35,7 +35,7 @@ $gallery_feature = church_theme_get_gallery_feature_media();
 </section>
 
 <section class="section">
-    <div class="wrap content-grid">
+    <div class="wrap">
         <?php if ($instagram_feed['items'] !== []) : ?>
             <article class="card gallery-feed reveal">
                 <div class="gallery-feed__header">
@@ -127,20 +127,6 @@ $gallery_feature = church_theme_get_gallery_feature_media();
                 </div>
             </article>
         <?php endif; ?>
-
-        <article class="card content-placeholder gallery-state reveal">
-            <p class="eyebrow"><?php esc_html_e('Teaching', 'church-theme'); ?></p>
-            <h2><?php esc_html_e('Browse recent preaching while the gallery grows.', 'church-theme'); ?></h2>
-            <p><?php esc_html_e('Catch up on the latest sermons or get in touch before your first Sunday at Crossroad South Church.', 'church-theme'); ?></p>
-            <div class="callout__actions">
-                <a class="button" href="<?php echo esc_url(church_theme_get_sermon_archive_url()); ?>">
-                    <?php esc_html_e('View Sermons', 'church-theme'); ?>
-                </a>
-                <a class="text-link" href="<?php echo esc_url(church_theme_get_page_url('worship')); ?>">
-                    <?php esc_html_e('Explore Worship', 'church-theme'); ?>
-                </a>
-            </div>
-        </article>
     </div>
 </section>
 <?php

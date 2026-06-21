@@ -893,11 +893,6 @@ select {
   align-items: start;
 }
 
-.gallery-feed,
-.gallery-state {
-  align-self: start;
-}
-
 .gallery-feed__header,
 .gallery-card__actions {
   display: flex;
@@ -909,7 +904,7 @@ select {
 
 .gallery-feed__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 1.1rem;
 }
 
