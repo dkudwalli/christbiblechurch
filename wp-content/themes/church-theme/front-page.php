@@ -9,6 +9,7 @@ $hero_url = church_theme_resolve_url(church_theme_get_mod('hero_primary_url'));
 $service_times = church_theme_split_lines(church_theme_get_mod('service_times'));
 $worship_location = church_theme_split_lines(church_theme_get_mod('worship_location'));
 $latest_sermon = church_theme_get_latest_sermon_query();
+$recent_sermons = church_theme_get_latest_sermon_query(3, 1);
 $upcoming_events = church_theme_get_event_query(true, 3);
 ?>
 <section class="hero">
@@ -170,6 +171,11 @@ $upcoming_events = church_theme_get_event_query(true, 3);
                 </div>
             </article>
             <?php wp_reset_postdata(); ?>
+
+            <?php if ($recent_sermons->have_posts()) : ?>
+                <p class="eyebrow home-recent-sermons__label reveal"><?php esc_html_e('More recent teaching', 'church-theme'); ?></p>
+                <?php church_theme_render_post_grid($recent_sermons, ['template-parts/sermon', 'card'], 'sermon-grid reveal-stagger home-recent-sermons'); ?>
+            <?php endif; ?>
         <?php else : ?>
             <article class="card reveal" style="text-align: center; padding: 4rem 2rem;">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 1rem; opacity: 0.3; color: var(--accent);"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>

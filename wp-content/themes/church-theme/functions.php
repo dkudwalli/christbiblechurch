@@ -1323,11 +1323,12 @@ function church_theme_get_event_query(bool $upcoming, int $posts_per_page = -1):
     ]);
 }
 
-function church_theme_get_latest_sermon_query(int $limit = 1): WP_Query
+function church_theme_get_latest_sermon_query(int $limit = 1, int $offset = 0): WP_Query
 {
     return new WP_Query([
         'post_type' => 'sermon',
         'posts_per_page' => $limit,
+        'offset' => $offset,
         'meta_key' => 'sermon_date',
         'orderby' => 'meta_value',
         'order' => 'DESC',

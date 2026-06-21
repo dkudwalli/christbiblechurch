@@ -697,6 +697,11 @@ button[type="submit"]:hover {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.home-recent-sermons__label {
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+}
+
 .sermon-card,
 .sermon-feature {
   align-items: start;
