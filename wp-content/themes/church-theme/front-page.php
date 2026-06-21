@@ -28,6 +28,17 @@ $upcoming_events = church_theme_get_event_query(true, 3);
                     <?php esc_html_e('Learn about Crossroad South', 'church-theme'); ?>
                 </a>
             </div>
+
+            <?php if ($service_times !== [] || $worship_location !== []) : ?>
+                <p class="hero__meta">
+                    <?php if ($service_times !== []) : ?>
+                        <span class="hero__meta-item"><?php echo church_theme_icon('clock'); ?><?php echo esc_html($service_times[0]); ?></span>
+                    <?php endif; ?>
+                    <?php if ($worship_location !== []) : ?>
+                        <span class="hero__meta-item"><?php echo church_theme_icon('location'); ?><?php echo esc_html($worship_location[0]); ?></span>
+                    <?php endif; ?>
+                </p>
+            <?php endif; ?>
         </div>
 
         <div class="hero__aside">

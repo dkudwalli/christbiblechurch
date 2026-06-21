@@ -431,6 +431,28 @@ h4 {
   align-items: center;
 }
 
+.hero__meta {
+  display: none; /* desktop shows the adjacent "Gather With Us" card instead */
+}
+
+@media (max-width: 960px) {
+  .hero__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.1rem;
+    margin-top: 1.25rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-soft);
+  }
+
+  .hero__meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+}
+
 .card,
 .callout,
 .map-frame,
