@@ -1,0 +1,18 @@
+Hostinger migration artifacts for this project
+
+Files Hostinger asked for:
+- hostinger-website-files.tar.gz
+- hostinger-database.sql
+
+Important notes:
+1. The imported database currently uses http://localhost:8080 as home/siteurl because it was exported from the local Docker site.
+   After import, update WordPress home/siteurl to your final domain.
+
+2. The website archive now contains a Hostinger-style wp-config.php template at its root.
+   If you upload manually, fill in the Hostinger DB name/user/password in public_html/wp-config.php.
+   If you use Hostinger's migration team, they may set those values during migration.
+
+Suggested SQL after import:
+UPDATE wp_options
+SET option_value = 'https://YOUR-DOMAIN'
+WHERE option_name IN ('home', 'siteurl');
