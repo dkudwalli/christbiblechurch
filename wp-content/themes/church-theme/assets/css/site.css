@@ -169,6 +169,10 @@ h4 {
   color: var(--text-soft);
 }
 
+.site-footer__copy {
+  color: rgba(255, 255, 255, 0.92);
+}
+
 .site-nav {
   justify-self: end;
 }

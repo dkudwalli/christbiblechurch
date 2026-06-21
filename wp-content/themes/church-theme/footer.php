@@ -30,10 +30,6 @@ $instagram_url = church_theme_get_instagram_profile_url();
                         <?php endforeach; ?>
                     </p>
                 <?php endif; ?>
-                <?php $footer_invite = church_theme_get_mod('footer_invite'); ?>
-                <?php if ($footer_invite !== '') : ?>
-                    <p class="site-footer__copy"><?php echo esc_html($footer_invite); ?></p>
-                <?php endif; ?>
             </div>
         </div>
 

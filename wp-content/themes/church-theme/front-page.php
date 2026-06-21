@@ -215,7 +215,6 @@ $upcoming_events = church_theme_get_event_query(true, 3);
         <div>
             <p class="eyebrow"><?php esc_html_e('Visit', 'church-theme'); ?></p>
             <h2><?php esc_html_e('Questions before Sunday?', 'church-theme'); ?></h2>
-            <p><?php echo esc_html(church_theme_get_mod('footer_invite')); ?></p>
         </div>
 
         <div class="callout__actions">
