@@ -8,7 +8,7 @@ get_header();
 the_post();
 
 $instagram_profile_url = church_theme_get_instagram_profile_url();
-$instagram_feed = church_theme_get_instagram_feed();
+$instagram_feed = church_theme_get_instagram_feed(25);
 $gallery_feature = church_theme_get_gallery_feature_media();
 ?>
 <section class="page-hero">

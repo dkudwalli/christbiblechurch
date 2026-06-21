@@ -59,6 +59,26 @@ test("public pages render a visible main region", async ({ page }) => {
   }
 });
 
+test("gallery feed renders a five-by-five desktop layout when enough Instagram posts exist", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1200 });
+  await page.goto("/gallery/");
+
+  const galleryGrid = page.locator(".gallery-feed__grid").first();
+  const galleryCards = page.locator(".gallery-card");
+
+  await expect(galleryCards.first()).toBeVisible();
+  await expect(galleryCards).toHaveCount(25);
+
+  const columnCount = await galleryGrid.evaluate((element) => {
+    return window
+      .getComputedStyle(element)
+      .gridTemplateColumns.split(" ")
+      .filter(Boolean).length;
+  });
+
+  expect(columnCount).toBe(5);
+});
+
 test("mobile navigation opens and submenu controls expand", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
