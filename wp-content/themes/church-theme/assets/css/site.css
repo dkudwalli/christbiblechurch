@@ -1433,7 +1433,7 @@ select {
 
 .site-footer__meta {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 2rem;
 }
 
@@ -1441,14 +1441,47 @@ select {
   min-width: 0;
   padding-left: 1rem;
   border-left: 2px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
 }
 
 .site-footer__column p {
-  margin: 0.35rem 0 0;
+  margin: 0;
 }
 
 .site-footer__label {
   color: var(--highlight);
+}
+
+.site-footer__item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.7rem;
+  align-items: start;
+}
+
+.site-footer__item-icon {
+  display: inline-flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 0.12rem;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.site-footer__icon {
+  margin-right: 0;
+}
+
+.site-footer__item-body {
+  min-width: 0;
+  display: grid;
+  gap: 0.18rem;
+}
+
+.site-footer__contact-group {
+  display: grid;
+  gap: 0.7rem;
 }
 
 .site-footer__line {
@@ -1473,7 +1506,7 @@ select {
 
 .site-footer__nav ul {
   list-style: none;
-  margin: 0.35rem 0 0;
+  margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
@@ -1648,7 +1681,7 @@ select {
 
 @media (min-width: 1201px) {
   .site-footer__inner {
-    grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr);
+    grid-template-columns: minmax(18rem, 0.72fr) minmax(0, 1.28fr);
     gap: 2.5rem;
   }
 
@@ -1658,7 +1691,7 @@ select {
   }
 
   .site-footer__meta {
-    grid-template-columns: minmax(0, 0.65fr) minmax(0, 1.15fr) minmax(0, 0.9fr);
+    grid-template-columns: minmax(9.5rem, 0.72fr) minmax(13.5rem, 1.18fr) minmax(12.5rem, 1fr);
     gap: 1.75rem;
   }
 }
@@ -1670,8 +1703,23 @@ select {
   }
 
   .site-footer__meta {
-    grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.1fr) minmax(0, 0.95fr);
+    grid-template-columns: minmax(10.25rem, 0.82fr) minmax(0, 1.18fr);
+    grid-template-areas:
+      "explore visit"
+      "explore mailing";
     gap: 1.75rem;
+  }
+
+  .site-footer__column--explore {
+    grid-area: explore;
+  }
+
+  .site-footer__column--visit {
+    grid-area: visit;
+  }
+
+  .site-footer__column--mailing {
+    grid-area: mailing;
   }
 }
 

@@ -340,6 +340,8 @@ test("footer keeps desktop labels and contact content on stable lines", async ({
     const text = document.querySelector(".site-footer__lines");
     const labels = [...document.querySelectorAll(".site-footer__label")];
     const addressBlocks = [...document.querySelectorAll(".site-footer__lines")];
+    const locationBlock = document.querySelector(".site-footer__column--visit .site-footer__lines");
+    const contactGroup = document.querySelector(".site-footer__contact-group");
 
     return {
       linkOverflowWrap: link ? getComputedStyle(link).overflowWrap : "",
@@ -347,6 +349,9 @@ test("footer keeps desktop labels and contact content on stable lines", async ({
       textOverflowWrap: text ? getComputedStyle(text).overflowWrap : "",
       textWordBreak: text ? getComputedStyle(text).wordBreak : "",
       emailRectCount: link ? link.getClientRects().length : 0,
+      hasContactGroup: Boolean(contactGroup),
+      contactGroupTop: contactGroup ? contactGroup.getBoundingClientRect().top : 0,
+      locationBottom: locationBlock ? locationBlock.getBoundingClientRect().bottom : 0,
       labelHeights: labels.map((label) =>
         Math.round(label.getBoundingClientRect().height * 10) / 10
       ),
@@ -361,6 +366,8 @@ test("footer keeps desktop labels and contact content on stable lines", async ({
   expect(footerStyles.linkWordBreak).toBe("normal");
   expect(footerStyles.textWordBreak).toBe("normal");
   expect(footerStyles.emailRectCount).toBe(1);
+  expect(footerStyles.hasContactGroup).toBe(true);
+  expect(footerStyles.contactGroupTop).toBeGreaterThan(footerStyles.locationBottom);
   expect(new Set(footerStyles.labelHeights).size).toBe(1);
   expect(footerStyles.addressLineCounts).toEqual([3, 3]);
 });
@@ -374,6 +381,9 @@ test("footer stacks brand above metadata at mid-width without wrapping the email
     const meta = document.querySelector(".site-footer__meta");
     const email = document.querySelector('.site-footer__column a[href^="mailto:"]');
     const labels = [...document.querySelectorAll(".site-footer__label")];
+    const explore = document.querySelector(".site-footer__column--explore");
+    const visit = document.querySelector(".site-footer__column--visit");
+    const mailing = document.querySelector(".site-footer__column--mailing");
 
     return {
       brandBottom: brand ? brand.getBoundingClientRect().bottom : 0,
@@ -382,6 +392,12 @@ test("footer stacks brand above metadata at mid-width without wrapping the email
         ? getComputedStyle(meta).gridTemplateColumns.split(" ").length
         : 0,
       emailRectCount: email ? email.getClientRects().length : 0,
+      exploreLeft: explore ? explore.getBoundingClientRect().left : 0,
+      exploreRight: explore ? explore.getBoundingClientRect().right : 0,
+      visitLeft: visit ? visit.getBoundingClientRect().left : 0,
+      visitTop: visit ? visit.getBoundingClientRect().top : 0,
+      mailingLeft: mailing ? mailing.getBoundingClientRect().left : 0,
+      mailingTop: mailing ? mailing.getBoundingClientRect().top : 0,
       labelHeights: labels.map((label) =>
         Math.round(label.getBoundingClientRect().height * 10) / 10
       )
@@ -389,8 +405,11 @@ test("footer stacks brand above metadata at mid-width without wrapping the email
   });
 
   expect(footerLayout.metaTop).toBeGreaterThan(footerLayout.brandBottom);
-  expect(footerLayout.metaColumnCount).toBe(3);
+  expect(footerLayout.metaColumnCount).toBe(2);
   expect(footerLayout.emailRectCount).toBe(1);
+  expect(footerLayout.visitLeft).toBeGreaterThan(footerLayout.exploreRight);
+  expect(Math.abs(footerLayout.mailingLeft - footerLayout.visitLeft)).toBeLessThan(4);
+  expect(footerLayout.mailingTop).toBeGreaterThan(footerLayout.visitTop);
   expect(new Set(footerLayout.labelHeights).size).toBe(1);
 });
 

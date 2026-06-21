@@ -34,7 +34,7 @@ $instagram_url = church_theme_get_instagram_profile_url();
         </div>
 
         <div class="site-footer__meta">
-            <div class="site-footer__column">
+            <div class="site-footer__column site-footer__column--explore">
                 <p class="site-footer__label"><?php esc_html_e('Explore', 'church-theme'); ?></p>
                 <nav class="site-footer__nav" aria-label="<?php esc_attr_e('Footer navigation', 'church-theme'); ?>">
                     <ul>
@@ -50,36 +50,62 @@ $instagram_url = church_theme_get_instagram_profile_url();
             </div>
 
             <?php if ($worship_location !== [] || $contact_phone !== '' || $contact_email !== '') : ?>
-                <div class="site-footer__column">
+                <div class="site-footer__column site-footer__column--visit">
                     <p class="site-footer__label"><?php esc_html_e('Visit & Connect', 'church-theme'); ?></p>
 
                     <?php if ($worship_location !== []) : ?>
-                        <p class="site-footer__lines">
-                            <?php echo church_theme_icon('location'); ?>
-                            <?php foreach ($worship_location as $line) : ?>
-                                <span class="site-footer__line"><?php echo esc_html($line); ?></span>
-                            <?php endforeach; ?>
+                        <p class="site-footer__item site-footer__lines">
+                            <span class="site-footer__item-icon">
+                                <?php echo church_theme_icon('location', ['class' => 'site-footer__icon']); ?>
+                            </span>
+                            <span class="site-footer__item-body">
+                                <?php foreach ($worship_location as $line) : ?>
+                                    <span class="site-footer__line"><?php echo esc_html($line); ?></span>
+                                <?php endforeach; ?>
+                            </span>
                         </p>
                     <?php endif; ?>
 
-                    <?php if ($contact_phone !== '') : ?>
-                        <p><?php echo church_theme_icon('phone'); ?><a href="tel:<?php echo esc_attr(church_theme_phone_href($contact_phone)); ?>"><?php echo esc_html($contact_phone); ?></a></p>
-                    <?php endif; ?>
+                    <?php if ($contact_phone !== '' || $contact_email !== '') : ?>
+                        <div class="site-footer__contact-group">
+                            <?php if ($contact_phone !== '') : ?>
+                                <p class="site-footer__item">
+                                    <span class="site-footer__item-icon">
+                                        <?php echo church_theme_icon('phone', ['class' => 'site-footer__icon']); ?>
+                                    </span>
+                                    <span class="site-footer__item-body">
+                                        <a href="tel:<?php echo esc_attr(church_theme_phone_href($contact_phone)); ?>"><?php echo esc_html($contact_phone); ?></a>
+                                    </span>
+                                </p>
+                            <?php endif; ?>
 
-                    <?php if ($contact_email !== '') : ?>
-                        <p><?php echo church_theme_icon('envelope'); ?><a href="mailto:<?php echo esc_attr($contact_email); ?>"><?php echo esc_html($contact_email); ?></a></p>
+                            <?php if ($contact_email !== '') : ?>
+                                <p class="site-footer__item">
+                                    <span class="site-footer__item-icon">
+                                        <?php echo church_theme_icon('envelope', ['class' => 'site-footer__icon']); ?>
+                                    </span>
+                                    <span class="site-footer__item-body">
+                                        <a href="mailto:<?php echo esc_attr($contact_email); ?>"><?php echo esc_html($contact_email); ?></a>
+                                    </span>
+                                </p>
+                            <?php endif; ?>
+                        </div>
                     <?php endif; ?>
                 </div>
             <?php endif; ?>
 
             <?php if ($communication_address !== []) : ?>
-                <div class="site-footer__column">
+                <div class="site-footer__column site-footer__column--mailing">
                     <p class="site-footer__label"><?php esc_html_e('Mailing Address', 'church-theme'); ?></p>
-                    <p class="site-footer__lines">
-                        <?php echo church_theme_icon('address'); ?>
-                        <?php foreach ($communication_address as $line) : ?>
-                            <span class="site-footer__line"><?php echo esc_html($line); ?></span>
-                        <?php endforeach; ?>
+                    <p class="site-footer__item site-footer__lines">
+                        <span class="site-footer__item-icon">
+                            <?php echo church_theme_icon('address', ['class' => 'site-footer__icon']); ?>
+                        </span>
+                        <span class="site-footer__item-body">
+                            <?php foreach ($communication_address as $line) : ?>
+                                <span class="site-footer__line"><?php echo esc_html($line); ?></span>
+                            <?php endforeach; ?>
+                        </span>
                     </p>
                 </div>
             <?php endif; ?>
