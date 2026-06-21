@@ -893,8 +893,7 @@ select {
   align-items: start;
 }
 
-.gallery-feed__header,
-.gallery-card__actions {
+.gallery-feed__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -926,24 +925,6 @@ select {
   height: 100%;
   object-fit: cover;
   transition: transform 300ms ease;
-}
-
-.gallery-card__meta {
-  display: grid;
-  gap: 0.7rem;
-  padding: 1rem;
-}
-
-.gallery-card__meta p {
-  margin: 0;
-}
-
-.gallery-card__type {
-  font-size: 0.76rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--accent-secondary-strong);
 }
 
 .page-hero__panel-meta {
@@ -1638,6 +1619,14 @@ select {
 .lightbox__close:hover {
   opacity: 1;
   transform: scale(1.1);
+}
+
+.lightbox__caption {
+  margin: 1rem 0 0;
+  max-width: 60ch;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.5;
 }
 
 .lightbox__link {

@@ -53,32 +53,11 @@ $gallery_feature = church_theme_get_gallery_feature_media();
 
                 <div class="gallery-feed__grid">
                     <?php foreach ($instagram_feed['items'] as $item) : ?>
-                        <?php
-                        $timestamp = strtotime((string) ($item['timestamp'] ?? ''));
-                        $caption = trim((string) ($item['caption'] ?? ''));
-                        ?>
+                        <?php $caption = trim((string) ($item['caption'] ?? '')); ?>
                         <article class="gallery-card">
-                            <a class="gallery-card__media js-lightbox skeleton" href="<?php echo esc_url((string) $item['image_url']); ?>" data-permalink="<?php echo esc_url((string) $item['permalink']); ?>" aria-label="<?php esc_attr_e('View image in lightbox', 'church-theme'); ?>">
+                            <a class="gallery-card__media js-lightbox skeleton" href="<?php echo esc_url((string) $item['image_url']); ?>" data-permalink="<?php echo esc_url((string) $item['permalink']); ?>" data-caption="<?php echo esc_attr($caption); ?>" aria-label="<?php esc_attr_e('View image in lightbox', 'church-theme'); ?>">
                                 <img src="<?php echo esc_url((string) $item['image_url']); ?>" alt="<?php echo esc_attr($caption !== '' ? $caption : __('Crossroad South Church Instagram post', 'church-theme')); ?>" loading="lazy" decoding="async">
                             </a>
-
-                            <div class="gallery-card__meta">
-                                <p class="gallery-card__type"><?php echo esc_html(ucwords(strtolower(str_replace('_', ' ', (string) ($item['media_type'] ?? 'Photo'))))); ?></p>
-
-                                <?php if ($caption !== '') : ?>
-                                    <p><?php echo esc_html(wp_trim_words($caption, 20)); ?></p>
-                                <?php endif; ?>
-
-                                <div class="gallery-card__actions">
-                                    <?php if ($timestamp) : ?>
-                                        <span><?php echo esc_html(wp_date('M j, Y', $timestamp)); ?></span>
-                                    <?php endif; ?>
-
-                                    <a class="text-link" href="<?php echo esc_url((string) $item['permalink']); ?>" target="_blank" rel="noreferrer noopener">
-                                        <?php esc_html_e('View Post', 'church-theme'); ?>
-                                    </a>
-                                </div>
-                            </div>
                         </article>
                     <?php endforeach; ?>
                 </div>
