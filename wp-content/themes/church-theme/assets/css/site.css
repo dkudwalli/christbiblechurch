@@ -1782,6 +1782,13 @@ select {
     display: inline-flex;
   }
 
+  /* The collapsed nav becomes a full-width second grid row below; center the
+     brand/toggle row in the band so they aren't pushed to the top. */
+  .site-header__inner {
+    align-content: center;
+    row-gap: 0;
+  }
+
   .site-nav {
     display: block;
     grid-column: 1 / -1;
