@@ -361,4 +361,109 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
   }
+
+  // Hero slideshow banner: intro animation, video reduced-motion guard, and
+  // the crossfading slideshow (auto-advance + arrows + dots).
+  const bannerReducedMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)"
+  ).matches;
+
+  // Pause autoplay video when the visitor prefers reduced motion.
+  const bannerVideo = document.querySelector(".hero-banner__video");
+  if (bannerVideo && bannerReducedMotion) {
+    bannerVideo.removeAttribute("autoplay");
+    bannerVideo.pause();
+  }
+
+  // Animate the overlay heading/CTA in once on load (all banner modes).
+  const bannerIntro = document.querySelector("[data-hero-banner-intro]");
+  if (bannerIntro) {
+    window.requestAnimationFrame(() => {
+      bannerIntro.classList.add("is-intro-done");
+    });
+  }
+
+  // Slideshow (only emitted in markup when there are 2+ images).
+  const banner = document.querySelector("[data-hero-banner]");
+  if (banner) {
+    const slides = Array.from(banner.querySelectorAll(".hero-banner__slide"));
+    const dots = Array.from(banner.querySelectorAll("[data-hero-dot]"));
+    const prevButton = banner.querySelector("[data-hero-prev]");
+    const nextButton = banner.querySelector("[data-hero-next]");
+    const AUTO_MS = 6000;
+    let current = 0;
+    let timer = null;
+
+    const go = (index) => {
+      const next = (index + slides.length) % slides.length;
+      slides.forEach((slide, i) => {
+        const active = i === next;
+        slide.classList.toggle("is-active", active);
+        if (active) {
+          slide.removeAttribute("aria-hidden");
+        } else {
+          slide.setAttribute("aria-hidden", "true");
+        }
+      });
+      dots.forEach((dot, i) => {
+        const active = i === next;
+        dot.classList.toggle("is-active", active);
+        dot.setAttribute("aria-selected", active ? "true" : "false");
+      });
+      current = next;
+    };
+
+    const stop = () => {
+      if (timer !== null) {
+        window.clearInterval(timer);
+        timer = null;
+      }
+    };
+
+    const start = () => {
+      if (bannerReducedMotion || document.hidden) {
+        return;
+      }
+      stop();
+      timer = window.setInterval(() => go(current + 1), AUTO_MS);
+    };
+
+    // Manual controls always work; they restart the auto-advance timer.
+    const goAndRestart = (index) => {
+      go(index);
+      start();
+    };
+
+    if (prevButton) {
+      prevButton.addEventListener("click", () => goAndRestart(current - 1));
+    }
+    if (nextButton) {
+      nextButton.addEventListener("click", () => goAndRestart(current + 1));
+    }
+    dots.forEach((dot, i) => {
+      dot.addEventListener("click", () => goAndRestart(i));
+    });
+
+    banner.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowLeft") {
+        goAndRestart(current - 1);
+      } else if (event.key === "ArrowRight") {
+        goAndRestart(current + 1);
+      }
+    });
+
+    banner.addEventListener("mouseenter", stop);
+    banner.addEventListener("mouseleave", start);
+    banner.addEventListener("focusin", stop);
+    banner.addEventListener("focusout", start);
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        stop();
+      } else {
+        start();
+      }
+    });
+
+    start();
+  }
 });

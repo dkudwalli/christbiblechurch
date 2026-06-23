@@ -12,6 +12,7 @@ $latest_sermon = church_theme_get_latest_sermon_query();
 $recent_sermons = church_theme_get_latest_sermon_query(3, 1);
 $upcoming_events = church_theme_get_event_query(true, 3);
 ?>
+<?php get_template_part('template-parts/hero-banner'); ?>
 <section class="hero">
     <div class="wrap hero__grid">
         <div class="hero__content">

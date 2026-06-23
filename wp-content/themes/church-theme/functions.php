@@ -27,6 +27,10 @@ function church_theme_defaults(): array
         'instagram_account_id' => '',
         'instagram_access_token' => '',
         'default_og_image' => '',
+        'banner_heading' => '',
+        'banner_subtext' => '',
+        'banner_cta_label' => '',
+        'banner_cta_url' => '',
     ];
 }
 
@@ -80,6 +84,11 @@ function church_theme_get_instagram_profile_url(): string
 function church_theme_sanitize_instagram_account_id(string $value): string
 {
     return preg_replace('/[^0-9]/', '', $value) ?: '';
+}
+
+function church_theme_sanitize_checkbox($value): bool
+{
+    return (bool) $value;
 }
 
 function church_theme_normalize_path(string $path): string
@@ -629,6 +638,72 @@ function church_theme_get_attachment_image_asset(int $attachment_id): ?array
 }
 
 /**
+ * Resolve the hero banner image slots (banner_image_1..5) into ordered image
+ * assets. Skips empty/invalid slots and de-duplicates repeated attachments.
+ *
+ * Each asset carries its attachment 'id' so the template can render it via
+ * wp_get_attachment_image() — necessary because skipping/de-duping means the
+ * array index no longer maps back to the original slot number.
+ *
+ * @return array<int, array<string, mixed>>
+ */
+function church_theme_get_banner_images(): array
+{
+    $images = [];
+    $seen = [];
+
+    for ($slot = 1; $slot <= 5; $slot++) {
+        $attachment_id = (int) get_theme_mod('banner_image_' . $slot, 0);
+
+        if ($attachment_id < 1 || isset($seen[$attachment_id])) {
+            continue;
+        }
+
+        $asset = church_theme_get_attachment_image_asset($attachment_id);
+
+        if ($asset === null) {
+            continue;
+        }
+
+        $asset['id'] = $attachment_id;
+        $images[] = $asset;
+        $seen[$attachment_id] = true;
+    }
+
+    return $images;
+}
+
+/**
+ * Resolve the hero banner video slot (banner_video) into a renderable source,
+ * or null when unset/invalid. The poster falls back to the first banner image
+ * so something paints before the video bytes arrive.
+ *
+ * @return array<string, string>|null
+ */
+function church_theme_get_banner_video(): ?array
+{
+    $attachment_id = (int) get_theme_mod('banner_video', 0);
+
+    if ($attachment_id < 1) {
+        return null;
+    }
+
+    $url = wp_get_attachment_url($attachment_id);
+
+    if (! $url) {
+        return null;
+    }
+
+    $images = church_theme_get_banner_images();
+
+    return [
+        'url' => $url,
+        'mime' => get_post_mime_type($attachment_id) ?: 'video/mp4',
+        'poster' => $images !== [] ? (string) $images[0]['src'] : '',
+    ];
+}
+
+/**
  * Resolve a sermon card's thumbnail image: a per-sermon featured image when set
  * (lets the church differentiate cards), otherwise the YouTube thumbnail.
  *
@@ -713,6 +788,8 @@ function church_theme_icon(string $name, array $args = []): string
         'clock'    => '<circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>',
         'calendar' => '<rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>',
         'address'  => '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path>',
+        'arrow-left'  => '<polyline points="15 18 9 12 15 6"></polyline>',
+        'arrow-right' => '<polyline points="9 18 15 12 9 6"></polyline>',
     ];
 
     if (! isset($paths[$name])) {
@@ -1038,6 +1115,10 @@ function church_theme_customize_register(WP_Customize_Manager $wp_customize): vo
         ['section' => 'church_theme_home', 'id' => 'service_times', 'label' => __('Service Times', 'church-theme'), 'type' => 'textarea', 'sanitize' => 'sanitize_textarea_field'],
         ['section' => 'church_theme_home', 'id' => 'worship_location', 'label' => __('Worship Location', 'church-theme'), 'type' => 'textarea', 'sanitize' => 'sanitize_textarea_field'],
         ['section' => 'church_theme_home', 'id' => 'latest_sermon_heading', 'label' => __('Latest Sermon Heading', 'church-theme'), 'type' => 'text', 'sanitize' => 'sanitize_text_field'],
+        ['section' => 'church_theme_home', 'id' => 'banner_heading', 'label' => __('Banner Heading', 'church-theme'), 'type' => 'text', 'sanitize' => 'sanitize_text_field'],
+        ['section' => 'church_theme_home', 'id' => 'banner_subtext', 'label' => __('Banner Subtext', 'church-theme'), 'type' => 'textarea', 'sanitize' => 'sanitize_textarea_field'],
+        ['section' => 'church_theme_home', 'id' => 'banner_cta_label', 'label' => __('Banner Button Label', 'church-theme'), 'type' => 'text', 'sanitize' => 'sanitize_text_field'],
+        ['section' => 'church_theme_home', 'id' => 'banner_cta_url', 'label' => __('Banner Button URL', 'church-theme'), 'type' => 'url', 'sanitize' => 'esc_url_raw'],
         ['section' => 'church_theme_identity', 'id' => 'mission_statement', 'label' => __('Mission Statement', 'church-theme'), 'type' => 'textarea', 'sanitize' => 'sanitize_textarea_field'],
         ['section' => 'church_theme_identity', 'id' => 'footer_mission_line', 'label' => __('Footer Mission Line', 'church-theme'), 'type' => 'textarea', 'sanitize' => 'sanitize_textarea_field'],
         ['section' => 'church_theme_identity', 'id' => 'vision_statement', 'label' => __('Vision Statement', 'church-theme'), 'type' => 'textarea', 'sanitize' => 'sanitize_textarea_field'],
@@ -1065,6 +1146,47 @@ function church_theme_customize_register(WP_Customize_Manager $wp_customize): vo
             'label' => $field['label'],
             'type' => $field['type'],
         ]);
+    }
+
+    // Hero banner toggle + media slots. These need an explicit block: the loop
+    // above only passes a string control type, but media slots require a
+    // WP_Customize_Media_Control object and the toggle a boolean default that
+    // the string-keyed church_theme_defaults() map can't express.
+    $wp_customize->add_setting('banner_enabled', [
+        'default' => false,
+        'sanitize_callback' => 'church_theme_sanitize_checkbox',
+    ]);
+    $wp_customize->add_control('banner_enabled', [
+        'section' => 'church_theme_home',
+        'type' => 'checkbox',
+        'priority' => 1,
+        'label' => __('Enable hero banner (shows above the main hero)', 'church-theme'),
+    ]);
+
+    $wp_customize->add_setting('banner_video', [
+        'default' => 0,
+        'sanitize_callback' => 'absint',
+    ]);
+    $wp_customize->add_control(new WP_Customize_Media_Control($wp_customize, 'banner_video', [
+        'section' => 'church_theme_home',
+        'mime_type' => 'video',
+        'label' => __('Banner Background Video', 'church-theme'),
+        'description' => __('When set, a muted looping video replaces the images. MP4/WebM, ideally under ~5MB.', 'church-theme'),
+    ]));
+
+    for ($slot = 1; $slot <= 5; $slot++) {
+        $image_id = 'banner_image_' . $slot;
+
+        $wp_customize->add_setting($image_id, [
+            'default' => 0,
+            'sanitize_callback' => 'absint',
+        ]);
+        $wp_customize->add_control(new WP_Customize_Media_Control($wp_customize, $image_id, [
+            'section' => 'church_theme_home',
+            'mime_type' => 'image',
+            /* translators: %d: banner image slot number. */
+            'label' => sprintf(__('Banner Image %d', 'church-theme'), $slot),
+        ]));
     }
 }
 add_action('customize_register', 'church_theme_customize_register');
