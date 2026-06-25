@@ -575,6 +575,34 @@ h4 {
   margin-bottom: 0;
 }
 
+.triple-e {
+  color: var(--accent);
+}
+
+.core-values-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.core-values-list li {
+  padding-left: 1rem;
+  position: relative;
+}
+
+.core-values-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.6em;
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
 .button,
 button,
 input,

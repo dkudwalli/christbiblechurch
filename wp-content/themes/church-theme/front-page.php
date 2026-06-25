@@ -91,14 +91,14 @@ $upcoming_events = church_theme_get_event_query(true, 3);
 <section class="section section--muted">
     <div class="wrap">
         <div class="section-heading reveal">
-            <p class="eyebrow"><?php esc_html_e('Our Foundation', 'church-theme'); ?></p>
+            <p class="eyebrow"><?php esc_html_e('Our Mission, Vision and Core Values', 'church-theme'); ?></p>
             <h2><?php esc_html_e('The priorities shaping Crossroad South Church.', 'church-theme'); ?></h2>
         </div>
 
         <div class="summary-grid reveal-stagger">
             <article class="card summary-card reveal">
                 <p class="card__label"><?php esc_html_e('Mission', 'church-theme'); ?></p>
-                <h3><?php esc_html_e('Exalt, Edify, Evangelize', 'church-theme'); ?></h3>
+                <h3><span class="triple-e"><?php esc_html_e('Exalt', 'church-theme'); ?></span>, <span class="triple-e"><?php esc_html_e('Edify', 'church-theme'); ?></span>, <span class="triple-e"><?php esc_html_e('Evangelize', 'church-theme'); ?></span></h3>
                 <p><?php echo esc_html(church_theme_get_mod('mission_statement')); ?></p>
             </article>
 
@@ -111,7 +111,12 @@ $upcoming_events = church_theme_get_event_query(true, 3);
             <article class="card summary-card">
                 <p class="card__label"><?php esc_html_e('Core Values', 'church-theme'); ?></p>
                 <h3><?php esc_html_e('Gospel-centered and deeply biblical', 'church-theme'); ?></h3>
-                <p><?php echo esc_html(church_theme_get_mod('core_values_summary')); ?></p>
+                <ul class="core-values-list">
+                    <li><?php esc_html_e('Gospel-Centered', 'church-theme'); ?></li>
+                    <li><?php esc_html_e('Deeply Biblical', 'church-theme'); ?></li>
+                    <li><?php esc_html_e('Breaking Down Barriers', 'church-theme'); ?></li>
+                    <li><?php esc_html_e('Missional Living', 'church-theme'); ?></li>
+                </ul>
             </article>
         </div>
     </div>
@@ -120,7 +125,7 @@ $upcoming_events = church_theme_get_event_query(true, 3);
 <section class="section">
     <div class="wrap">
         <div class="section-heading reveal">
-            <p class="eyebrow"><?php esc_html_e('Recent Teaching', 'church-theme'); ?></p>
+            <p class="eyebrow"><?php esc_html_e('Sermons', 'church-theme'); ?></p>
             <h2><?php echo esc_html(church_theme_get_mod('latest_sermon_heading')); ?></h2>
         </div>
 
@@ -174,7 +179,7 @@ $upcoming_events = church_theme_get_event_query(true, 3);
             <?php wp_reset_postdata(); ?>
 
             <?php if ($recent_sermons->have_posts()) : ?>
-                <p class="eyebrow home-recent-sermons__label reveal"><?php esc_html_e('More recent teaching', 'church-theme'); ?></p>
+                <p class="eyebrow home-recent-sermons__label reveal"><?php esc_html_e('More sermons', 'church-theme'); ?></p>
                 <?php church_theme_render_post_grid($recent_sermons, ['template-parts/sermon', 'card'], 'sermon-grid reveal-stagger home-recent-sermons'); ?>
             <?php endif; ?>
         <?php else : ?>
