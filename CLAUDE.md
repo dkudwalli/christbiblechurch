@@ -84,8 +84,9 @@ A file-based fallback for when Hostinger/Apache routing doesn't pass pretty URLs
 
 - **Page/post routes** (`about/`, `about-us/`, `contact/`, `contact-us/`, `events/`, `gallery/`, `give/`, `worship/`, `sermons/`, `series/`, `speaker/`, and individual sermon subdirs like `sermons/<slug>/`) simply `require` the WordPress root `index.php`, letting WP resolve the URL normally.
 - **Taxonomy term routes** (`series/<term>/`, `speaker/<term>/`) instead `require` the root `taxonomy-route-shim.php` and call `church_route_shim_boot_taxonomy($taxonomy, $slug)`, which forces the taxonomy/term query vars and boots WordPress directly.
+- **Photo album routes** (`photo-albums/<slug>/`) are not committed snapshots. `Church_Core_Photo_Albums` creates and removes those shim directories automatically at runtime so Hostinger fallback routing stays aligned with published albums.
 
-These directories are committed snapshots of published URLs — when adding a sermon, series, or speaker, add the matching shim directory so the file-based fallback stays in sync.
+The page/post and taxonomy shim directories are committed snapshots of published URLs — when adding a sermon, series, or speaker, add the matching shim directory so the file-based fallback stays in sync. Photo album shims are the exception and should be managed by the plugin instead of by hand.
 
 ### Content Model
 

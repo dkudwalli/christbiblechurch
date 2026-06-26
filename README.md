@@ -51,7 +51,7 @@ After setup:
 - `wp-content/themes/church-theme`: custom PHP theme
 - `wp-content/plugins/church-core`: sermon model and contact workflow
 
-WordPress core is not committed. The Docker image supplies it, and the repo only tracks the custom church code plus the clean-route shims under `about/`, `contact/`, `sermons/`, `series/`, and `speaker/`.
+WordPress core is not committed. The Docker image supplies it, and the repo only tracks the custom church code plus the clean-route shims under `about/`, `contact/`, `sermons/`, `series/`, and `speaker/`. Photo album fallback routes under `photo-albums/` are generated automatically by the `church-core` plugin when albums are published.
 
 On Hostinger, this repository is meant to be pulled into an existing WordPress install. Do not add WordPress core files, bundled plugins, or `wp-content/uploads` to Git, because Hostinger's pull-based deploy will refuse to overwrite the live untracked install.
 
@@ -279,7 +279,7 @@ RewriteRule . /index.php [L]
 
 Keep the real `wp-config.php` only on the server. This repo provides `wp-config.example.php` as a template and should not store live database credentials.
 
-For Hostinger deployments, the repo also includes committed clean-route shims for the currently published sermon, series, and speaker URLs. They provide a file-based fallback when Apache or Hostinger routing does not pass a pretty URL into WordPress. The canonical series URLs remain `/series/{slug}/`, and `/sermons/?series={slug}` is only the temporary verification fallback if a series page starts returning a server-level 404.
+For Hostinger deployments, the repo also includes committed clean-route shims for the currently published sermon, series, and speaker URLs. They provide a file-based fallback when Apache or Hostinger routing does not pass a pretty URL into WordPress. Photo album routes use the same fallback pattern, but their `photo-albums/{slug}/index.php` shims are created and removed automatically by the `church-core` plugin as albums are published, renamed, drafted, trashed, or deleted. The canonical series URLs remain `/series/{slug}/`, and `/sermons/?series={slug}` is only the temporary verification fallback if a series page starts returning a server-level 404.
 
 The bootstrap script intentionally does not seed a saved WordPress menu. The theme fallback navigation already renders `Home`, `About`, `Sermons`, and `Contact` with environment-correct URLs. If you want a custom menu in production, create it directly in that environment and avoid importing menu items with hardcoded localhost or port-based URLs.
 

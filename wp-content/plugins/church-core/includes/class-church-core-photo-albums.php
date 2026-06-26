@@ -7,13 +7,24 @@ final class Church_Core_Photo_Albums
 {
     public const DATE_META_KEY = 'album_date';
     public const PHOTO_IDS_META_KEY = 'album_photo_ids';
+    private const ROUTE_ROOT = 'photo-albums';
+    private const ROUTE_SHIM_VERSION = '1';
+    private const ROUTE_SHIM_VERSION_OPTION = 'church_core_photo_album_route_shim_version';
+    private const ROUTE_SHIM_NOTICE_OPTION = 'church_core_photo_album_route_shim_notice';
+    private const SYNCED_ROUTE_SLUG_META_KEY = '_church_core_photo_album_route_shim_slug';
 
     public static function boot(): void
     {
         add_action('init', [__CLASS__, 'register_content']);
+        add_action('init', [__CLASS__, 'maybe_reconcile_route_shims'], 20);
         add_action('add_meta_boxes', [__CLASS__, 'register_meta_boxes']);
         add_action('save_post_photo_album', [__CLASS__, 'save_meta']);
+        add_action('save_post_photo_album', [__CLASS__, 'sync_route_shim_on_save'], 20, 3);
+        add_action('trashed_post', [__CLASS__, 'handle_trashed_post']);
+        add_action('untrashed_post', [__CLASS__, 'handle_untrashed_post']);
+        add_action('before_delete_post', [__CLASS__, 'handle_before_delete_post']);
         add_action('admin_enqueue_scripts', [__CLASS__, 'enqueue_admin_assets']);
+        add_action('admin_notices', [__CLASS__, 'maybe_render_route_shim_notice']);
         add_filter('manage_photo_album_posts_columns', [__CLASS__, 'album_columns']);
         add_action('manage_photo_album_posts_custom_column', [__CLASS__, 'render_album_column'], 10, 2);
     }
@@ -140,6 +151,130 @@ final class Church_Core_Photo_Albums
         }
     }
 
+    public static function sync_route_shim_on_save(int $post_id, WP_Post $post): void
+    {
+        if (wp_is_post_revision($post_id) || wp_is_post_autosave($post_id)) {
+            return;
+        }
+
+        if ($post->post_type !== 'photo_album') {
+            return;
+        }
+
+        self::sync_route_shim_for_post($post);
+    }
+
+    public static function handle_trashed_post(int $post_id): void
+    {
+        $post = get_post($post_id);
+
+        if (! $post instanceof WP_Post || $post->post_type !== 'photo_album') {
+            return;
+        }
+
+        self::sync_route_shim_for_post($post);
+    }
+
+    public static function handle_untrashed_post(int $post_id): void
+    {
+        $post = get_post($post_id);
+
+        if (! $post instanceof WP_Post || $post->post_type !== 'photo_album') {
+            return;
+        }
+
+        self::sync_route_shim_for_post($post);
+    }
+
+    public static function handle_before_delete_post(int $post_id): void
+    {
+        $post = get_post($post_id);
+
+        if (! $post instanceof WP_Post || $post->post_type !== 'photo_album') {
+            return;
+        }
+
+        self::remove_route_shims_for_post($post->ID, $post->post_name);
+    }
+
+    public static function maybe_reconcile_route_shims(): void
+    {
+        if (wp_installing()) {
+            return;
+        }
+
+        if (get_option(self::ROUTE_SHIM_VERSION_OPTION) === self::ROUTE_SHIM_VERSION) {
+            return;
+        }
+
+        $post_ids = get_posts([
+            'fields' => 'ids',
+            'numberposts' => -1,
+            'post_status' => 'publish',
+            'post_type' => 'photo_album',
+            'suppress_filters' => true,
+        ]);
+        $all_synced = true;
+
+        foreach ($post_ids as $post_id) {
+            $post = get_post($post_id);
+
+            if (! $post instanceof WP_Post) {
+                continue;
+            }
+
+            $all_synced = self::sync_route_shim_for_post($post) && $all_synced;
+        }
+
+        if (! $all_synced) {
+            return;
+        }
+
+        update_option(self::ROUTE_SHIM_VERSION_OPTION, self::ROUTE_SHIM_VERSION, false);
+        self::clear_route_shim_notice();
+    }
+
+    public static function maybe_render_route_shim_notice(): void
+    {
+        if (! function_exists('get_current_screen')) {
+            return;
+        }
+
+        $screen = get_current_screen();
+
+        if (! $screen || $screen->post_type !== 'photo_album') {
+            return;
+        }
+
+        $notice = get_option(self::ROUTE_SHIM_NOTICE_OPTION);
+
+        if (! is_array($notice)) {
+            return;
+        }
+
+        delete_option(self::ROUTE_SHIM_NOTICE_OPTION);
+
+        $slug = isset($notice['slug']) ? (string) $notice['slug'] : '';
+        $path = isset($notice['path']) ? (string) $notice['path'] : '';
+        $reason = isset($notice['reason']) ? (string) $notice['reason'] : '';
+        ?>
+        <div class="notice notice-error">
+            <p>
+                <?php
+                echo esc_html(
+                    sprintf(
+                        'Photo album route fallback could not be synchronized for slug "%1$s". Hostinger may continue showing "No content found." Path: %2$s. %3$s',
+                        $slug !== '' ? $slug : '(unknown)',
+                        $path !== '' ? $path : '(unknown)',
+                        $reason !== '' ? $reason : 'Check that WordPress can write to the site root.'
+                    )
+                );
+                ?>
+            </p>
+        </div>
+        <?php
+    }
+
     public static function enqueue_admin_assets(string $hook): void
     {
         if (! in_array($hook, ['post-new.php', 'post.php'], true)) {
@@ -204,6 +339,176 @@ final class Church_Core_Photo_Albums
     public static function get_photo_ids(int $post_id): array
     {
         return self::sanitize_photo_ids(get_post_meta($post_id, self::PHOTO_IDS_META_KEY, true));
+    }
+
+    private static function sync_route_shim_for_post(WP_Post $post): bool
+    {
+        $current_slug = self::normalize_route_slug($post->post_name);
+
+        if ($post->post_status !== 'publish' || $current_slug === '') {
+            return self::remove_route_shims_for_post($post->ID, $current_slug);
+        }
+
+        $previous_slug = self::get_synced_route_slug($post->ID);
+        $all_synced = true;
+
+        if ($previous_slug !== '' && $previous_slug !== $current_slug) {
+            $all_synced = self::remove_route_shim($previous_slug) && $all_synced;
+        }
+
+        $all_synced = self::ensure_route_shim($current_slug) && $all_synced;
+
+        if (! $all_synced) {
+            return false;
+        }
+
+        update_post_meta($post->ID, self::SYNCED_ROUTE_SLUG_META_KEY, $current_slug);
+        self::clear_route_shim_notice();
+
+        return true;
+    }
+
+    private static function remove_route_shims_for_post(int $post_id, string $current_slug = ''): bool
+    {
+        $slugs = array_values(array_unique(array_filter([
+            self::get_synced_route_slug($post_id),
+            self::normalize_route_slug($current_slug),
+        ])));
+        $all_removed = true;
+
+        foreach ($slugs as $slug) {
+            $all_removed = self::remove_route_shim($slug) && $all_removed;
+        }
+
+        if (! $all_removed) {
+            return false;
+        }
+
+        delete_post_meta($post_id, self::SYNCED_ROUTE_SLUG_META_KEY);
+        self::clear_route_shim_notice();
+
+        return true;
+    }
+
+    private static function ensure_route_shim(string $slug): bool
+    {
+        $route_root = self::get_route_root_path();
+
+        if (! is_dir($route_root) && ! wp_mkdir_p($route_root)) {
+            self::store_route_shim_notice($slug, $route_root, 'Could not create the photo album route directory.');
+            return false;
+        }
+
+        $route_directory = self::get_route_directory_path($slug);
+
+        if (! is_dir($route_directory) && ! wp_mkdir_p($route_directory)) {
+            self::store_route_shim_notice($slug, $route_directory, 'Could not create the album shim directory.');
+            return false;
+        }
+
+        $route_file = self::get_route_file_path($slug);
+        $expected_contents = self::get_route_shim_contents();
+        $existing_contents = file_exists($route_file) ? file_get_contents($route_file) : false;
+
+        if ($existing_contents === $expected_contents) {
+            return true;
+        }
+
+        $bytes_written = @file_put_contents($route_file, $expected_contents, LOCK_EX);
+
+        if ($bytes_written === false) {
+            self::store_route_shim_notice($slug, $route_file, 'Could not write the album shim file.');
+            return false;
+        }
+
+        return true;
+    }
+
+    private static function remove_route_shim(string $slug): bool
+    {
+        $slug = self::normalize_route_slug($slug);
+
+        if ($slug === '') {
+            return true;
+        }
+
+        $route_file = self::get_route_file_path($slug);
+
+        if (file_exists($route_file) && ! @unlink($route_file)) {
+            self::store_route_shim_notice($slug, $route_file, 'Could not remove the album shim file.');
+            return false;
+        }
+
+        $route_directory = self::get_route_directory_path($slug);
+
+        if (! is_dir($route_directory)) {
+            return true;
+        }
+
+        $directory_contents = scandir($route_directory);
+
+        if (! is_array($directory_contents)) {
+            self::store_route_shim_notice($slug, $route_directory, 'Could not inspect the album shim directory.');
+            return false;
+        }
+
+        $remaining_entries = array_diff($directory_contents, ['.', '..']);
+
+        if ($remaining_entries !== []) {
+            self::store_route_shim_notice($slug, $route_directory, 'The album shim directory still contains unexpected files.');
+            return false;
+        }
+
+        if (! @rmdir($route_directory)) {
+            self::store_route_shim_notice($slug, $route_directory, 'Could not remove the empty album shim directory.');
+            return false;
+        }
+
+        return true;
+    }
+
+    private static function get_route_root_path(): string
+    {
+        return trailingslashit(ABSPATH) . self::ROUTE_ROOT;
+    }
+
+    private static function get_route_directory_path(string $slug): string
+    {
+        return self::get_route_root_path() . '/' . self::normalize_route_slug($slug);
+    }
+
+    private static function get_route_file_path(string $slug): string
+    {
+        return self::get_route_directory_path($slug) . '/index.php';
+    }
+
+    private static function get_route_shim_contents(): string
+    {
+        return "<?php\nrequire dirname(dirname(__DIR__)) . '/index.php';\n";
+    }
+
+    private static function get_synced_route_slug(int $post_id): string
+    {
+        return self::normalize_route_slug((string) get_post_meta($post_id, self::SYNCED_ROUTE_SLUG_META_KEY, true));
+    }
+
+    private static function normalize_route_slug(string $slug): string
+    {
+        return sanitize_title($slug);
+    }
+
+    private static function store_route_shim_notice(string $slug, string $path, string $reason): void
+    {
+        update_option(self::ROUTE_SHIM_NOTICE_OPTION, [
+            'path' => $path,
+            'reason' => $reason,
+            'slug' => self::normalize_route_slug($slug),
+        ], false);
+    }
+
+    private static function clear_route_shim_notice(): void
+    {
+        delete_option(self::ROUTE_SHIM_NOTICE_OPTION);
     }
 
     private static function render_photo_item(int $photo_id): void
