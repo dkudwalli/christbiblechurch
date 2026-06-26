@@ -99,19 +99,19 @@ HTML
 BELIEFS_CONTENT="$(cat <<'HTML'
 <p>What follows is our understanding of the basic essentials of the biblical, orthodox Christian faith. We regard these as theological convictions commonly held by Christ-followers throughout the history of Christian thought and teaching, as derived from the sixty-six books of the Bible.</p>
 <h3>The Bible</h3>
-<p>We believe the Bible, both the Old and New Testaments, to be the inspired Word of God, without error in the original writings, the complete revelation of God’s will for the salvation of men, and the divine and final authority for all Christian faith and practice.</p>
+<p>We believe the Bible, both the Old and New Testaments, to be the inspired Word of God, without error in the original writings, the complete revelation of God’s will for the salvation of men, and the divine and final authority for all Christian faith and practice (2 Timothy 3:16-17; 2 Peter 1:20-21; Psalm 19:7-11).</p>
 <h3>God</h3>
-<p>We believe in one God, Creator of all things, infinitely perfect and eternally existing in three persons: Father, Son, and Holy Spirit.</p>
+<p>We believe in one God, Creator of all things, infinitely perfect and eternally existing in three persons: Father, Son, and Holy Spirit (Deuteronomy 6:4; Genesis 1:1; Matthew 28:19; 2 Corinthians 13:14).</p>
 <h3>Jesus Christ</h3>
-<p>We believe that Jesus Christ is true God and true man, conceived of the Holy Spirit and born of the Virgin Mary. He died on the cross as a sacrifice for our sins according to the Scriptures, was bodily raised on the third day, ascended into heaven, and now serves as our High Priest and Advocate.</p>
+<p>We believe that Jesus Christ is true God and true man, conceived of the Holy Spirit and born of the Virgin Mary. He died on the cross as a sacrifice for our sins according to the Scriptures, was bodily raised on the third day, ascended into heaven, and now serves as our High Priest and Advocate (John 1:1, 14; Matthew 1:18-23; 1 Corinthians 15:3-4; Hebrews 4:14-16).</p>
 <h3>The Holy Spirit</h3>
-<p>We believe that the ministry of the Holy Spirit is to glorify the Lord Jesus Christ and, in this age, to convict, regenerate, indwell, guide, instruct, and empower the believer for godly living and service.</p>
+<p>We believe that the ministry of the Holy Spirit is to glorify the Lord Jesus Christ and, in this age, to convict, regenerate, indwell, guide, instruct, and empower the believer for godly living and service (John 16:13-14; Titus 3:5-6; Romans 8:9-14; Acts 1:8).</p>
 <h3>Man</h3>
-<p>We believe that man was created in the image of God but fell into sin and is therefore eternally separated from God. Only through regeneration by the Holy Spirit can salvation and eternal spiritual life be obtained.</p>
+<p>We believe that man was created in the image of God but fell into sin and is therefore eternally separated from God. Only through regeneration by the Holy Spirit can salvation and eternal spiritual life be obtained (Genesis 1:26-27; Romans 3:23; Ephesians 2:1-5; John 3:5-8).</p>
 <h3>Cross</h3>
-<p>We believe that the blood of Jesus Christ, shed in His death on the cross, together with His resurrection from the dead, provides the only ground for justification and salvation for all who believe. Those who receive Jesus Christ are born of the Holy Spirit and become children of God.</p>
+<p>We believe that the blood of Jesus Christ, shed in His death on the cross, together with His resurrection from the dead, provides the only ground for justification and salvation for all who believe. Those who receive Jesus Christ are born of the Holy Spirit and become children of God (Romans 3:21-26; 1 Peter 2:24; 1 Corinthians 15:3-4; John 1:12-13).</p>
 <h3>Ordinances</h3>
-<p>We believe that water baptism and the Lord’s Supper are ordinances to be observed by the church during the present age. They are not, however, to be regarded as means of salvation.</p>
+<p>We believe that water baptism and the Lord’s Supper are ordinances to be observed by the church during the present age. They are not, however, to be regarded as means of salvation (Matthew 28:19-20; 1 Corinthians 11:23-26; Ephesians 2:8-9).</p>
 HTML
 )"
 

@@ -11,12 +11,15 @@ final class Church_Core_Photo_Albums
     private const ROUTE_SHIM_VERSION = '1';
     private const ROUTE_SHIM_VERSION_OPTION = 'church_core_photo_album_route_shim_version';
     private const ROUTE_SHIM_NOTICE_OPTION = 'church_core_photo_album_route_shim_notice';
+    private const REWRITE_VERSION = '1';
+    private const REWRITE_VERSION_OPTION = 'church_core_photo_album_rewrite_version';
     private const SYNCED_ROUTE_SLUG_META_KEY = '_church_core_photo_album_route_shim_slug';
 
     public static function boot(): void
     {
         add_action('init', [__CLASS__, 'register_content']);
         add_action('init', [__CLASS__, 'maybe_reconcile_route_shims'], 20);
+        add_action('init', [__CLASS__, 'maybe_run_rewrite_upgrade'], 20);
         add_action('add_meta_boxes', [__CLASS__, 'register_meta_boxes']);
         add_action('save_post_photo_album', [__CLASS__, 'save_meta']);
         add_action('save_post_photo_album', [__CLASS__, 'sync_route_shim_on_save'], 20, 3);
@@ -232,6 +235,29 @@ final class Church_Core_Photo_Albums
 
         update_option(self::ROUTE_SHIM_VERSION_OPTION, self::ROUTE_SHIM_VERSION, false);
         self::clear_route_shim_notice();
+    }
+
+    public static function maybe_run_rewrite_upgrade(): void
+    {
+        if (wp_installing()) {
+            return;
+        }
+
+        if (get_option(self::REWRITE_VERSION_OPTION) === self::REWRITE_VERSION) {
+            return;
+        }
+
+        if (! post_type_exists('photo_album')) {
+            self::register_content();
+        }
+
+        flush_rewrite_rules(false);
+
+        if (! self::stored_rewrite_rules_include_photo_albums()) {
+            return;
+        }
+
+        update_option(self::REWRITE_VERSION_OPTION, self::REWRITE_VERSION, false);
     }
 
     public static function maybe_render_route_shim_notice(): void
@@ -485,6 +511,23 @@ final class Church_Core_Photo_Albums
     private static function get_route_shim_contents(): string
     {
         return "<?php\nrequire dirname(dirname(__DIR__)) . '/index.php';\n";
+    }
+
+    private static function stored_rewrite_rules_include_photo_albums(): bool
+    {
+        $rewrite_rules = get_option('rewrite_rules', []);
+
+        if (! is_array($rewrite_rules)) {
+            return false;
+        }
+
+        foreach ($rewrite_rules as $rule => $query) {
+            if (str_contains((string) $rule, 'photo-albums/') || str_contains((string) $query, 'photo_album=')) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static function get_synced_route_slug(int $post_id): string

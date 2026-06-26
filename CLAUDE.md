@@ -85,6 +85,7 @@ A file-based fallback for when Hostinger/Apache routing doesn't pass pretty URLs
 - **Page/post routes** (`about/`, `about-us/`, `contact/`, `contact-us/`, `events/`, `gallery/`, `give/`, `worship/`, `sermons/`, `series/`, `speaker/`, and individual sermon subdirs like `sermons/<slug>/`) simply `require` the WordPress root `index.php`, letting WP resolve the URL normally.
 - **Taxonomy term routes** (`series/<term>/`, `speaker/<term>/`) instead `require` the root `taxonomy-route-shim.php` and call `church_route_shim_boot_taxonomy($taxonomy, $slug)`, which forces the taxonomy/term query vars and boots WordPress directly.
 - **Photo album routes** (`photo-albums/<slug>/`) are not committed snapshots. `Church_Core_Photo_Albums` creates and removes those shim directories automatically at runtime so Hostinger fallback routing stays aligned with published albums.
+- **Photo album rewrites** are also self-healed once after deploy. `Church_Core_Photo_Albums` runs a one-time soft rewrite flush when its rewrite-version option is stale so `/photo-albums/<slug>/` does not depend on a manual permalink save after plugin updates.
 
 The page/post and taxonomy shim directories are committed snapshots of published URLs — when adding a sermon, series, or speaker, add the matching shim directory so the file-based fallback stays in sync. Photo album shims are the exception and should be managed by the plugin instead of by hand.
 
@@ -111,4 +112,4 @@ Taxonomies: `series` (hierarchical), `speaker` (non-hierarchical).
 
 ### Deployment Notes
 
-Production is Hostinger managed WordPress. Deploy only `wp-content/themes/church-theme/` and `wp-content/plugins/church-core/`. After deploying, flush permalinks (`Settings > Permalinks > Save Changes`). Keep `wp-config.php` only on the server — this repo provides `wp-config.example.php` as a template.
+Production is Hostinger managed WordPress. Deploy only `wp-content/themes/church-theme/` and `wp-content/plugins/church-core/`. After deploying route changes, flush permalinks (`Settings > Permalinks > Save Changes`) if needed. Photo albums now soft-flush their own rewrite rules once after deploy, but a manual permalink save remains the fallback if any pretty URL still returns a WordPress 404. Keep `wp-config.php` only on the server — this repo provides `wp-config.example.php` as a template.
