@@ -216,4 +216,189 @@ document.addEventListener("DOMContentLoaded", () => {
     toggleLayoutPanels();
     syncProfileRows();
   });
+
+  const albumPhotoRoots = document.querySelectorAll("[data-album-photos-root]");
+
+  albumPhotoRoots.forEach((root) => {
+    const photoList = root.querySelector("[data-album-photo-list]");
+    const photoTemplate = root.querySelector("[data-album-photo-template]");
+    const pickerButton = root.querySelector("[data-album-photo-picker]");
+    let dragItem = null;
+
+    if (!photoList || !photoTemplate || !pickerButton) {
+      return;
+    }
+
+    const createPlaceholder = () => {
+      const placeholder = document.createElement("span");
+      placeholder.className = "church-core-album-photo__placeholder";
+      placeholder.textContent = "No image selected";
+      return placeholder;
+    };
+
+    const populatePhotoItem = (item, attachment) => {
+      const input = item.querySelector("[data-album-photo-input]");
+      const preview = item.querySelector("[data-album-photo-preview]");
+      const title = item.querySelector("[data-album-photo-title]");
+      const caption = item.querySelector("[data-album-photo-caption]");
+      const previewUrl =
+        attachment?.sizes?.thumbnail?.url ||
+        attachment?.sizes?.medium?.url ||
+        attachment?.url ||
+        "";
+
+      if (input) {
+        input.value = String(attachment?.id || "");
+      }
+
+      if (preview) {
+        preview.innerHTML = "";
+
+        if (previewUrl) {
+          const image = document.createElement("img");
+          image.src = previewUrl;
+          image.alt = "";
+          image.loading = "lazy";
+          preview.appendChild(image);
+        } else {
+          preview.appendChild(createPlaceholder());
+        }
+      }
+
+      if (title) {
+        title.textContent = attachment?.title || "Selected photo";
+      }
+
+      if (caption) {
+        caption.textContent =
+          attachment?.caption || "No caption set for this image.";
+      }
+    };
+
+    const appendPhotoItem = (attachment) => {
+      const existingIds = new Set(
+        [...photoList.querySelectorAll("[data-album-photo-input]")].map(
+          (input) => input.value
+        )
+      );
+
+      if (!attachment?.id || existingIds.has(String(attachment.id))) {
+        return;
+      }
+
+      const fragment = photoTemplate.content.cloneNode(true);
+      const item = fragment.querySelector("[data-album-photo-item]");
+
+      if (!item) {
+        return;
+      }
+
+      populatePhotoItem(item, attachment);
+      photoList.appendChild(fragment);
+    };
+
+    const getDragTarget = (container, y) => {
+      const items = [...container.querySelectorAll("[data-album-photo-item]")].filter(
+        (item) => item !== dragItem
+      );
+
+      return items.reduce(
+        (closest, item) => {
+          const box = item.getBoundingClientRect();
+          const offset = y - box.top - box.height / 2;
+
+          if (offset < 0 && offset > closest.offset) {
+            return { offset, element: item };
+          }
+
+          return closest;
+        },
+        { offset: Number.NEGATIVE_INFINITY, element: null }
+      ).element;
+    };
+
+    pickerButton.addEventListener("click", (event) => {
+      event.preventDefault();
+
+      if (!(window.wp && window.wp.media)) {
+        return;
+      }
+
+      const frame = window.wp.media({
+        title:
+          pickerButton.getAttribute("data-media-title") ||
+          "Choose album photos",
+        button: {
+          text:
+            pickerButton.getAttribute("data-media-button") ||
+            "Use these photos"
+        },
+        library: {
+          type: ["image"]
+        },
+        multiple: true
+      });
+
+      frame.on("select", () => {
+        const attachments = frame.state().get("selection").toJSON();
+
+        attachments.forEach((attachment) => appendPhotoItem(attachment));
+      });
+
+      frame.open();
+    });
+
+    root.addEventListener("click", (event) => {
+      const removeButton = event.target.closest("[data-album-photo-remove]");
+
+      if (!removeButton) {
+        return;
+      }
+
+      event.preventDefault();
+
+      const item = removeButton.closest("[data-album-photo-item]");
+
+      if (item) {
+        item.remove();
+      }
+    });
+
+    photoList.addEventListener("dragstart", (event) => {
+      const item = event.target.closest("[data-album-photo-item]");
+
+      if (!item) {
+        return;
+      }
+
+      dragItem = item;
+      item.classList.add("is-dragging");
+      event.dataTransfer.effectAllowed = "move";
+    });
+
+    photoList.addEventListener("dragover", (event) => {
+      if (!dragItem) {
+        return;
+      }
+
+      event.preventDefault();
+      const target = getDragTarget(photoList, event.clientY);
+
+      if (!target) {
+        photoList.appendChild(dragItem);
+        return;
+      }
+
+      photoList.insertBefore(dragItem, target);
+    });
+
+    photoList.addEventListener("dragend", () => {
+      if (!dragItem) {
+        return;
+      }
+
+      dragItem.classList.remove("is-dragging");
+      dragItem = null;
+    });
+  });
 });

@@ -8,7 +8,8 @@ get_header();
 the_post();
 
 $instagram_profile_url = church_theme_get_instagram_profile_url();
-$instagram_feed = church_theme_get_instagram_feed(25);
+$instagram_feed = church_theme_get_instagram_feed(10);
+$photo_albums = church_theme_get_photo_album_query();
 $gallery_feature = church_theme_get_gallery_feature_media();
 ?>
 <section class="page-hero">
@@ -35,7 +36,21 @@ $gallery_feature = church_theme_get_gallery_feature_media();
 </section>
 
 <section class="section">
-    <div class="wrap">
+    <div class="wrap gallery-stack">
+        <div class="gallery-albums">
+            <div class="section-heading reveal">
+                <p class="eyebrow"><?php esc_html_e('Gallery', 'church-theme'); ?></p>
+                <h2><?php esc_html_e('Photo albums', 'church-theme'); ?></h2>
+            </div>
+
+            <?php if (! church_theme_render_post_grid($photo_albums, ['template-parts/album', 'card'], 'album-grid reveal-stagger')) : ?>
+                <article class="card content-placeholder reveal">
+                    <h3><?php esc_html_e('No photo albums have been published yet.', 'church-theme'); ?></h3>
+                    <p><?php esc_html_e('When new albums are added, they will appear here before the Instagram feed.', 'church-theme'); ?></p>
+                </article>
+            <?php endif; ?>
+        </div>
+
         <?php if ($instagram_feed['items'] !== []) : ?>
             <article class="card gallery-feed reveal">
                 <div class="gallery-feed__header">
@@ -55,7 +70,7 @@ $gallery_feature = church_theme_get_gallery_feature_media();
                     <?php foreach ($instagram_feed['items'] as $item) : ?>
                         <?php $caption = trim((string) ($item['caption'] ?? '')); ?>
                         <article class="gallery-card">
-                            <a class="gallery-card__media js-lightbox skeleton" href="<?php echo esc_url((string) $item['image_url']); ?>" data-permalink="<?php echo esc_url((string) $item['permalink']); ?>" data-caption="<?php echo esc_attr($caption); ?>" aria-label="<?php esc_attr_e('View image in lightbox', 'church-theme'); ?>">
+                            <a class="gallery-card__media js-lightbox skeleton" href="<?php echo esc_url((string) $item['image_url']); ?>" data-permalink="<?php echo esc_url((string) $item['permalink']); ?>" data-caption="<?php echo esc_attr($caption); ?>" data-link-label="<?php esc_attr_e('View on Instagram', 'church-theme'); ?>" aria-label="<?php esc_attr_e('View image in lightbox', 'church-theme'); ?>">
                                 <img src="<?php echo esc_url((string) $item['image_url']); ?>" alt="<?php echo esc_attr($caption !== '' ? $caption : __('Crossroad South Church Instagram post', 'church-theme')); ?>" loading="lazy" decoding="async">
                             </a>
                         </article>

@@ -59,24 +59,50 @@ test("public pages render a visible main region", async ({ page }) => {
   }
 });
 
-test("gallery feed renders a five-by-five desktop layout when enough Instagram posts exist", async ({ page }) => {
+test("gallery page prioritizes seeded photo albums and keeps Instagram secondary", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1200 });
   await page.goto("/gallery/");
 
-  const galleryGrid = page.locator(".gallery-feed__grid").first();
-  const galleryCards = page.locator(".gallery-card");
+  const albumSection = page.locator(".gallery-albums");
+  const albumCards = page.locator(".album-card");
+  const instagramSection = page.locator(".gallery-feed");
+  const instagramCards = instagramSection.locator(".gallery-card");
 
-  await expect(galleryCards.first()).toBeVisible();
-  await expect(galleryCards).toHaveCount(25);
+  await expect(albumSection).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Photo albums" })).toBeVisible();
+  await expect(albumCards).toHaveCount(3);
+  await expect(albumCards.first()).toContainText("Church Retreat 2024");
+  await expect(instagramSection).toBeVisible();
 
-  const columnCount = await galleryGrid.evaluate((element) => {
-    return window
-      .getComputedStyle(element)
-      .gridTemplateColumns.split(" ")
-      .filter(Boolean).length;
+  const sectionOrder = await page.evaluate(() => {
+    const album = document.querySelector(".gallery-albums");
+    const instagram = document.querySelector(".gallery-feed");
+
+    if (!album || !instagram) {
+      return null;
+    }
+
+    return album.compareDocumentPosition(instagram);
   });
 
-  expect(columnCount).toBe(5);
+  expect(sectionOrder & 4).toBe(4);
+  const instagramCardCount = await instagramCards.count();
+  expect(instagramCardCount).toBeGreaterThan(0);
+  expect(instagramCardCount).toBeLessThanOrEqual(10);
+});
+
+test("seeded album detail page renders photo grid and shared lightbox", async ({ page }) => {
+  await page.goto("/photo-albums/church-retreat-2024/");
+
+  await expect(page.getByRole("heading", { name: "Church Retreat 2024" })).toBeVisible();
+  await expect(page.locator(".album-detail")).toBeVisible();
+  await expect(page.locator(".album-photo-grid .gallery-card")).toHaveCount(4);
+  await expect(page.getByRole("link", { name: "Back to gallery" })).toBeVisible();
+
+  await page.locator(".album-photo-grid .js-lightbox").first().click();
+  await expect(page.locator("dialog.lightbox[open]")).toBeVisible();
+  await expect(page.locator(".lightbox__image")).toBeVisible();
+  await expect(page.locator(".lightbox__link")).toHaveCount(0);
 });
 
 test("mobile navigation opens and submenu controls expand", async ({ page }) => {
@@ -116,7 +142,9 @@ test("homepage reveal content remains readable without JavaScript", async ({ bro
   });
 
   expect(hiddenRevealCount).toBe(0);
-  await expect(page.getByText("Our Foundation", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Our Mission, Vision and Core Values", { exact: true })
+  ).toBeVisible();
   await expect(page.getByRole("heading", { name: "Upcoming opportunities to gather." })).toBeVisible();
 
   await context.close();
@@ -171,7 +199,9 @@ test("section pages render configured section layouts and section targets", asyn
 
   await page.goto("/worship/");
   await expect(page.locator(".section-nav__list a[href='#womens-ministry']")).toBeVisible();
-  await expect(page.locator("#womens-ministry .section-card, #womens-ministry .section-story")).toBeVisible();
+  await expect(
+    page.locator("#womens-ministry .section-card, #womens-ministry .section-story").first()
+  ).toBeVisible();
 });
 
 test("contact page renders a simplified four-field form and styled phone input", async ({ page }) => {

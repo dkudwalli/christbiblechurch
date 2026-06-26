@@ -206,7 +206,7 @@ HTML
 )"
 
 GALLERY_CONTENT="$(cat <<'HTML'
-<p>Browse photos and updates from Crossroad South Church here. The page is ready for a live Instagram-connected gallery and will safely fall back until the account access is added.</p>
+<p>Browse curated photo albums from Crossroad South Church and a smaller stream of recent Instagram updates. New albums will appear here as they are added.</p>
 HTML
 )"
 
@@ -258,6 +258,250 @@ for legacy_slug in about contact events what-we-teach sample-page; do
 done
 
 run_wp eval "if (class_exists('Church_Core_Page_Sections')) { Church_Core_Page_Sections::run_schema_upgrade_now(); }" >/dev/null
+
+run_wp eval "
+\$attachment_source_meta = '_church_bootstrap_source_path';
+\$theme_root = trailingslashit(get_theme_root()) . 'church-theme';
+
+\$ensure_attachment = static function (array \$asset) use (\$attachment_source_meta, \$theme_root): int {
+    \$relative_path = (string) (\$asset['path'] ?? '');
+    \$title = (string) (\$asset['title'] ?? '');
+    \$caption = (string) (\$asset['caption'] ?? '');
+    \$alt = (string) (\$asset['alt'] ?? '');
+
+    if (\$relative_path === '') {
+        return 0;
+    }
+
+    \$existing = get_posts([
+        'post_type' => 'attachment',
+        'post_status' => 'inherit',
+        'posts_per_page' => 1,
+        'meta_key' => \$attachment_source_meta,
+        'meta_value' => \$relative_path,
+        'fields' => 'ids',
+    ]);
+
+    if (is_array(\$existing) && \$existing !== []) {
+        \$attachment_id = (int) \$existing[0];
+
+        wp_update_post([
+            'ID' => \$attachment_id,
+            'post_title' => \$title,
+            'post_excerpt' => \$caption,
+        ]);
+
+        update_post_meta(\$attachment_id, '_wp_attachment_image_alt', \$alt);
+
+        return \$attachment_id;
+    }
+
+    \$absolute_path = \$theme_root . \$relative_path;
+
+    if (! file_exists(\$absolute_path)) {
+        return 0;
+    }
+
+    \$uploads = wp_upload_dir();
+
+    if (! empty(\$uploads['error'])) {
+        return 0;
+    }
+
+    require_once ABSPATH . 'wp-admin/includes/file.php';
+    require_once ABSPATH . 'wp-admin/includes/image.php';
+    require_once ABSPATH . 'wp-admin/includes/media.php';
+
+    \$filename = wp_unique_filename(\$uploads['path'], basename(\$absolute_path));
+    \$destination = trailingslashit(\$uploads['path']) . \$filename;
+
+    if (! copy(\$absolute_path, \$destination)) {
+        return 0;
+    }
+
+    \$filetype = wp_check_filetype(\$filename, null);
+    \$attachment_id = wp_insert_attachment([
+        'post_mime_type' => (string) (\$filetype['type'] ?? ''),
+        'post_title' => \$title,
+        'post_excerpt' => \$caption,
+        'post_status' => 'inherit',
+    ], \$destination);
+
+    if (is_wp_error(\$attachment_id) || (int) \$attachment_id < 1) {
+        return 0;
+    }
+
+    \$metadata = wp_generate_attachment_metadata((int) \$attachment_id, \$destination);
+
+    if (is_array(\$metadata)) {
+        wp_update_attachment_metadata((int) \$attachment_id, \$metadata);
+    }
+
+    update_post_meta((int) \$attachment_id, '_wp_attachment_image_alt', \$alt);
+    update_post_meta((int) \$attachment_id, \$attachment_source_meta, \$relative_path);
+
+    return (int) \$attachment_id;
+};
+
+\$ensure_photo_album = static function (array \$album) use (\$ensure_attachment): void {
+    \$slug = (string) (\$album['slug'] ?? '');
+
+    if (\$slug === '') {
+        return;
+    }
+
+    \$existing = get_page_by_path(\$slug, OBJECT, 'photo_album');
+    \$photo_ids = [];
+
+    foreach ((array) (\$album['photos'] ?? []) as \$photo_asset) {
+        \$photo_id = \$ensure_attachment((array) \$photo_asset);
+
+        if (\$photo_id > 0) {
+            \$photo_ids[] = \$photo_id;
+        }
+    }
+
+    \$cover_id = \$ensure_attachment((array) (\$album['cover'] ?? []));
+    \$post_data = [
+        'post_type' => 'photo_album',
+        'post_status' => 'publish',
+        'post_name' => \$slug,
+        'post_title' => (string) (\$album['title'] ?? ''),
+        'post_excerpt' => (string) (\$album['excerpt'] ?? ''),
+        'post_content' => (string) (\$album['content'] ?? ''),
+        'meta_input' => [
+            'album_date' => (string) (\$album['date'] ?? ''),
+            'album_photo_ids' => \$photo_ids,
+        ],
+    ];
+
+    if (\$existing instanceof WP_Post) {
+        \$post_data['ID'] = (int) \$existing->ID;
+    }
+
+    \$post_id = wp_insert_post(wp_slash(\$post_data), true);
+
+    if (is_wp_error(\$post_id) || (int) \$post_id < 1) {
+        return;
+    }
+
+    if (\$cover_id > 0) {
+        set_post_thumbnail((int) \$post_id, \$cover_id);
+    }
+};
+
+\$albums = [
+    [
+        'slug' => 'church-retreat-2024',
+        'title' => 'Church Retreat 2024',
+        'date' => '2024-10-12',
+        'excerpt' => 'Highlights from our church retreat, including fellowship, prayer, worship, and shared meals.',
+        'content' => '<p>These photos capture a joyful weekend of worship, prayer, shared meals, and unhurried fellowship together as a church family.</p>',
+        'cover' => [
+            'path' => '/assets/images/crossroads/retreat.webp',
+            'title' => 'Church Retreat 2024 cover',
+            'caption' => 'Church family gathered during the 2024 retreat.',
+            'alt' => 'Crossroad South Church gathered at the 2024 retreat',
+        ],
+        'photos' => [
+            [
+                'path' => '/assets/images/crossroads/retreat.webp',
+                'title' => 'Retreat gathering',
+                'caption' => 'Church family gathered during the 2024 retreat.',
+                'alt' => 'Crossroad South Church gathered at the 2024 retreat',
+            ],
+            [
+                'path' => '/assets/images/crossroads/benji-rashmi.webp',
+                'title' => 'Pastoral family together',
+                'caption' => 'A warm moment with the pastoral family during fellowship.',
+                'alt' => 'Pastoral family together during church fellowship',
+            ],
+            [
+                'path' => '/assets/images/crossroads/tim-ruth.webp',
+                'title' => 'Serving together',
+                'caption' => 'Church members serving and praying together.',
+                'alt' => 'Church members serving together at Crossroad South Church',
+            ],
+            [
+                'path' => '/assets/images/crossroads/kishore-shirley.webp',
+                'title' => 'Joyful fellowship',
+                'caption' => 'A candid moment of fellowship and encouragement.',
+                'alt' => 'Church members sharing a joyful moment of fellowship',
+            ],
+        ],
+    ],
+    [
+        'slug' => 'womens-ministry-prayer-lunch',
+        'title' => 'Women\'s Ministry Prayer Lunch',
+        'date' => '2024-08-18',
+        'excerpt' => 'Snapshots from a Sunday of prayer, fellowship, and conversation after the service.',
+        'content' => '<p>The women of the church gathered after worship for prayer, encouragement, and practical care for one another.</p>',
+        'cover' => [
+            'path' => '/assets/images/crossroads/women-ministry.webp',
+            'title' => 'Women\'s Ministry Prayer Lunch cover',
+            'caption' => 'Women gathered for prayer and conversation after the service.',
+            'alt' => 'Women gathered together for prayer and conversation',
+        ],
+        'photos' => [
+            [
+                'path' => '/assets/images/crossroads/women-ministry.webp',
+                'title' => 'Women\'s ministry gathering',
+                'caption' => 'Women gathered for prayer and conversation after the service.',
+                'alt' => 'Women gathered together for prayer and conversation',
+            ],
+            [
+                'path' => '/assets/images/crossroads/retreat.webp',
+                'title' => 'Shared meal',
+                'caption' => 'A shared table during an afternoon of fellowship.',
+                'alt' => 'Shared meal during church fellowship',
+            ],
+            [
+                'path' => '/assets/images/crossroads/benji-rashmi.webp',
+                'title' => 'Encouraging one another',
+                'caption' => 'Members staying back to connect and care for one another.',
+                'alt' => 'Church members encouraging one another after the service',
+            ],
+        ],
+    ],
+    [
+        'slug' => 'sunday-fellowship-2024',
+        'title' => 'Sunday Fellowship 2024',
+        'date' => '2024-06-23',
+        'excerpt' => 'A few scenes from ordinary Sunday life together after worship.',
+        'content' => '<p>Not every album needs a special event. These photos show the ordinary beauty of conversations, service, and friendship after the Sunday gathering.</p>',
+        'cover' => [
+            'path' => '/assets/images/crossroads/tim-ruth.webp',
+            'title' => 'Sunday Fellowship 2024 cover',
+            'caption' => 'Members lingering after the service for fellowship.',
+            'alt' => 'Church members lingering after the service for fellowship',
+        ],
+        'photos' => [
+            [
+                'path' => '/assets/images/crossroads/tim-ruth.webp',
+                'title' => 'Lingering after worship',
+                'caption' => 'Members lingering after the service for fellowship.',
+                'alt' => 'Church members lingering after the service for fellowship',
+            ],
+            [
+                'path' => '/assets/images/crossroads/kishore-shirley.webp',
+                'title' => 'Families connecting',
+                'caption' => 'Families catching up and welcoming one another.',
+                'alt' => 'Families connecting after the Sunday worship service',
+            ],
+            [
+                'path' => '/assets/images/crossroads/retreat.webp',
+                'title' => 'Serving with joy',
+                'caption' => 'Moments of service and shared responsibility.',
+                'alt' => 'Church members serving with joy',
+            ],
+        ],
+    ],
+];
+
+foreach (\$albums as \$album) {
+    \$ensure_photo_album(\$album);
+}
+" >/dev/null
 
 run_wp option update show_on_front page
 run_wp option update page_on_front "${HOME_ID}"

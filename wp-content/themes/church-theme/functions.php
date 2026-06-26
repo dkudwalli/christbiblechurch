@@ -6,7 +6,7 @@ if (! defined('ABSPATH')) {
 function church_theme_defaults(): array
 {
     return [
-        'hero_title' => 'Exalting the Triune God, Edifying Believers, Evangelizing the Unreached.',
+        'hero_title' => 'Welcome to Crossroad South',
         'hero_primary_label' => 'Plan Your Visit',
         'hero_primary_url' => '/contact-us/',
         'welcome_summary' => 'We are a community of Christ-followers from diverse linguistic, geographic, and cultural backgrounds. Corporate worship and small groups are conducted in English, and we are kids, youth, and adult friendly.',
@@ -343,6 +343,11 @@ function church_theme_get_event_archive_url(): string
     return get_post_type_archive_link('event') ?: home_url('/events/');
 }
 
+function church_theme_get_photo_album_archive_url(): string
+{
+    return church_theme_get_page_url('gallery');
+}
+
 function church_theme_get_sermon_url(?int $post_id = null): string
 {
     $resolved_post_id = $post_id ?: get_the_ID();
@@ -365,6 +370,18 @@ function church_theme_get_event_url(?int $post_id = null): string
     }
 
     return church_theme_get_event_archive_url();
+}
+
+function church_theme_get_photo_album_url(?int $post_id = null): string
+{
+    $resolved_post_id = $post_id ?: get_the_ID();
+    $permalink = $resolved_post_id > 0 ? get_permalink($resolved_post_id) : '';
+
+    if (is_string($permalink) && $permalink !== '') {
+        return $permalink;
+    }
+
+    return church_theme_get_photo_album_archive_url();
 }
 
 function church_theme_resolve_url(string $url): string
@@ -1401,6 +1418,38 @@ function church_theme_get_event_notes_preview(int $post_id, int $word_limit = 26
     return wp_trim_words($content, $word_limit);
 }
 
+function church_theme_get_photo_album_date(int $post_id): string
+{
+    $value = class_exists('Church_Core_Photo_Albums')
+        ? Church_Core_Photo_Albums::get_album_date($post_id)
+        : (string) get_post_meta($post_id, 'album_date', true);
+
+    if ($value === '') {
+        return get_the_date('', $post_id);
+    }
+
+    $timestamp = strtotime($value);
+
+    return $timestamp ? wp_date(get_option('date_format'), $timestamp) : $value;
+}
+
+function church_theme_get_photo_album_summary_preview(int $post_id, int $word_limit = 26): string
+{
+    $content = (string) get_post_field('post_excerpt', $post_id);
+
+    if ($content === '') {
+        $content = wp_strip_all_tags(strip_shortcodes((string) get_post_field('post_content', $post_id)));
+    }
+
+    $content = trim(preg_replace('/\s+/', ' ', $content) ?: '');
+
+    if ($content === '') {
+        return '';
+    }
+
+    return wp_trim_words($content, $word_limit);
+}
+
 function church_theme_get_sermon_excerpt_preview(int $post_id, int $word_limit = 24): string
 {
     $content = (string) get_post_field('post_excerpt', $post_id);
@@ -1416,6 +1465,27 @@ function church_theme_get_sermon_excerpt_preview(int $post_id, int $word_limit =
     }
 
     return wp_trim_words($content, $word_limit);
+}
+
+function church_theme_get_photo_album_query(int $posts_per_page = -1): WP_Query
+{
+    $meta_key = class_exists('Church_Core_Photo_Albums')
+        ? Church_Core_Photo_Albums::DATE_META_KEY
+        : 'album_date';
+
+    return new WP_Query([
+        'post_type' => 'photo_album',
+        'post_status' => 'publish',
+        'posts_per_page' => $posts_per_page,
+        'meta_key' => $meta_key,
+        'orderby' => [
+            'meta_value' => 'DESC',
+            'date' => 'DESC',
+        ],
+        'meta_type' => 'DATE',
+        'no_found_rows' => true,
+        'ignore_sticky_posts' => true,
+    ]);
 }
 
 function church_theme_get_event_query(bool $upcoming, int $posts_per_page = -1): WP_Query
@@ -1495,6 +1565,49 @@ function church_theme_get_related_sermon_query(int $post_id, int $limit = 3): ar
 function church_theme_get_sermon_audio_url(int $post_id): string
 {
     return (string) get_post_meta($post_id, 'audio_url', true);
+}
+
+function church_theme_get_photo_album_photo_ids(int $post_id): array
+{
+    if (! class_exists('Church_Core_Photo_Albums')) {
+        return [];
+    }
+
+    return Church_Core_Photo_Albums::get_photo_ids($post_id);
+}
+
+function church_theme_get_photo_album_photo_assets(int $post_id): array
+{
+    $assets = [];
+
+    foreach (church_theme_get_photo_album_photo_ids($post_id) as $attachment_id) {
+        $asset = church_theme_get_attachment_image_asset((int) $attachment_id);
+
+        if (! is_array($asset) || empty($asset['src'])) {
+            continue;
+        }
+
+        $asset['id'] = (int) $attachment_id;
+        $asset['title'] = get_the_title($attachment_id);
+        $assets[] = $asset;
+    }
+
+    return $assets;
+}
+
+function church_theme_get_photo_album_cover_asset(int $post_id): ?array
+{
+    if (has_post_thumbnail($post_id)) {
+        $asset = church_theme_get_attachment_image_asset((int) get_post_thumbnail_id($post_id));
+
+        if (is_array($asset) && ! empty($asset['src'])) {
+            return $asset;
+        }
+    }
+
+    $photos = church_theme_get_photo_album_photo_assets($post_id);
+
+    return $photos !== [] ? $photos[0] : null;
 }
 
 function church_theme_get_sermon_primary_term(int $post_id, string $taxonomy): ?WP_Term

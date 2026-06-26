@@ -27,6 +27,7 @@ require_once CHURCH_CORE_PATH . 'includes/class-church-core-sermon-sync-service.
 require_once CHURCH_CORE_PATH . 'includes/class-church-core-sermon-cron.php';
 require_once CHURCH_CORE_PATH . 'includes/class-church-core-sermon-sync-admin.php';
 require_once CHURCH_CORE_PATH . 'includes/class-church-core-events.php';
+require_once CHURCH_CORE_PATH . 'includes/class-church-core-photo-albums.php';
 require_once CHURCH_CORE_PATH . 'includes/class-church-core-contact.php';
 require_once CHURCH_CORE_PATH . 'includes/class-church-core-page-sections.php';
 

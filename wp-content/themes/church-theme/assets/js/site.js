@@ -307,14 +307,14 @@ document.addEventListener("DOMContentLoaded", () => {
         <button class="lightbox__close" aria-label="Close" type="button">&times;</button>
         <img class="lightbox__image" src="" alt="">
         <p class="lightbox__caption"></p>
-        <a class="lightbox__link" href="" target="_blank" rel="noreferrer noopener">View on Instagram</a>
+        <div data-lightbox-link-shell></div>
       </div>
     `;
     document.body.appendChild(dialog);
 
     const img = dialog.querySelector(".lightbox__image");
     const caption = dialog.querySelector(".lightbox__caption");
-    const link = dialog.querySelector(".lightbox__link");
+    const linkShell = dialog.querySelector("[data-lightbox-link-shell]");
     const closeBtn = dialog.querySelector(".lightbox__close");
 
     const closeLightbox = () => {
@@ -340,8 +340,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const imageUrl = trigger.getAttribute("href");
         const permalink = trigger.getAttribute("data-permalink");
         const captionText = trigger.getAttribute("data-caption");
+        const linkLabel =
+          trigger.getAttribute("data-link-label") || "Open image";
+        const altText =
+          trigger.getAttribute("data-lightbox-alt") ||
+          trigger.querySelector("img")?.getAttribute("alt") ||
+          "";
 
         img.src = imageUrl;
+        img.alt = altText;
         if (captionText) {
           caption.textContent = captionText;
           caption.style.display = "block";
@@ -349,11 +356,19 @@ document.addEventListener("DOMContentLoaded", () => {
           caption.textContent = "";
           caption.style.display = "none";
         }
-        if (permalink) {
-          link.href = permalink;
-          link.style.display = "block";
-        } else {
-          link.style.display = "none";
+
+        if (linkShell) {
+          linkShell.innerHTML = "";
+
+          if (permalink) {
+            const link = document.createElement("a");
+            link.className = "lightbox__link";
+            link.href = permalink;
+            link.target = "_blank";
+            link.rel = "noreferrer noopener";
+            link.textContent = linkLabel;
+            linkShell.appendChild(link);
+          }
         }
         
         dialog.showModal();
