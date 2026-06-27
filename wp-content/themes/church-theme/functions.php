@@ -655,6 +655,40 @@ function church_theme_get_attachment_image_asset(int $attachment_id): ?array
 }
 
 /**
+ * Resolve the front-page hero community image (shown above the "Gather With Us"
+ * card). Returns the Customizer-selected attachment when set and valid, otherwise
+ * the bundled theme asset. Both shapes are compatible with
+ * church_theme_render_static_image().
+ *
+ * @return array<string, mixed>|null
+ */
+function church_theme_get_hero_community_image(): ?array
+{
+    $attachment_id = (int) get_theme_mod('hero_community_image', 0);
+
+    if ($attachment_id > 0) {
+        $asset = church_theme_get_attachment_image_asset($attachment_id);
+
+        if ($asset !== null) {
+            // Guard against an alt regression: church_theme_get_attachment_image_asset()
+            // falls back to the attachment title (= filename stem, e.g. "women-ministry-1")
+            // when the Media Library "Alternative Text" field is empty. Substitute a
+            // meaningful generic description so the hero never ships a filename as alt.
+            if (trim((string) get_post_meta($attachment_id, '_wp_attachment_image_alt', true)) === '') {
+                $asset['alt'] = __('The Crossroad South Church community', 'church-theme');
+            }
+
+            return $asset;
+        }
+    }
+
+    return church_theme_get_static_image(
+        '/assets/images/crossroads/retreat.webp',
+        __('The Crossroad South Church community at a recent retreat', 'church-theme')
+    );
+}
+
+/**
  * Resolve the hero banner image slots (banner_image_1..5) into ordered image
  * assets. Skips empty/invalid slots and de-duplicates repeated attachments.
  *
@@ -1179,6 +1213,17 @@ function church_theme_customize_register(WP_Customize_Manager $wp_customize): vo
         'priority' => 1,
         'label' => __('Enable hero banner (shows above the main hero)', 'church-theme'),
     ]);
+
+    $wp_customize->add_setting('hero_community_image', [
+        'default' => 0,
+        'sanitize_callback' => 'absint',
+    ]);
+    $wp_customize->add_control(new WP_Customize_Media_Control($wp_customize, 'hero_community_image', [
+        'section' => 'church_theme_home',
+        'mime_type' => 'image',
+        'label' => __('Hero Image (beside the welcome text)', 'church-theme'),
+        'description' => __('Shown above the “Gather With Us” card. Leave empty to use the bundled default. Recommended ~1300×975 or larger; it is cropped to a 3:2 landscape.', 'church-theme'),
+    ]));
 
     $wp_customize->add_setting('banner_video', [
         'default' => 0,

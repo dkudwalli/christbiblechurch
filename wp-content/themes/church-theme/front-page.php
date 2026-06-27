@@ -45,10 +45,7 @@ $upcoming_events = church_theme_get_event_query(true, 3);
 
         <div class="hero__aside">
             <?php
-            $hero_community_image = church_theme_get_static_image(
-                '/assets/images/crossroads/retreat.webp',
-                __('The Crossroad South Church community at a recent retreat', 'church-theme')
-            );
+            $hero_community_image = church_theme_get_hero_community_image();
             ?>
             <?php if ($hero_community_image !== null) : ?>
                 <figure class="hero__media">
