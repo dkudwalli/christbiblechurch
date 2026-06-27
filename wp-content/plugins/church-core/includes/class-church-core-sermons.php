@@ -10,10 +10,12 @@ final class Church_Core_Sermons
         add_action('init', [__CLASS__, 'register_content']);
         add_action('add_meta_boxes', [__CLASS__, 'register_meta_boxes']);
         add_action('save_post_sermon', [__CLASS__, 'save_meta']);
-        add_action('pre_get_posts', [__CLASS__, 'tune_archive_query']);
+        add_action('pre_get_posts', [__CLASS__, 'tune_query']);
         add_action('admin_enqueue_scripts', [__CLASS__, 'enqueue_admin_assets']);
         add_filter('manage_sermon_posts_columns', [__CLASS__, 'sermon_columns']);
+        add_filter('manage_edit-sermon_sortable_columns', [__CLASS__, 'sermon_sortable_columns']);
         add_action('manage_sermon_posts_custom_column', [__CLASS__, 'render_sermon_column'], 10, 2);
+        add_filter('posts_clauses', [__CLASS__, 'filter_admin_sermon_date_sort_clauses'], 10, 2);
     }
 
     public static function register_content(): void
@@ -215,9 +217,23 @@ final class Church_Core_Sermons
         }
     }
 
+    public static function tune_query(WP_Query $query): void
+    {
+        if (! $query->is_main_query()) {
+            return;
+        }
+
+        if (is_admin()) {
+            self::maybe_tune_admin_list_query($query);
+            return;
+        }
+
+        self::tune_archive_query($query);
+    }
+
     public static function tune_archive_query(WP_Query $query): void
     {
-        if (is_admin() || ! $query->is_main_query()) {
+        if (is_admin()) {
             return;
         }
 
@@ -274,6 +290,30 @@ final class Church_Core_Sermons
         }
     }
 
+    public static function maybe_tune_admin_list_query(WP_Query $query): void
+    {
+        global $pagenow;
+
+        if ($pagenow !== 'edit.php') {
+            return;
+        }
+
+        self::tune_admin_list_query($query);
+    }
+
+    public static function tune_admin_list_query(WP_Query $query): void
+    {
+        if (! self::query_targets_sermon_post_type($query)) {
+            return;
+        }
+
+        if ($query->get('orderby') !== 'sermon_date') {
+            return;
+        }
+
+        $query->set('church_core_sort_sermon_date_admin', true);
+    }
+
     public static function enqueue_admin_assets(string $hook): void
     {
         if (! in_array($hook, ['post-new.php', 'post.php'], true)) {
@@ -305,6 +345,19 @@ final class Church_Core_Sermons
         return $columns;
     }
 
+    public static function sermon_sortable_columns(array $columns): array
+    {
+        $columns['sermon_date'] = [
+            'sermon_date',
+            true,
+            __('Sermon Date', 'church-core'),
+            __('Table ordered by Sermon Date.', 'church-core'),
+            'desc',
+        ];
+
+        return $columns;
+    }
+
     public static function render_sermon_column(string $column, int $post_id): void
     {
         if ($column === 'speaker') {
@@ -321,5 +374,49 @@ final class Church_Core_Sermons
             $date = (string) get_post_meta($post_id, 'sermon_date', true);
             echo $date !== '' ? esc_html($date) : '—';
         }
+    }
+
+    public static function filter_admin_sermon_date_sort_clauses(array $clauses, WP_Query $query): array
+    {
+        if (! $query->get('church_core_sort_sermon_date_admin')) {
+            return $clauses;
+        }
+
+        global $wpdb;
+
+        $meta_alias = 'church_core_sermon_date_meta';
+        $meta_join = $wpdb->prepare(
+            " LEFT JOIN (
+                SELECT post_id, MAX(meta_value) AS sermon_date_value
+                FROM {$wpdb->postmeta}
+                WHERE meta_key = %s
+                GROUP BY post_id
+            ) AS {$meta_alias} ON ({$wpdb->posts}.ID = {$meta_alias}.post_id)",
+            'sermon_date'
+        );
+
+        if (! str_contains($clauses['join'], $meta_alias)) {
+            $clauses['join'] .= $meta_join;
+        }
+
+        $order = strtoupper((string) $query->get('order')) === 'ASC' ? 'ASC' : 'DESC';
+
+        $clauses['orderby'] = "CASE
+            WHEN {$meta_alias}.sermon_date_value IS NULL OR {$meta_alias}.sermon_date_value = '' THEN 1
+            ELSE 0
+        END ASC, CAST({$meta_alias}.sermon_date_value AS DATE) {$order}, {$wpdb->posts}.ID {$order}";
+
+        return $clauses;
+    }
+
+    private static function query_targets_sermon_post_type(WP_Query $query): bool
+    {
+        $post_type = $query->get('post_type');
+
+        if (is_array($post_type)) {
+            return in_array('sermon', $post_type, true);
+        }
+
+        return $post_type === 'sermon';
     }
 }
