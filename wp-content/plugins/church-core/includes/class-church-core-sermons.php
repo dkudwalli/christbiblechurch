@@ -266,10 +266,16 @@ final class Church_Core_Sermons
 
         $query->set('post_type', 'sermon');
         $query->set('posts_per_page', 9);
-        $query->set('meta_key', 'sermon_date');
-        $query->set('orderby', 'meta_value');
-        $query->set('meta_type', 'DATE');
-        $query->set('order', 'DESC');
+        // Order by sermon_date but keep sermons that have no sermon_date set. A bare
+        // meta_key + orderby=meta_value INNER-JOINs postmeta and silently drops
+        // keyless posts from the archive; an OR meta_query (EXISTS / NOT EXISTS)
+        // LEFT-JOINs instead, so dateless sermons sort last rather than vanishing.
+        $query->set('meta_query', [
+            'relation' => 'OR',
+            'sermon_date_present' => ['key' => 'sermon_date', 'compare' => 'EXISTS', 'type' => 'DATE'],
+            'sermon_date_missing' => ['key' => 'sermon_date', 'compare' => 'NOT EXISTS'],
+        ]);
+        $query->set('orderby', ['sermon_date_present' => 'DESC', 'date' => 'DESC']);
 
         if ($active_taxonomy_filters !== []) {
             $tax_query = [];

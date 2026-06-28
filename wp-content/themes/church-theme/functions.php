@@ -1522,12 +1522,18 @@ function church_theme_get_photo_album_query(int $posts_per_page = -1): WP_Query
         'post_type' => 'photo_album',
         'post_status' => 'publish',
         'posts_per_page' => $posts_per_page,
-        'meta_key' => $meta_key,
+        // Order by album date but keep albums that have no date set. A bare meta_key
+        // INNER-JOINs postmeta and drops keyless albums from the gallery entirely;
+        // the OR meta_query LEFT-JOINs so dateless albums sort last instead.
+        'meta_query' => [
+            'relation' => 'OR',
+            'album_date_present' => ['key' => $meta_key, 'compare' => 'EXISTS', 'type' => 'DATE'],
+            'album_date_missing' => ['key' => $meta_key, 'compare' => 'NOT EXISTS'],
+        ],
         'orderby' => [
-            'meta_value' => 'DESC',
+            'album_date_present' => 'DESC',
             'date' => 'DESC',
         ],
-        'meta_type' => 'DATE',
         'no_found_rows' => true,
         'ignore_sticky_posts' => true,
     ]);
@@ -1564,9 +1570,13 @@ function church_theme_get_latest_sermon_query(int $limit = 1, int $offset = 0): 
         'post_type' => 'sermon',
         'posts_per_page' => $limit,
         'offset' => $offset,
-        'meta_key' => 'sermon_date',
-        'orderby' => 'meta_value',
-        'order' => 'DESC',
+        // Keep sermons that have no sermon_date set (see church_theme_get_photo_album_query).
+        'meta_query' => [
+            'relation' => 'OR',
+            'sermon_date_present' => ['key' => 'sermon_date', 'compare' => 'EXISTS', 'type' => 'DATE'],
+            'sermon_date_missing' => ['key' => 'sermon_date', 'compare' => 'NOT EXISTS'],
+        ],
+        'orderby' => ['sermon_date_present' => 'DESC', 'date' => 'DESC'],
         'no_found_rows' => true,
     ]);
 }
@@ -1578,9 +1588,13 @@ function church_theme_get_related_sermon_query(int $post_id, int $limit = 3): ar
         'post_type' => 'sermon',
         'posts_per_page' => $limit,
         'post__not_in' => [$post_id],
-        'meta_key' => 'sermon_date',
-        'orderby' => 'meta_value',
-        'order' => 'DESC',
+        // Keep sermons that have no sermon_date set (see church_theme_get_photo_album_query).
+        'meta_query' => [
+            'relation' => 'OR',
+            'sermon_date_present' => ['key' => 'sermon_date', 'compare' => 'EXISTS', 'type' => 'DATE'],
+            'sermon_date_missing' => ['key' => 'sermon_date', 'compare' => 'NOT EXISTS'],
+        ],
+        'orderby' => ['sermon_date_present' => 'DESC', 'date' => 'DESC'],
         'no_found_rows' => true,
     ];
 

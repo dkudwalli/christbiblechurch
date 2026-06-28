@@ -110,12 +110,22 @@ final class Church_Core_Sermon_Sync_Service
         $title = isset($video['title']) ? trim((string) $video['title']) : '';
         $published_at = isset($video['published_at']) ? trim((string) $video['published_at']) : '';
         $privacy_status = isset($video['privacy_status']) ? trim((string) $video['privacy_status']) : '';
+        $live_broadcast_content = isset($video['live_broadcast_content']) ? trim((string) $video['live_broadcast_content']) : 'none';
+        $actual_end_time = isset($video['actual_end_time']) ? trim((string) $video['actual_end_time']) : '';
 
         if ($video_id === '' || $title === '' || $published_at === '') {
             return false;
         }
 
         if ($privacy_status !== '' && $privacy_status !== 'public') {
+            return false;
+        }
+
+        // Skip scheduled or in-progress livestreams: they are public and titled
+        // before the message exists, so importing them would publish a sermon
+        // prematurely. A finished broadcast reverts to 'none' and/or carries an
+        // actualEndTime, so completed streams still import normally.
+        if ($live_broadcast_content !== '' && $live_broadcast_content !== 'none' && $actual_end_time === '') {
             return false;
         }
 
