@@ -247,7 +247,10 @@ test("contact form preserves simplified field values on invalid submit", async (
   await page.locator("#contact_phone").fill("+91 98765 43210");
   await page.locator("#contact_message").fill("Testing preserved form state.");
   await page.locator("#contact_message").fill("");
-  await page.locator(".contact-form").evaluate((form) => form.submit());
+  await Promise.all([
+    page.waitForURL(/church_contact_status=invalid/),
+    page.locator(".contact-form").evaluate((form) => form.submit()),
+  ]);
 
   await expect(page.locator(".contact-form__notice.is-error")).toBeVisible();
   await expect(page.locator("#contact_name")).toHaveValue("Playwright Visitor");
