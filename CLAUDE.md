@@ -15,12 +15,18 @@ cp .env.example .env
 ```
 Site: `http://localhost:8080` | Admin: `http://localhost:8080/wp-admin/`
 
-**Lint (PHP syntax + PHPCS + CSS):**
+**Lint (PHP syntax + PHPCS + CSS + route shims):**
 ```bash
-npm run lint          # all three checks
-npm run lint:php      # php -l syntax check only
+npm run lint          # all four checks
+npm run lint:php      # php -l syntax check (theme, plugin, and committed route-shim dirs)
 npm run lint:phpcs    # PSR-12 via phpcs.phar (auto-downloads if missing, falls back to Docker)
 npm run lint:css      # stylelint on theme CSS
+npm run lint:shims    # static validation of the committed route-shim tree (Node, no DB)
+```
+
+**PHP tests (requires running local site; each test runs in its own wp-cli process):**
+```bash
+npm run test:php      # bin/test-php.sh — runs church-core/tests/*.php via wp-cli eval-file (as root so ABSPATH is writable)
 ```
 
 **Smoke tests (requires running local site):**
@@ -64,10 +70,14 @@ CSS is split into `assets/css/site.css`, `forms.css`, and `accessibility.css`. N
 | `Church_Core_Contact` | ✓ | `[church_contact_form]` shortcode, CSRF nonce, honeypot, `wp_mail()` |
 | `Church_Core_Events` | ✓ | `event` CPT |
 | `Church_Core_Page_Sections` | ✓ | Per-page section layout meta (`church_section_layout`, `church_section_profiles`) stored as post meta on child pages of About Us and Worship |
+| `Church_Core_Photo_Albums` | ✓ | `photo_album` CPT, album meta, and runtime management of `photo-albums/<slug>/` route shims |
+| `Church_Core_Sermon_Route_Shims` | ✓ | Additively creates `sermons/<slug>/` + the `sermons/` listing route shim when a sermon is published (closes the cron-sync gap); never removes at runtime |
 | `Church_Core_Sermon_Sync_Service` | | Orchestrates YouTube → sermon sync logic |
 | `Church_Core_Youtube_Client` | | YouTube Data API v3 calls (channels, playlistItems, videos) |
 | `Church_Core_Scripture_Extractor` | | `from_title()` — parses a scripture reference (e.g. `Mark 8:22-26`) out of a YouTube video title; maps book aliases |
 | `Church_Core_Term_Helper` | | `ensure_term()` — find-or-create a `series`/`speaker` term during sync/import |
+| `Church_Core_Route_Shim_Writer` (trait) | | Shared create-if-missing shim helpers used by `Photo_Albums` and `Sermon_Route_Shims` |
+| `Church_Core_Shim_CLI` | | `wp church-core regenerate-shims [--check]` — maintainer command to rebuild the committed shim tree from the DB |
 
 ### Page Section System
 

@@ -5,6 +5,8 @@ if (! defined('ABSPATH')) {
 
 final class Church_Core_Photo_Albums
 {
+    use Church_Core_Route_Shim_Writer;
+
     public const DATE_META_KEY = 'album_date';
     public const PHOTO_IDS_META_KEY = 'album_photo_ids';
     private const ROUTE_ROOT = 'photo-albums';
@@ -416,40 +418,6 @@ final class Church_Core_Photo_Albums
         return true;
     }
 
-    private static function ensure_route_shim(string $slug): bool
-    {
-        $route_root = self::get_route_root_path();
-
-        if (! is_dir($route_root) && ! wp_mkdir_p($route_root)) {
-            self::store_route_shim_notice($slug, $route_root, 'Could not create the photo album route directory.');
-            return false;
-        }
-
-        $route_directory = self::get_route_directory_path($slug);
-
-        if (! is_dir($route_directory) && ! wp_mkdir_p($route_directory)) {
-            self::store_route_shim_notice($slug, $route_directory, 'Could not create the album shim directory.');
-            return false;
-        }
-
-        $route_file = self::get_route_file_path($slug);
-        $expected_contents = self::get_route_shim_contents();
-        $existing_contents = file_exists($route_file) ? file_get_contents($route_file) : false;
-
-        if ($existing_contents === $expected_contents) {
-            return true;
-        }
-
-        $bytes_written = @file_put_contents($route_file, $expected_contents, LOCK_EX);
-
-        if ($bytes_written === false) {
-            self::store_route_shim_notice($slug, $route_file, 'Could not write the album shim file.');
-            return false;
-        }
-
-        return true;
-    }
-
     private static function remove_route_shim(string $slug): bool
     {
         $slug = self::normalize_route_slug($slug);
@@ -493,22 +461,7 @@ final class Church_Core_Photo_Albums
         return true;
     }
 
-    private static function get_route_root_path(): string
-    {
-        return trailingslashit(ABSPATH) . self::ROUTE_ROOT;
-    }
-
-    private static function get_route_directory_path(string $slug): string
-    {
-        return self::get_route_root_path() . '/' . self::normalize_route_slug($slug);
-    }
-
-    private static function get_route_file_path(string $slug): string
-    {
-        return self::get_route_directory_path($slug) . '/index.php';
-    }
-
-    private static function get_route_shim_contents(): string
+    protected static function get_route_shim_contents(): string
     {
         return "<?php\nrequire dirname(dirname(__DIR__)) . '/index.php';\n";
     }
@@ -533,25 +486,6 @@ final class Church_Core_Photo_Albums
     private static function get_synced_route_slug(int $post_id): string
     {
         return self::normalize_route_slug((string) get_post_meta($post_id, self::SYNCED_ROUTE_SLUG_META_KEY, true));
-    }
-
-    private static function normalize_route_slug(string $slug): string
-    {
-        return sanitize_title($slug);
-    }
-
-    private static function store_route_shim_notice(string $slug, string $path, string $reason): void
-    {
-        update_option(self::ROUTE_SHIM_NOTICE_OPTION, [
-            'path' => $path,
-            'reason' => $reason,
-            'slug' => self::normalize_route_slug($slug),
-        ], false);
-    }
-
-    private static function clear_route_shim_notice(): void
-    {
-        delete_option(self::ROUTE_SHIM_NOTICE_OPTION);
     }
 
     private static function render_photo_item(int $photo_id): void

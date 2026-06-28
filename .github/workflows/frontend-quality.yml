@@ -35,6 +35,11 @@ jobs:
           chmod +x bin/bootstrap-wordpress.sh
           ./bin/bootstrap-wordpress.sh
 
+      - name: Run PHP tests
+        run: |
+          chmod +x bin/test-php.sh
+          npm run test:php
+
       - name: Run Playwright smoke tests
         env:
           PLAYWRIGHT_BASE_URL: http://localhost:8080

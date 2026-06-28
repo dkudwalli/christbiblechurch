@@ -18,6 +18,7 @@ define('CHURCH_CORE_PATH', plugin_dir_path(__FILE__));
 define('CHURCH_CORE_URL', plugin_dir_url(__FILE__));
 
 require_once CHURCH_CORE_PATH . 'includes/class-church-core.php';
+require_once CHURCH_CORE_PATH . 'includes/trait-church-core-route-shim-writer.php';
 require_once CHURCH_CORE_PATH . 'includes/class-church-core-sermons.php';
 require_once CHURCH_CORE_PATH . 'includes/class-church-core-term-helper.php';
 require_once CHURCH_CORE_PATH . 'includes/class-church-core-scripture-extractor.php';
@@ -28,10 +29,16 @@ require_once CHURCH_CORE_PATH . 'includes/class-church-core-sermon-cron.php';
 require_once CHURCH_CORE_PATH . 'includes/class-church-core-sermon-sync-admin.php';
 require_once CHURCH_CORE_PATH . 'includes/class-church-core-events.php';
 require_once CHURCH_CORE_PATH . 'includes/class-church-core-photo-albums.php';
+require_once CHURCH_CORE_PATH . 'includes/class-church-core-sermon-route-shims.php';
 require_once CHURCH_CORE_PATH . 'includes/class-church-core-contact.php';
 require_once CHURCH_CORE_PATH . 'includes/class-church-core-page-sections.php';
 
 register_activation_hook(CHURCH_CORE_FILE, ['Church_Core', 'activate']);
 register_deactivation_hook(CHURCH_CORE_FILE, ['Church_Core', 'deactivate']);
+
+if (defined('WP_CLI') && WP_CLI) {
+    require_once CHURCH_CORE_PATH . 'includes/class-church-core-shim-cli.php';
+    WP_CLI::add_command('church-core regenerate-shims', ['Church_Core_Shim_CLI', 'regenerate']);
+}
 
 Church_Core::boot();

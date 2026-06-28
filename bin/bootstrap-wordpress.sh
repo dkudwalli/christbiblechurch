@@ -503,6 +503,146 @@ foreach (\$albums as \$album) {
 }
 " >/dev/null
 
+run_wp eval "
+\$ensure_term = static function (string \$name, string \$taxonomy): int {
+    if (\$name === '' || ! class_exists('Church_Core_Term_Helper')) {
+        return 0;
+    }
+
+    \$term_id = Church_Core_Term_Helper::ensure_term(\$name, \$taxonomy);
+
+    return is_wp_error(\$term_id) ? 0 : (int) \$term_id;
+};
+
+\$ensure_sermon = static function (array \$sermon) use (\$ensure_term): void {
+    \$slug = (string) (\$sermon['slug'] ?? '');
+
+    if (\$slug === '') {
+        return;
+    }
+
+    \$existing = get_page_by_path(\$slug, OBJECT, 'sermon');
+    \$meta = ['sermon_date' => (string) (\$sermon['date'] ?? '')];
+
+    if (! empty(\$sermon['scripture'])) {
+        \$meta['scripture_reference'] = (string) \$sermon['scripture'];
+    }
+
+    if (! empty(\$sermon['audio_url'])) {
+        \$meta['audio_url'] = (string) \$sermon['audio_url'];
+    }
+
+    \$post_data = [
+        'post_type' => 'sermon',
+        'post_status' => 'publish',
+        'post_name' => \$slug,
+        'post_title' => (string) (\$sermon['title'] ?? ''),
+        'post_excerpt' => (string) (\$sermon['excerpt'] ?? ''),
+        'post_content' => (string) (\$sermon['content'] ?? ''),
+        'meta_input' => \$meta,
+    ];
+
+    if (\$existing instanceof WP_Post) {
+        \$post_data['ID'] = (int) \$existing->ID;
+    }
+
+    \$post_id = wp_insert_post(wp_slash(\$post_data), true);
+
+    if (is_wp_error(\$post_id) || (int) \$post_id < 1) {
+        return;
+    }
+
+    \$series_id = \$ensure_term((string) (\$sermon['series'] ?? ''), 'series');
+
+    if (\$series_id > 0) {
+        wp_set_object_terms((int) \$post_id, [\$series_id], 'series', false);
+    }
+
+    \$speaker_id = \$ensure_term((string) (\$sermon['speaker'] ?? ''), 'speaker');
+
+    if (\$speaker_id > 0) {
+        wp_set_object_terms((int) \$post_id, [\$speaker_id], 'speaker', false);
+    }
+};
+
+\$ensure_event = static function (array \$event): void {
+    \$slug = (string) (\$event['slug'] ?? '');
+
+    if (\$slug === '') {
+        return;
+    }
+
+    \$existing = get_page_by_path(\$slug, OBJECT, 'event');
+    \$post_data = [
+        'post_type' => 'event',
+        'post_status' => 'publish',
+        'post_name' => \$slug,
+        'post_title' => (string) (\$event['title'] ?? ''),
+        'post_content' => (string) (\$event['content'] ?? ''),
+        'meta_input' => [
+            'event_start' => (string) (\$event['start'] ?? ''),
+            'event_location' => (string) (\$event['location'] ?? ''),
+        ],
+    ];
+
+    if (\$existing instanceof WP_Post) {
+        \$post_data['ID'] = (int) \$existing->ID;
+    }
+
+    wp_insert_post(wp_slash(\$post_data), true);
+};
+
+\$sermons = [
+    [
+        'slug' => 'faith-that-endures',
+        'title' => 'Faith That Endures — James 1:2-8',
+        'date' => '2026-05-17',
+        'scripture' => 'James 1:2-8',
+        'series' => 'Faith Foundations',
+        'speaker' => 'Pastor John Doe',
+        'audio_url' => 'https://example.com/audio/faith-that-endures.mp3',
+        'excerpt' => 'Counting it all joy when trials come.',
+        'content' => '<p>A study of perseverance and the testing of faith from the opening of James.</p>',
+    ],
+    [
+        'slug' => 'the-good-shepherd',
+        'title' => 'The Good Shepherd — John 10:1-18',
+        'date' => '2026-05-24',
+        'scripture' => 'John 10:1-18',
+        'series' => 'Faith Foundations',
+        'speaker' => 'Pastor John Doe',
+        'excerpt' => 'Jesus lays down his life for the sheep.',
+        'content' => '<p>Jesus describes himself as the good shepherd who knows and protects his flock.</p>',
+    ],
+];
+
+foreach (\$sermons as \$sermon) {
+    \$ensure_sermon(\$sermon);
+}
+
+\$now = (int) current_time('timestamp');
+\$events = [
+    [
+        'slug' => 'autumn-prayer-gathering',
+        'title' => 'Autumn Prayer Gathering',
+        'start' => date('Y-m-d H:i:s', \$now + 90 * DAY_IN_SECONDS),
+        'location' => 'Mother Theresa Hall, Don Bosco Skill Mission',
+        'content' => '<p>An evening of corporate prayer and worship for the whole church family.</p>',
+    ],
+    [
+        'slug' => 'spring-baptism-service',
+        'title' => 'Spring Baptism Service',
+        'start' => date('Y-m-d H:i:s', \$now - 30 * DAY_IN_SECONDS),
+        'location' => 'Mother Theresa Hall, Don Bosco Skill Mission',
+        'content' => '<p>Celebrating new believers as they follow the Lord in baptism.</p>',
+    ],
+];
+
+foreach (\$events as \$event) {
+    \$ensure_event(\$event);
+}
+" >/dev/null
+
 run_wp option update show_on_front page
 run_wp option update page_on_front "${HOME_ID}"
 

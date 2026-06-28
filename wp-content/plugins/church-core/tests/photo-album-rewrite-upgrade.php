@@ -102,11 +102,17 @@ register_shutdown_function(static function () use ($created_post_id, $original_r
     church_test_remove_directory($route_path);
 });
 
+// The connection target and Host header are configurable so this test can run
+// from a separate container (e.g. wp-cli) where the site is reachable by service
+// name rather than 127.0.0.1. Defaults preserve the original local behavior.
+$test_base_url = rtrim((string) (getenv('CHURCH_TEST_BASE_URL') ?: 'http://127.0.0.1'), '/');
+$test_host_header = (string) (getenv('CHURCH_TEST_HOST') ?: 'localhost:8080');
+
 $query_var_response = wp_remote_get(
-    'http://127.0.0.1/?photo_album=' . rawurlencode($test_slug),
+    $test_base_url . '/?photo_album=' . rawurlencode($test_slug),
     [
         'headers' => [
-            'Host' => 'localhost:8080',
+            'Host' => $test_host_header,
         ],
         'redirection' => 0,
     ]
