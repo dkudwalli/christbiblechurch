@@ -36,7 +36,7 @@ final class Church_Core_Contact
     {
         $status = isset($_GET['church_contact_status']) ? sanitize_key(wp_unslash((string) $_GET['church_contact_status'])) : '';
         $form_state = self::get_form_state();
-        $has_notice = in_array($status, ['success', 'invalid', 'error'], true);
+        $has_notice = in_array($status, ['success', 'invalid', 'error', 'throttled'], true);
         $notice_id = 'church-contact-form-notice';
         $notice_attr = $has_notice ? ' aria-describedby="' . esc_attr($notice_id) . '"' : '';
         ob_start();
@@ -48,6 +48,8 @@ final class Church_Core_Contact
                 <p id="<?php echo esc_attr($notice_id); ?>" class="contact-form__notice is-error" role="alert" aria-live="assertive"><?php esc_html_e('Please complete the required fields and try again.', 'church-core'); ?></p>
             <?php elseif ($status === 'error') : ?>
                 <p id="<?php echo esc_attr($notice_id); ?>" class="contact-form__notice is-error" role="alert" aria-live="assertive"><?php esc_html_e('Something went wrong while saving your message. Please try again.', 'church-core'); ?></p>
+            <?php elseif ($status === 'throttled') : ?>
+                <p id="<?php echo esc_attr($notice_id); ?>" class="contact-form__notice is-error" role="alert" aria-live="assertive"><?php esc_html_e('You have sent several messages in a short time. Please try again a little later.', 'church-core'); ?></p>
             <?php endif; ?>
 
             <form class="contact-form" method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
@@ -121,6 +123,21 @@ final class Church_Core_Contact
             self::redirect_with_status($redirect, 'invalid', $state);
         }
 
+        // Per-IP rate limit: cap how many messages a single sender can store per
+        // hour to blunt inbox-flood / table-bloat spam (the honeypot only stops
+        // naive bots). Counted on stored messages, so honest validation retries
+        // above never consume budget. REMOTE_ADDR only — forwarded headers are not
+        // trustworthy for a gate; raise the limit via the filter if the site ever
+        // sits behind a shared proxy.
+        $ip = isset($_SERVER['REMOTE_ADDR']) ? (string) $_SERVER['REMOTE_ADDR'] : '';
+        $rate_key = 'church_contact_rl_' . md5($ip . '|' . wp_salt('nonce'));
+        $rate_limit = (int) apply_filters('church_core_contact_rate_limit', 5);
+        $rate_count = (int) get_transient($rate_key);
+
+        if ($rate_limit > 0 && $rate_count >= $rate_limit) {
+            self::redirect_with_status($redirect, 'throttled', $state);
+        }
+
         $post_id = wp_insert_post([
             'post_type' => 'contact_submission',
             'post_status' => 'publish',
@@ -135,6 +152,10 @@ final class Church_Core_Contact
 
         if (is_wp_error($post_id)) {
             self::redirect_with_status($redirect, 'error', $state);
+        }
+
+        if ($rate_limit > 0) {
+            set_transient($rate_key, $rate_count + 1, HOUR_IN_SECONDS);
         }
 
         $recipient = apply_filters('church_core_contact_recipient', get_option('admin_email'));
@@ -162,7 +183,7 @@ final class Church_Core_Contact
             'church_contact_status' => $status,
         ];
 
-        if ($state !== [] && in_array($status, ['invalid', 'error'], true)) {
+        if ($state !== [] && in_array($status, ['invalid', 'error', 'throttled'], true)) {
             $args['church_contact_state'] = self::store_form_state($state);
         }
 

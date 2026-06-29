@@ -26,7 +26,7 @@ final class Church_Core_Sermon_Sync_Admin
             'edit.php?post_type=sermon',
             __('YouTube Sync', 'church-core'),
             __('YouTube Sync', 'church-core'),
-            'manage_categories',
+            'manage_options',
             self::PAGE_SLUG,
             [__CLASS__, 'render_page']
         );
@@ -63,8 +63,18 @@ final class Church_Core_Sermon_Sync_Admin
             $schedule_weekday = $defaults['schedule_weekday'];
         }
 
+        // Preserve the stored API key when the field is submitted blank (the form
+        // renders it empty so the secret is never echoed into markup). A non-empty
+        // submission replaces it.
+        $submitted_api_key = sanitize_text_field((string) $settings['api_key']);
+
+        if ($submitted_api_key === '') {
+            $current_settings = Church_Core_Sermon_Cron::get_settings();
+            $submitted_api_key = (string) ($current_settings['api_key'] ?? '');
+        }
+
         $sanitized = [
-            'api_key' => sanitize_text_field((string) $settings['api_key']),
+            'api_key' => $submitted_api_key,
             'channel_id' => sanitize_text_field((string) $settings['channel_id']),
             'schedule_weekday' => $schedule_weekday,
             'schedule_time' => $schedule_time,
@@ -260,8 +270,16 @@ final class Church_Core_Sermon_Sync_Admin
                                 <label for="church-core-youtube-api-key"><?php esc_html_e('YouTube API Key', 'church-core'); ?></label>
                             </th>
                             <td>
-                                <input class="regular-text" type="password" id="church-core-youtube-api-key" name="<?php echo esc_attr(Church_Core_Sermon_Cron::SETTINGS_OPTION); ?>[api_key]" value="<?php echo esc_attr((string) $settings['api_key']); ?>" autocomplete="off">
-                                <p class="description"><?php esc_html_e('Use a YouTube Data API v3 key with access to channels, playlistItems, and videos.', 'church-core'); ?></p>
+                                <input class="regular-text" type="password" id="church-core-youtube-api-key" name="<?php echo esc_attr(Church_Core_Sermon_Cron::SETTINGS_OPTION); ?>[api_key]" value="" autocomplete="off">
+                                <p class="description">
+                                    <?php
+                                    if ((string) $settings['api_key'] !== '') {
+                                        esc_html_e('A key is saved. Leave this blank to keep it, or enter a new key to replace it.', 'church-core');
+                                    } else {
+                                        esc_html_e('Use a YouTube Data API v3 key with access to channels, playlistItems, and videos.', 'church-core');
+                                    }
+                                    ?>
+                                </p>
                             </td>
                         </tr>
                         <tr>
@@ -470,10 +488,9 @@ final class Church_Core_Sermon_Sync_Admin
 
     private static function assert_permissions(): void
     {
-        $post_type_object = get_post_type_object('sermon');
-        $publish_cap = $post_type_object instanceof WP_Post_Type ? $post_type_object->cap->publish_posts : 'publish_posts';
-
-        if (! current_user_can('manage_categories') || ! current_user_can($publish_cap)) {
+        // Admin-only: the screen exposes a billable Google API key and sync settings,
+        // and this matches the manage_options gate that options.php enforces on save.
+        if (! current_user_can('manage_options')) {
             wp_die(
                 esc_html__('You do not have permission to manage sermon sync.', 'church-core'),
                 esc_html__('Forbidden', 'church-core'),
