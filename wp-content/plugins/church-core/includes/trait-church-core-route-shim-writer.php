@@ -48,6 +48,7 @@ trait Church_Core_Route_Shim_Writer
         $existing_contents = file_exists($route_file) ? file_get_contents($route_file) : false;
 
         if ($existing_contents === $expected_contents) {
+            self::clear_route_shim_notice($slug);
             return true;
         }
 
@@ -57,6 +58,8 @@ trait Church_Core_Route_Shim_Writer
             self::store_route_shim_notice($slug, $route_file, 'Could not write the route shim file.');
             return false;
         }
+
+        self::clear_route_shim_notice($slug);
 
         return true;
     }
@@ -81,17 +84,53 @@ trait Church_Core_Route_Shim_Writer
         return sanitize_title($slug);
     }
 
+    /**
+     * Failure notices are stored as a map keyed by normalized slug so that one
+     * item's failure (or another item's success) never erases a different item's
+     * pending notice. The map shape is [ slug => ['path','reason','slug'] ].
+     */
     protected static function store_route_shim_notice(string $slug, string $path, string $reason): void
     {
-        update_option(self::ROUTE_SHIM_NOTICE_OPTION, [
+        $slug = self::normalize_route_slug($slug);
+        $notices = get_option(self::ROUTE_SHIM_NOTICE_OPTION, []);
+
+        if (! is_array($notices)) {
+            $notices = [];
+        }
+
+        $notices[$slug] = [
             'path' => $path,
             'reason' => $reason,
-            'slug' => self::normalize_route_slug($slug),
-        ], false);
+            'slug' => $slug,
+        ];
+
+        update_option(self::ROUTE_SHIM_NOTICE_OPTION, $notices, false);
     }
 
-    protected static function clear_route_shim_notice(): void
+    /**
+     * Clear one slug's notice, or (with no slug) all notices — the latter is used
+     * after a fully-successful reconcile.
+     */
+    protected static function clear_route_shim_notice(string $slug = ''): void
     {
-        delete_option(self::ROUTE_SHIM_NOTICE_OPTION);
+        if ($slug === '') {
+            delete_option(self::ROUTE_SHIM_NOTICE_OPTION);
+            return;
+        }
+
+        $slug = self::normalize_route_slug($slug);
+        $notices = get_option(self::ROUTE_SHIM_NOTICE_OPTION, []);
+
+        if (! is_array($notices) || ! array_key_exists($slug, $notices)) {
+            return;
+        }
+
+        unset($notices[$slug]);
+
+        if ($notices === []) {
+            delete_option(self::ROUTE_SHIM_NOTICE_OPTION);
+        } else {
+            update_option(self::ROUTE_SHIM_NOTICE_OPTION, $notices, false);
+        }
     }
 }

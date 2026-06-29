@@ -59,7 +59,7 @@ final class Church_Core_Sermon_Sync_Service
             $legacy_post_id = $this->find_existing_post_by_youtube_url((string) $video['video_id']);
 
             if ($legacy_post_id > 0) {
-                update_post_meta($legacy_post_id, 'youtube_video_id', (string) $video['video_id']);
+                update_post_meta($legacy_post_id, Church_Core_Sermons::YOUTUBE_VIDEO_ID_META_KEY, (string) $video['video_id']);
 
                 $this->maybe_backfill_scripture_reference((int) $legacy_post_id, $scripture_reference);
                 $result['backfilled']++;
@@ -153,13 +153,13 @@ final class Church_Core_Sermon_Sync_Service
         }
 
         $meta_input = [
-            'sermon_date' => $dates['sermon_date'],
-            'youtube_video_id' => (string) $video['video_id'],
-            'youtube_url' => (string) $video['youtube_url'],
+            Church_Core_Sermons::SERMON_DATE_META_KEY => $dates['sermon_date'],
+            Church_Core_Sermons::YOUTUBE_VIDEO_ID_META_KEY => (string) $video['video_id'],
+            Church_Core_Sermons::YOUTUBE_URL_META_KEY => (string) $video['youtube_url'],
         ];
 
         if ($scripture_reference !== '') {
-            $meta_input['scripture_reference'] = $scripture_reference;
+            $meta_input[Church_Core_Sermons::SCRIPTURE_REFERENCE_META_KEY] = $scripture_reference;
         }
 
         $post_id = wp_insert_post([
@@ -306,11 +306,11 @@ final class Church_Core_Sermon_Sync_Service
             return false;
         }
 
-        if ((string) get_post_meta($post_id, 'scripture_reference', true) !== '') {
+        if ((string) get_post_meta($post_id, Church_Core_Sermons::SCRIPTURE_REFERENCE_META_KEY, true) !== '') {
             return false;
         }
 
-        update_post_meta($post_id, 'scripture_reference', $scripture_reference);
+        update_post_meta($post_id, Church_Core_Sermons::SCRIPTURE_REFERENCE_META_KEY, $scripture_reference);
 
         return true;
     }
@@ -324,7 +324,7 @@ final class Church_Core_Sermon_Sync_Service
             'fields' => 'ids',
             'meta_query' => [
                 [
-                    'key' => 'youtube_video_id',
+                    'key' => Church_Core_Sermons::YOUTUBE_VIDEO_ID_META_KEY,
                     'value' => $video_id,
                 ]
             ],
@@ -346,7 +346,7 @@ final class Church_Core_Sermon_Sync_Service
             'fields' => 'ids',
             'meta_query' => [
                 [
-                    'key' => 'youtube_url',
+                    'key' => Church_Core_Sermons::YOUTUBE_URL_META_KEY,
                     'value' => $video_id,
                     'compare' => 'LIKE',
                 ]
@@ -354,7 +354,7 @@ final class Church_Core_Sermon_Sync_Service
         ]);
 
         foreach ($posts as $post_id) {
-            $youtube_url = (string) get_post_meta((int) $post_id, 'youtube_url', true);
+            $youtube_url = (string) get_post_meta((int) $post_id, Church_Core_Sermons::YOUTUBE_URL_META_KEY, true);
 
             if (Church_Core_Youtube_Client::extract_video_id_from_url($youtube_url) === $video_id) {
                 return (int) $post_id;
@@ -372,22 +372,22 @@ final class Church_Core_Sermon_Sync_Service
             'posts_per_page' => -1,
             'fields' => 'ids',
             'meta_query' => [
-                ['key' => 'youtube_url', 'compare' => 'EXISTS'],
-                ['key' => 'youtube_video_id', 'compare' => 'NOT EXISTS'],
+                ['key' => Church_Core_Sermons::YOUTUBE_URL_META_KEY, 'compare' => 'EXISTS'],
+                ['key' => Church_Core_Sermons::YOUTUBE_VIDEO_ID_META_KEY, 'compare' => 'NOT EXISTS'],
             ],
         ]);
 
         $backfilled = 0;
 
         foreach ($post_ids as $post_id) {
-            $youtube_url = (string) get_post_meta((int) $post_id, 'youtube_url', true);
+            $youtube_url = (string) get_post_meta((int) $post_id, Church_Core_Sermons::YOUTUBE_URL_META_KEY, true);
             $video_id = Church_Core_Youtube_Client::extract_video_id_from_url($youtube_url);
 
             if ($video_id === '') {
                 continue;
             }
 
-            update_post_meta((int) $post_id, 'youtube_video_id', $video_id);
+            update_post_meta((int) $post_id, Church_Core_Sermons::YOUTUBE_VIDEO_ID_META_KEY, $video_id);
             $backfilled++;
         }
 

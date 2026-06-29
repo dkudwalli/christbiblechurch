@@ -142,6 +142,7 @@ final class Church_Core_Sermon_Cron
 
                 self::store_last_run($result);
                 self::append_log('error', $message);
+                self::maybe_alert_cron_failure($trigger, $result);
 
                 return $result;
             }
@@ -176,11 +177,50 @@ final class Church_Core_Sermon_Cron
                     'skipped' => $result['skipped'],
                 ]
             );
+            self::maybe_alert_cron_failure($trigger, $result);
 
             return $result;
         } finally {
             delete_transient(self::LOCK_TRANSIENT);
         }
+    }
+
+    /**
+     * Email the site admin when a SCHEDULED (cron) sync fails or partially fails.
+     * Manual runs already surface a notice on the YouTube Sync screen, so only the
+     * unattended cron trigger needs a push. Lock-contention skips are intentionally
+     * not alerted (transient, self-resolving). Recipient is filterable.
+     */
+    private static function maybe_alert_cron_failure(string $trigger, array $result): void
+    {
+        if ($trigger !== 'cron') {
+            return;
+        }
+
+        $status = (string) ($result['status'] ?? '');
+
+        if ($status !== 'error' && $status !== 'partial') {
+            return;
+        }
+
+        $recipient = apply_filters('church_core_sermon_sync_alert_recipient', get_option('admin_email'));
+
+        if (! is_string($recipient) || $recipient === '') {
+            return;
+        }
+
+        $errors = isset($result['errors']) && is_array($result['errors']) ? array_map('strval', $result['errors']) : [];
+        /* translators: %s: site name. */
+        $subject = sprintf(__('[%s] Weekly sermon sync needs attention', 'church-core'), wp_specialchars_decode((string) get_bloginfo('name'), ENT_QUOTES));
+        $body = implode("\n", array_filter([
+            /* translators: %s: sync status (error or partial). */
+            sprintf(__('The scheduled YouTube sermon sync finished with status: %s', 'church-core'), $status),
+            (string) ($result['message'] ?? ''),
+            $errors !== [] ? "\n" . __('Errors:', 'church-core') . "\n- " . implode("\n- ", $errors) : '',
+            "\n" . __('Open Sermons → YouTube Sync in the dashboard for the full log.', 'church-core'),
+        ], static fn ($line): bool => $line !== ''));
+
+        wp_mail($recipient, $subject, $body);
     }
 
     public static function ensure_schedule(): void

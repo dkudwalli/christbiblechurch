@@ -172,6 +172,9 @@ final class Church_Core_Contact
 
         if (! $sent) {
             error_log('church-core: wp_mail failed for contact submission ID ' . $post_id);
+            // Flag it so an admin who relies on email still discovers the message
+            // in the Contact Messages list (the submission itself is already saved).
+            update_post_meta($post_id, 'notification_failed', '1');
         }
 
         self::redirect_with_status($redirect, 'success');
@@ -258,6 +261,10 @@ final class Church_Core_Contact
     {
         if ($column === 'contact_email') {
             echo esc_html((string) get_post_meta($post_id, 'contact_email', true) ?: '—');
+
+            if (get_post_meta($post_id, 'notification_failed', true)) {
+                echo '<br><span style="color:#b32d2e;">' . esc_html__('⚠ Email notification not sent — message saved here.', 'church-core') . '</span>';
+            }
         }
 
         if ($column === 'contact_phone') {

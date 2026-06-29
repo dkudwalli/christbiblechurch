@@ -651,7 +651,7 @@ final class Church_Core_Sermon_Import
             }
         }
 
-        update_post_meta($post_id, 'sermon_date', $row['sermon_date']);
+        update_post_meta($post_id, Church_Core_Sermons::SERMON_DATE_META_KEY, $row['sermon_date']);
 
         foreach (['scripture_reference', 'youtube_url', 'audio_url'] as $meta_key) {
             if ($row[$meta_key] === '') {
@@ -664,7 +664,7 @@ final class Church_Core_Sermon_Import
         $youtube_video_id = Church_Core_Youtube_Client::extract_video_id_from_url($row['youtube_url']);
 
         if ($youtube_video_id !== '') {
-            update_post_meta($post_id, 'youtube_video_id', $youtube_video_id);
+            update_post_meta($post_id, Church_Core_Sermons::YOUTUBE_VIDEO_ID_META_KEY, $youtube_video_id);
         }
 
         $result['imported']++;
@@ -686,25 +686,12 @@ final class Church_Core_Sermon_Import
 
     private static function persist_result(array $result): void
     {
-        set_transient(
-            self::RESULT_TRANSIENT_PREFIX . get_current_user_id(),
-            $result,
-            self::RESULT_TTL
-        );
+        Church_Core_Admin_Flash::set(self::RESULT_TRANSIENT_PREFIX, $result, self::RESULT_TTL);
     }
 
     private static function consume_result(): ?array
     {
-        $key = self::RESULT_TRANSIENT_PREFIX . get_current_user_id();
-        $result = get_transient($key);
-
-        if (! is_array($result)) {
-            return null;
-        }
-
-        delete_transient($key);
-
-        return $result;
+        return Church_Core_Admin_Flash::take(self::RESULT_TRANSIENT_PREFIX);
     }
 
     private static function is_valid_date(string $value): bool

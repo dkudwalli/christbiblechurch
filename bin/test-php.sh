@@ -22,6 +22,7 @@ TESTS=(
   "wp-content/plugins/church-core/tests/sermon-admin-sortable-date.php"
   "wp-content/plugins/church-core/tests/photo-album-route-shims.php"
   "wp-content/plugins/church-core/tests/sermon-route-shims.php"
+  "wp-content/plugins/church-core/tests/route-shim-notice.php"
   "wp-content/plugins/church-core/tests/photo-album-rewrite-upgrade.php"
 )
 

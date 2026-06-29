@@ -274,31 +274,36 @@ final class Church_Core_Photo_Albums
             return;
         }
 
-        $notice = get_option(self::ROUTE_SHIM_NOTICE_OPTION);
+        $notices = get_option(self::ROUTE_SHIM_NOTICE_OPTION);
 
-        if (! is_array($notice)) {
+        if (! is_array($notices) || $notices === []) {
             return;
         }
 
         delete_option(self::ROUTE_SHIM_NOTICE_OPTION);
 
-        $slug = isset($notice['slug']) ? (string) $notice['slug'] : '';
-        $path = isset($notice['path']) ? (string) $notice['path'] : '';
-        $reason = isset($notice['reason']) ? (string) $notice['reason'] : '';
+        // Notices are a map keyed by slug; tolerate the older single-notice shape.
+        if (isset($notices['reason']) || isset($notices['path'])) {
+            $notices = [$notices];
+        }
         ?>
         <div class="notice notice-error">
-            <p>
-                <?php
-                echo esc_html(
-                    sprintf(
-                        'Photo album route fallback could not be synchronized for slug "%1$s". Hostinger may continue showing "No content found." Path: %2$s. %3$s',
-                        $slug !== '' ? $slug : '(unknown)',
-                        $path !== '' ? $path : '(unknown)',
-                        $reason !== '' ? $reason : 'Check that WordPress can write to the site root.'
-                    )
-                );
-                ?>
-            </p>
+            <?php foreach ($notices as $notice) : ?>
+                <?php if (is_array($notice)) : ?>
+                    <p>
+                        <?php
+                        echo esc_html(
+                            sprintf(
+                                'Photo album route fallback could not be synchronized for slug "%1$s". Hostinger may continue showing "No content found." Path: %2$s. %3$s',
+                                isset($notice['slug']) && $notice['slug'] !== '' ? (string) $notice['slug'] : '(unknown)',
+                                isset($notice['path']) && $notice['path'] !== '' ? (string) $notice['path'] : '(unknown)',
+                                isset($notice['reason']) && $notice['reason'] !== '' ? (string) $notice['reason'] : 'Check that WordPress can write to the site root.'
+                            )
+                        );
+                        ?>
+                    </p>
+                <?php endif; ?>
+            <?php endforeach; ?>
         </div>
         <?php
     }
@@ -325,7 +330,7 @@ final class Church_Core_Photo_Albums
         wp_enqueue_script(
             'church-core-admin',
             CHURCH_CORE_URL . 'assets/admin.js',
-            ['jquery'],
+            [],
             filemtime(CHURCH_CORE_PATH . 'assets/admin.js'),
             true
         );
@@ -391,7 +396,6 @@ final class Church_Core_Photo_Albums
         }
 
         update_post_meta($post->ID, self::SYNCED_ROUTE_SLUG_META_KEY, $current_slug);
-        self::clear_route_shim_notice();
 
         return true;
     }
@@ -413,7 +417,6 @@ final class Church_Core_Photo_Albums
         }
 
         delete_post_meta($post_id, self::SYNCED_ROUTE_SLUG_META_KEY);
-        self::clear_route_shim_notice();
 
         return true;
     }
@@ -436,6 +439,7 @@ final class Church_Core_Photo_Albums
         $route_directory = self::get_route_directory_path($slug);
 
         if (! is_dir($route_directory)) {
+            self::clear_route_shim_notice($slug);
             return true;
         }
 
@@ -457,6 +461,8 @@ final class Church_Core_Photo_Albums
             self::store_route_shim_notice($slug, $route_directory, 'Could not remove the empty album shim directory.');
             return false;
         }
+
+        self::clear_route_shim_notice($slug);
 
         return true;
     }

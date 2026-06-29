@@ -260,6 +260,26 @@ final class Church_Core_Sermon_Sync_Admin
 
             <p><?php esc_html_e('Sync newly uploaded YouTube sermons into the sermon archive. Automatic sync runs on the schedule below once the church channel upload is available, and you can always trigger a manual sync if needed.', 'church-core'); ?></p>
 
+            <?php
+            self::render_settings_form(
+                $settings,
+                $speaker_terms,
+                $has_saved_default_speaker,
+                $selected_default_speaker_term_id,
+                $selected_default_speaker_exists,
+                $timezone_label
+            );
+            self::render_manual_sync_form();
+            self::render_status_table($last_run, $next_run);
+            self::render_recent_log($logs);
+            ?>
+        </div>
+        <?php
+    }
+
+    private static function render_settings_form(array $settings, array $speaker_terms, bool $has_saved_default_speaker, int $selected_default_speaker_term_id, bool $selected_default_speaker_exists, string $timezone_label): void
+    {
+        ?>
             <form method="post" action="options.php">
                 <?php settings_fields(self::SETTINGS_GROUP); ?>
 
@@ -356,7 +376,12 @@ final class Church_Core_Sermon_Sync_Admin
 
                 <?php submit_button(__('Save YouTube Sync Settings', 'church-core')); ?>
             </form>
+        <?php
+    }
 
+    private static function render_manual_sync_form(): void
+    {
+        ?>
             <hr>
 
             <h2><?php esc_html_e('Manual Sync', 'church-core'); ?></h2>
@@ -366,7 +391,12 @@ final class Church_Core_Sermon_Sync_Admin
                 <?php wp_nonce_field('church_core_sermon_sync_now'); ?>
                 <?php submit_button(__('Run Sync Now', 'church-core'), 'secondary', 'submit', false); ?>
             </form>
+        <?php
+    }
 
+    private static function render_status_table(array $last_run, int $next_run): void
+    {
+        ?>
             <hr>
 
             <h2><?php esc_html_e('Sync Status', 'church-core'); ?></h2>
@@ -428,7 +458,12 @@ final class Church_Core_Sermon_Sync_Admin
                     <?php endforeach; ?>
                 </ul>
             <?php endif; ?>
+        <?php
+    }
 
+    private static function render_recent_log(array $logs): void
+    {
+        ?>
             <h2><?php esc_html_e('Recent Log', 'church-core'); ?></h2>
             <?php if ($logs === []) : ?>
                 <p><?php esc_html_e('No sync log entries yet.', 'church-core'); ?></p>
@@ -452,7 +487,6 @@ final class Church_Core_Sermon_Sync_Admin
                     </tbody>
                 </table>
             <?php endif; ?>
-        </div>
         <?php
     }
 
@@ -501,24 +535,11 @@ final class Church_Core_Sermon_Sync_Admin
 
     private static function persist_notice(array $result): void
     {
-        set_transient(
-            self::NOTICE_TRANSIENT_PREFIX . get_current_user_id(),
-            $result,
-            self::NOTICE_TTL
-        );
+        Church_Core_Admin_Flash::set(self::NOTICE_TRANSIENT_PREFIX, $result, self::NOTICE_TTL);
     }
 
     private static function consume_notice(): ?array
     {
-        $key = self::NOTICE_TRANSIENT_PREFIX . get_current_user_id();
-        $notice = get_transient($key);
-
-        if (! is_array($notice)) {
-            return null;
-        }
-
-        delete_transient($key);
-
-        return $notice;
+        return Church_Core_Admin_Flash::take(self::NOTICE_TRANSIENT_PREFIX);
     }
 }

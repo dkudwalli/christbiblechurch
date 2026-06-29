@@ -173,7 +173,7 @@ final class Church_Core_Page_Sections
         wp_enqueue_script(
             'church-core-admin',
             CHURCH_CORE_URL . 'assets/admin.js',
-            ['jquery'],
+            [],
             filemtime(CHURCH_CORE_PATH . 'assets/admin.js'),
             true
         );

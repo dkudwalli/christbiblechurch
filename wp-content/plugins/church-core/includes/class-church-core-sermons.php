@@ -5,6 +5,12 @@ if (! defined('ABSPATH')) {
 
 final class Church_Core_Sermons
 {
+    public const SERMON_DATE_META_KEY = 'sermon_date';
+    public const SCRIPTURE_REFERENCE_META_KEY = 'scripture_reference';
+    public const YOUTUBE_URL_META_KEY = 'youtube_url';
+    public const YOUTUBE_VIDEO_ID_META_KEY = 'youtube_video_id';
+    public const AUDIO_URL_META_KEY = 'audio_url';
+
     public static function boot(): void
     {
         add_action('init', [__CLASS__, 'register_content']);
@@ -98,10 +104,10 @@ final class Church_Core_Sermons
         }
 
         $fields = [
-            'sermon_date' => (string) get_post_meta($post->ID, 'sermon_date', true),
-            'scripture_reference' => (string) get_post_meta($post->ID, 'scripture_reference', true),
-            'youtube_url' => (string) get_post_meta($post->ID, 'youtube_url', true),
-            'audio_url' => (string) get_post_meta($post->ID, 'audio_url', true),
+            'sermon_date' => (string) get_post_meta($post->ID, self::SERMON_DATE_META_KEY, true),
+            'scripture_reference' => (string) get_post_meta($post->ID, self::SCRIPTURE_REFERENCE_META_KEY, true),
+            'youtube_url' => (string) get_post_meta($post->ID, self::YOUTUBE_URL_META_KEY, true),
+            'audio_url' => (string) get_post_meta($post->ID, self::AUDIO_URL_META_KEY, true),
         ];
         ?>
         <table class="form-table" role="presentation">
@@ -207,13 +213,13 @@ final class Church_Core_Sermons
             update_post_meta($post_id, $meta_key, $value);
         }
 
-        $youtube_url = (string) get_post_meta($post_id, 'youtube_url', true);
+        $youtube_url = (string) get_post_meta($post_id, self::YOUTUBE_URL_META_KEY, true);
         $youtube_video_id = Church_Core_Youtube_Client::extract_video_id_from_url($youtube_url);
 
         if ($youtube_video_id === '') {
-            delete_post_meta($post_id, 'youtube_video_id');
+            delete_post_meta($post_id, self::YOUTUBE_VIDEO_ID_META_KEY);
         } else {
-            update_post_meta($post_id, 'youtube_video_id', $youtube_video_id);
+            update_post_meta($post_id, self::YOUTUBE_VIDEO_ID_META_KEY, $youtube_video_id);
         }
     }
 
@@ -272,8 +278,8 @@ final class Church_Core_Sermons
         // LEFT-JOINs instead, so dateless sermons sort last rather than vanishing.
         $query->set('meta_query', [
             'relation' => 'OR',
-            'sermon_date_present' => ['key' => 'sermon_date', 'compare' => 'EXISTS', 'type' => 'DATE'],
-            'sermon_date_missing' => ['key' => 'sermon_date', 'compare' => 'NOT EXISTS'],
+            'sermon_date_present' => ['key' => self::SERMON_DATE_META_KEY, 'compare' => 'EXISTS', 'type' => 'DATE'],
+            'sermon_date_missing' => ['key' => self::SERMON_DATE_META_KEY, 'compare' => 'NOT EXISTS'],
         ]);
         $query->set('orderby', ['sermon_date_present' => 'DESC', 'date' => 'DESC']);
 
@@ -336,7 +342,7 @@ final class Church_Core_Sermons
         wp_enqueue_script(
             'church-core-admin',
             CHURCH_CORE_URL . 'assets/admin.js',
-            ['jquery'],
+            [],
             filemtime(CHURCH_CORE_PATH . 'assets/admin.js'),
             true
         );
@@ -377,7 +383,7 @@ final class Church_Core_Sermons
         }
 
         if ($column === 'sermon_date') {
-            $date = (string) get_post_meta($post_id, 'sermon_date', true);
+            $date = (string) get_post_meta($post_id, self::SERMON_DATE_META_KEY, true);
             echo $date !== '' ? esc_html($date) : '—';
         }
     }

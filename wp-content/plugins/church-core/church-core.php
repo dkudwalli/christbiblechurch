@@ -18,6 +18,7 @@ define('CHURCH_CORE_PATH', plugin_dir_path(__FILE__));
 define('CHURCH_CORE_URL', plugin_dir_url(__FILE__));
 
 require_once CHURCH_CORE_PATH . 'includes/class-church-core.php';
+require_once CHURCH_CORE_PATH . 'includes/class-church-core-admin-flash.php';
 require_once CHURCH_CORE_PATH . 'includes/trait-church-core-route-shim-writer.php';
 require_once CHURCH_CORE_PATH . 'includes/class-church-core-sermons.php';
 require_once CHURCH_CORE_PATH . 'includes/class-church-core-term-helper.php';

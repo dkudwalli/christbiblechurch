@@ -133,32 +133,37 @@ final class Church_Core_Sermon_Route_Shims
             return;
         }
 
-        $notice = get_option(self::ROUTE_SHIM_NOTICE_OPTION);
+        $notices = get_option(self::ROUTE_SHIM_NOTICE_OPTION);
 
-        if (! is_array($notice)) {
+        if (! is_array($notices) || $notices === []) {
             return;
         }
 
         delete_option(self::ROUTE_SHIM_NOTICE_OPTION);
 
-        $slug = isset($notice['slug']) ? (string) $notice['slug'] : '';
-        $path = isset($notice['path']) ? (string) $notice['path'] : '';
-        $reason = isset($notice['reason']) ? (string) $notice['reason'] : '';
+        // Notices are a map keyed by slug; tolerate the older single-notice shape.
+        if (isset($notices['reason']) || isset($notices['path'])) {
+            $notices = [$notices];
+        }
         ?>
         <div class="notice notice-error">
-            <p>
-                <?php
-                echo esc_html(
-                    sprintf(
-                        /* translators: 1: sermon slug, 2: filesystem path, 3: failure reason. */
-                        __('Sermon route fallback could not be created for slug "%1$s". Hostinger may show "No content found" for this sermon until a committed shim is added. Path: %2$s. %3$s', 'church-core'),
-                        $slug !== '' ? $slug : '(unknown)',
-                        $path !== '' ? $path : '(unknown)',
-                        $reason !== '' ? $reason : 'Check that WordPress can write to the site root.'
-                    )
-                );
-                ?>
-            </p>
+            <?php foreach ($notices as $notice) : ?>
+                <?php if (is_array($notice)) : ?>
+                    <p>
+                        <?php
+                        echo esc_html(
+                            sprintf(
+                                /* translators: 1: sermon slug, 2: filesystem path, 3: failure reason. */
+                                __('Sermon route fallback could not be created for slug "%1$s". Hostinger may show "No content found" for this sermon until a committed shim is added. Path: %2$s. %3$s', 'church-core'),
+                                isset($notice['slug']) && $notice['slug'] !== '' ? (string) $notice['slug'] : '(unknown)',
+                                isset($notice['path']) && $notice['path'] !== '' ? (string) $notice['path'] : '(unknown)',
+                                isset($notice['reason']) && $notice['reason'] !== '' ? (string) $notice['reason'] : 'Check that WordPress can write to the site root.'
+                            )
+                        );
+                        ?>
+                    </p>
+                <?php endif; ?>
+            <?php endforeach; ?>
         </div>
         <?php
     }

@@ -5,6 +5,9 @@ if (! defined('ABSPATH')) {
 
 final class Church_Core_Events
 {
+    public const EVENT_START_META_KEY = 'event_start';
+    public const EVENT_LOCATION_META_KEY = 'event_location';
+
     public static function boot(): void
     {
         add_action('init', [__CLASS__, 'register_content']);
@@ -49,8 +52,8 @@ final class Church_Core_Events
     {
         wp_nonce_field('church_core_event_meta', 'church_core_event_meta_nonce');
 
-        $event_start = (string) get_post_meta($post->ID, 'event_start', true);
-        $event_location = (string) get_post_meta($post->ID, 'event_location', true);
+        $event_start = (string) get_post_meta($post->ID, self::EVENT_START_META_KEY, true);
+        $event_location = (string) get_post_meta($post->ID, self::EVENT_LOCATION_META_KEY, true);
         ?>
         <table class="form-table" role="presentation">
             <tbody>
@@ -91,15 +94,15 @@ final class Church_Core_Events
         $event_location = isset($_POST['event_location']) ? sanitize_text_field(wp_unslash((string) $_POST['event_location'])) : '';
 
         if ($event_start === '') {
-            delete_post_meta($post_id, 'event_start');
+            delete_post_meta($post_id, self::EVENT_START_META_KEY);
         } else {
-            update_post_meta($post_id, 'event_start', $event_start);
+            update_post_meta($post_id, self::EVENT_START_META_KEY, $event_start);
         }
 
         if ($event_location === '') {
-            delete_post_meta($post_id, 'event_location');
+            delete_post_meta($post_id, self::EVENT_LOCATION_META_KEY);
         } else {
-            update_post_meta($post_id, 'event_location', $event_location);
+            update_post_meta($post_id, self::EVENT_LOCATION_META_KEY, $event_location);
         }
     }
 
@@ -114,12 +117,12 @@ final class Church_Core_Events
     public static function render_event_column(string $column, int $post_id): void
     {
         if ($column === 'event_start') {
-            $event_start = (string) get_post_meta($post_id, 'event_start', true);
+            $event_start = (string) get_post_meta($post_id, self::EVENT_START_META_KEY, true);
             echo esc_html($event_start !== '' ? self::format_display_datetime($event_start) : '—');
         }
 
         if ($column === 'event_location') {
-            echo esc_html((string) get_post_meta($post_id, 'event_location', true) ?: '—');
+            echo esc_html((string) get_post_meta($post_id, self::EVENT_LOCATION_META_KEY, true) ?: '—');
         }
     }
 
