@@ -339,10 +339,13 @@ final class Church_Core_Sermon_Sync_Service
 
     private function find_existing_post_by_youtube_url(string $video_id): int
     {
+        // Unbounded: the LIKE on an 11-char video id is a cheap prefilter that matches
+        // ~0-1 rows, and each candidate is confirmed by exact id below — a low cap
+        // (was 10) could silently skip the real legacy post during backfill.
         $posts = get_posts([
             'post_type' => 'sermon',
             'post_status' => 'any',
-            'posts_per_page' => 10,
+            'posts_per_page' => -1,
             'fields' => 'ids',
             'meta_query' => [
                 [

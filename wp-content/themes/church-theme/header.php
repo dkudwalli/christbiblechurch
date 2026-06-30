@@ -20,11 +20,13 @@ if (! defined('ABSPATH')) {
     <div class="wrap site-header__inner">
         <a class="site-brand" href="<?php echo esc_url(home_url('/')); ?>">
             <?php
+            // Logo stays eager (above the fold) but without fetchpriority=high, so
+            // the single high-priority hint is reserved for the actual LCP element
+            // (the hero image) rather than competing with the small header logo.
             echo church_theme_render_static_image($brand_logo, [
                 'class' => 'site-brand__mark',
                 'loading' => 'eager',
                 'decoding' => 'sync',
-                'fetchpriority' => 'high',
                 'sizes' => '(max-width: 720px) 150px, 180px',
             ]);
             ?>

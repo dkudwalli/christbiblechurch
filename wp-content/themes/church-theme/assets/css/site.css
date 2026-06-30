@@ -2498,11 +2498,15 @@ html:not(.has-js) .hero-banner__content {
   transform: translateX(-50%);
 }
 
+/* 12px visual dot inside a >=24px hit area (WCAG 2.5.8); padding + content-box
+   background-clip keep only the 12px circle painted while the button stays >=24px. */
 .hero-banner__dot {
   width: 12px;
   height: 12px;
-  padding: 0;
+  padding: 6px;
+  box-sizing: content-box;
   background: rgba(246, 243, 236, 0.5);
+  background-clip: content-box;
   border: 0;
   border-radius: 999px;
   cursor: pointer;

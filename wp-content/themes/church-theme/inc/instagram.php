@@ -70,6 +70,9 @@ function church_theme_get_instagram_feed(int $limit = 9): array
     }
 
     $transient_key = 'church_theme_ig_' . md5($account_id . '|' . $access_token . '|' . $limit);
+    // Last-known-good payload, kept far longer than the live cache so a transient
+    // Instagram outage degrades to slightly stale photos rather than an empty grid.
+    $last_good_key = $transient_key . '_ok';
     $cached = get_transient($transient_key);
 
     if (is_array($cached)) {
@@ -81,47 +84,29 @@ function church_theme_get_instagram_feed(int $limit = 9): array
         'limit' => max(1, $limit),
         'access_token' => $access_token,
     ], church_theme_get_instagram_media_endpoint($account_id));
+    // 5s (not 15s) so a hung Graph API call can't stall the gallery page for a
+    // visitor who happens to land on the cache miss.
     $response = wp_safe_remote_get($endpoint, [
-        'timeout' => 15,
+        'timeout' => 5,
     ]);
     $response_code = is_wp_error($response) ? 0 : wp_remote_retrieve_response_code($response);
+    $body = is_wp_error($response) ? null : json_decode((string) wp_remote_retrieve_body($response), true);
 
-    if (is_wp_error($response) || $response_code < 200 || $response_code >= 300) {
-        $result = [
-            'configured' => true,
-            'items' => [],
-            'error' => true,
-        ];
-        set_transient($transient_key, $result, 5 * MINUTE_IN_SECONDS);
-
-        return $result;
+    if (is_wp_error($response) || $response_code < 200 || $response_code >= 300 || ! is_array($body['data'] ?? null)) {
+        return church_theme_instagram_failure_result($transient_key, $last_good_key);
     }
 
-    $body = json_decode((string) wp_remote_retrieve_body($response), true);
     $items = [];
 
-    if (! is_array($body['data'] ?? null)) {
-        $result = [
-            'configured' => true,
-            'items' => [],
-            'error' => true,
-        ];
-        set_transient($transient_key, $result, 5 * MINUTE_IN_SECONDS);
+    foreach ($body['data'] as $item) {
+        if (! is_array($item)) {
+            continue;
+        }
 
-        return $result;
-    }
+        $normalized = church_theme_normalize_instagram_media_item($item);
 
-    if (is_array($body['data'])) {
-        foreach ($body['data'] as $item) {
-            if (! is_array($item)) {
-                continue;
-            }
-
-            $normalized = church_theme_normalize_instagram_media_item($item);
-
-            if (is_array($normalized)) {
-                $items[] = $normalized;
-            }
+        if (is_array($normalized)) {
+            $items[] = $normalized;
         }
     }
 
@@ -131,6 +116,39 @@ function church_theme_get_instagram_feed(int $limit = 9): array
         'error' => false,
     ];
     set_transient($transient_key, $result, 15 * MINUTE_IN_SECONDS);
+    set_transient($last_good_key, $result, WEEK_IN_SECONDS);
+
+    return $result;
+}
+
+/**
+ * Resolve the response when an Instagram fetch fails: serve the last-known-good
+ * payload (marked stale) when one exists, otherwise an empty error result. Either
+ * way the decision is cached briefly so an outage does not re-hit the API on every
+ * request.
+ *
+ * @return array<string, mixed>
+ */
+function church_theme_instagram_failure_result(string $transient_key, string $last_good_key): array
+{
+    $last_good = get_transient($last_good_key);
+
+    if (is_array($last_good) && ! empty($last_good['items'])) {
+        $result = [
+            'configured' => true,
+            'items' => $last_good['items'],
+            'error' => false,
+            'stale' => true,
+        ];
+    } else {
+        $result = [
+            'configured' => true,
+            'items' => [],
+            'error' => true,
+        ];
+    }
+
+    set_transient($transient_key, $result, 5 * MINUTE_IN_SECONDS);
 
     return $result;
 }

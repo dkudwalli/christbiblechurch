@@ -70,7 +70,7 @@ $gallery_feature = church_theme_get_gallery_feature_media();
                     <?php foreach ($instagram_feed['items'] as $item) : ?>
                         <?php $caption = trim((string) ($item['caption'] ?? '')); ?>
                         <article class="gallery-card">
-                            <a class="gallery-card__media js-lightbox skeleton" href="<?php echo esc_url((string) $item['image_url']); ?>" data-permalink="<?php echo esc_url((string) $item['permalink']); ?>" data-caption="<?php echo esc_attr($caption); ?>" data-link-label="<?php esc_attr_e('View on Instagram', 'church-theme'); ?>" aria-label="<?php esc_attr_e('View image in lightbox', 'church-theme'); ?>">
+                            <a class="gallery-card__media js-lightbox skeleton" href="<?php echo esc_url((string) $item['image_url']); ?>" data-permalink="<?php echo esc_url((string) $item['permalink']); ?>" data-caption="<?php echo esc_attr($caption); ?>" data-link-label="<?php esc_attr_e('View on Instagram', 'church-theme'); ?>" aria-label="<?php echo esc_attr($caption !== '' ? sprintf(/* translators: %s: photo caption. */ __('View photo in lightbox: %s', 'church-theme'), $caption) : __('View image in lightbox', 'church-theme')); ?>">
                                 <img src="<?php echo esc_url((string) $item['image_url']); ?>" alt="<?php echo esc_attr($caption !== '' ? $caption : __('Crossroad South Church Instagram post', 'church-theme')); ?>" loading="lazy" decoding="async">
                             </a>
                         </article>

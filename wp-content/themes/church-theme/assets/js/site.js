@@ -423,7 +423,11 @@ document.addEventListener("DOMContentLoaded", () => {
       dots.forEach((dot, i) => {
         const active = i === next;
         dot.classList.toggle("is-active", active);
-        dot.setAttribute("aria-selected", active ? "true" : "false");
+        if (active) {
+          dot.setAttribute("aria-current", "true");
+        } else {
+          dot.removeAttribute("aria-current");
+        }
       });
       current = next;
     };

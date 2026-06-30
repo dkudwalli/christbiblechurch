@@ -15,6 +15,8 @@ final class Church_Core_Photo_Albums
     private const ROUTE_SHIM_NOTICE_OPTION = 'church_core_photo_album_route_shim_notice';
     private const REWRITE_VERSION = '1';
     private const REWRITE_VERSION_OPTION = 'church_core_photo_album_rewrite_version';
+    private const REWRITE_ATTEMPTS_OPTION = 'church_core_photo_album_rewrite_attempts';
+    private const REWRITE_MAX_ATTEMPTS = 3;
     private const SYNCED_ROUTE_SLUG_META_KEY = '_church_core_photo_album_route_shim_slug';
 
     public static function boot(): void
@@ -249,6 +251,26 @@ final class Church_Core_Photo_Albums
             return;
         }
 
+        // Bound the self-heal: without this, a state where the photo-album rules
+        // never appear (so the version is never recorded) would re-run
+        // flush_rewrite_rules() on every init forever. Cap the attempts per version
+        // epoch; once exhausted, stop flushing and rely on the documented manual
+        // "Save Permalinks" fallback.
+        $attempts_raw = get_option(self::REWRITE_ATTEMPTS_OPTION);
+        $attempts = is_array($attempts_raw) && ($attempts_raw['version'] ?? '') === self::REWRITE_VERSION
+            ? (int) ($attempts_raw['count'] ?? 0)
+            : 0;
+
+        if ($attempts >= self::REWRITE_MAX_ATTEMPTS) {
+            return;
+        }
+
+        update_option(
+            self::REWRITE_ATTEMPTS_OPTION,
+            ['version' => self::REWRITE_VERSION, 'count' => $attempts + 1],
+            false
+        );
+
         if (! post_type_exists('photo_album')) {
             self::register_content();
         }
@@ -260,6 +282,7 @@ final class Church_Core_Photo_Albums
         }
 
         update_option(self::REWRITE_VERSION_OPTION, self::REWRITE_VERSION, false);
+        delete_option(self::REWRITE_ATTEMPTS_OPTION);
     }
 
     public static function maybe_render_route_shim_notice(): void

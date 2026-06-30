@@ -100,7 +100,8 @@ $slide_count = count($banner_images);
         <div class="wrap hero-banner__inner">
             <div class="hero-banner__content" data-hero-banner-intro>
                 <?php if ($banner_heading !== '') : ?>
-                    <h2 class="hero-banner__heading"><?php echo esc_html($banner_heading); ?></h2>
+                    <?php // Promo banner text, not a document section — kept as a styled paragraph so it does not inject an h2 above the page h1 (heading-order, WCAG 1.3.1). ?>
+                    <p class="hero-banner__heading"><?php echo esc_html($banner_heading); ?></p>
                 <?php endif; ?>
 
                 <?php foreach ($banner_subtext as $line) : ?>
@@ -126,14 +127,13 @@ $slide_count = count($banner_images);
             <span class="screen-reader-text"><?php esc_html_e('Next slide', 'church-theme'); ?></span>
         </button>
 
-        <div class="hero-banner__dots" role="tablist" aria-label="<?php esc_attr_e('Choose slide', 'church-theme'); ?>">
+        <div class="hero-banner__dots" role="group" aria-label="<?php esc_attr_e('Choose slide', 'church-theme'); ?>">
             <?php foreach ($banner_images as $index => $image) : ?>
                 <button
                     class="hero-banner__dot<?php echo $index === 0 ? ' is-active' : ''; ?>"
                     type="button"
-                    role="tab"
                     data-hero-dot="<?php echo esc_attr((string) $index); ?>"
-                    aria-selected="<?php echo $index === 0 ? 'true' : 'false'; ?>"
+                    <?php echo $index === 0 ? 'aria-current="true"' : ''; ?>
                 >
                     <span class="screen-reader-text"><?php echo esc_html(sprintf(/* translators: %d: slide number. */ __('Go to slide %d', 'church-theme'), $index + 1)); ?></span>
                 </button>

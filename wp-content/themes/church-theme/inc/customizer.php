@@ -47,9 +47,11 @@ function church_theme_customize_register(WP_Customize_Manager $wp_customize): vo
         ['section' => 'church_theme_gallery', 'id' => 'instagram_access_token', 'label' => __('Instagram Access Token', 'church-theme'), 'type' => 'text', 'sanitize' => 'sanitize_text_field'],
     ];
 
+    $defaults = church_theme_defaults();
+
     foreach ($fields as $field) {
         $wp_customize->add_setting($field['id'], [
-            'default' => church_theme_defaults()[$field['id']] ?? '',
+            'default' => $defaults[$field['id']] ?? '',
             'sanitize_callback' => $field['sanitize'],
         ]);
 

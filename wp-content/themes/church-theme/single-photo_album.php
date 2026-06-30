@@ -53,6 +53,10 @@ while (have_posts()) :
                             <?php
                             $caption = trim((string) ($photo['caption'] ?? ''));
                             $alt = trim((string) ($photo['alt'] ?? ''));
+                            $lightbox_label_text = $caption !== '' ? $caption : $alt;
+                            $lightbox_label = $lightbox_label_text !== ''
+                                ? sprintf(/* translators: %s: photo caption or description. */ __('View photo in lightbox: %s', 'church-theme'), $lightbox_label_text)
+                                : __('View image in lightbox', 'church-theme');
                             ?>
                             <article class="gallery-card">
                                 <a
@@ -60,7 +64,7 @@ while (have_posts()) :
                                     href="<?php echo esc_url((string) $photo['src']); ?>"
                                     data-caption="<?php echo esc_attr($caption); ?>"
                                     data-lightbox-alt="<?php echo esc_attr($alt); ?>"
-                                    aria-label="<?php esc_attr_e('View image in lightbox', 'church-theme'); ?>"
+                                    aria-label="<?php echo esc_attr($lightbox_label); ?>"
                                 >
                                     <img
                                         src="<?php echo esc_url((string) $photo['src']); ?>"

@@ -125,7 +125,7 @@ $instagram_url = church_theme_get_instagram_profile_url();
             <?php esc_html_e('Crossroad South Church. All rights reserved.', 'church-theme'); ?>
         </p>
     </div>
-    <button class="back-to-top" aria-label="<?php esc_attr_e('Back to top', 'church-theme'); ?>" tabindex="-1">
+    <button class="back-to-top" aria-label="<?php esc_attr_e('Back to top', 'church-theme'); ?>">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="18 15 12 9 6 15"></polyline></svg>
     </button>
 </footer>

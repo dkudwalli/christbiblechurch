@@ -445,6 +445,8 @@ final class Church_Core_Sermon_Import
             $errors[] = __('Sermon date is required.', 'church-core');
         } elseif (! preg_match('/^\d{4}-\d{2}-\d{2}$/', $row['sermon_date']) || ! self::is_valid_date($row['sermon_date'])) {
             $errors[] = __('Sermon date must be a valid date in YYYY-MM-DD format.', 'church-core');
+        } elseif (! self::is_sermon_date_in_range($row['sermon_date'])) {
+            $errors[] = __('Sermon date is out of range (it must be on or after 2000-01-01 and no more than one year in the future).', 'church-core');
         }
 
         if (($raw_values['slug'] ?? '') !== '' && $row['slug'] === '') {
@@ -708,5 +710,24 @@ final class Church_Core_Sermon_Import
         }
 
         return $date->format('Y-m-d') === $value;
+    }
+
+    /**
+     * Guard against typo/garbage dates (e.g. year 0202 or 2099) being imported
+     * unattended: accept only 2000-01-01 .. one year from today (inclusive),
+     * which comfortably covers a real sermon archive plus modest scheduling.
+     */
+    private static function is_sermon_date_in_range(string $value): bool
+    {
+        $date = DateTimeImmutable::createFromFormat('!Y-m-d', $value, wp_timezone());
+
+        if (! $date instanceof DateTimeImmutable) {
+            return false;
+        }
+
+        $min = new DateTimeImmutable('2000-01-01', wp_timezone());
+        $max = (new DateTimeImmutable('now', wp_timezone()))->modify('+1 year');
+
+        return $date >= $min && $date <= $max;
     }
 }

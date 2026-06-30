@@ -87,9 +87,20 @@ final class Church_Core_Scripture_Extractor
             self::get_book_pattern()
         );
 
-        if (preg_match($pattern, $title, $matches) !== 1) {
+        if (preg_match($pattern, $title, $matches, PREG_OFFSET_CAPTURE) !== 1) {
             return '';
         }
+
+        // Reject clock times mistaken for chapter:verse, e.g. "Evening Service 6:30pm"
+        // preceded by a book-like word: if the matched number is immediately followed
+        // by an am/pm marker, it is a time, not a scripture reference.
+        $match_end = $matches[0][1] + strlen($matches[0][0]);
+        if (preg_match('/^\s*[ap]\.?m\.?\b/i', substr($title, $match_end)) === 1) {
+            return '';
+        }
+
+        // Collapse the offset-capture shape back to plain string groups.
+        $matches = array_map(static fn ($m) => is_array($m) ? $m[0] : $m, $matches);
 
         $book_name = self::expand_book_name((string) $matches['book']);
 
