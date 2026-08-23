@@ -15,13 +15,12 @@ cp .env.example .env
 ```
 Site: `http://localhost:8080` | Admin: `http://localhost:8080/wp-admin/`
 
-**Lint (PHP syntax + PHPCS + CSS + route shims):**
+**Lint (PHP syntax + PHPCS + CSS):**
 ```bash
-npm run lint          # all four checks
+npm run lint          # all three checks
 npm run lint:php      # php -l syntax check (theme, plugin, and committed route-shim dirs)
 npm run lint:phpcs    # PSR-12 via phpcs.phar (auto-downloads if missing, falls back to Docker)
 npm run lint:css      # stylelint on theme CSS
-npm run lint:shims    # static validation of the committed route-shim tree (Node, no DB)
 ```
 
 **PHP tests (requires running local site; each test runs in its own wp-cli process):**
@@ -92,12 +91,12 @@ CSS is split into `assets/css/site.css`, `forms.css`, and `accessibility.css`. N
 
 A file-based fallback for when Hostinger/Apache routing doesn't pass pretty URLs into WordPress. Committed route directories sit at the repo root, each holding an `index.php` shim:
 
-- **Page/post routes** (`about/`, `about-us/`, `contact/`, `contact-us/`, `events/`, `gallery/`, `give/`, `worship/`, `sermons/`, `series/`, `speaker/`, and individual sermon subdirs like `sermons/<slug>/`) simply `require` the WordPress root `index.php`, letting WP resolve the URL normally.
+- **Page/post routes** (`about-us/`, `contact-us/`, `events/`, `gallery/`, `give/`, `worship/`, `sermons/`, `series/`, `speaker/`, and individual sermon subdirs like `sermons/<slug>/`) simply `require` the WordPress root `index.php`, letting WP resolve the URL normally.
 - **Taxonomy term routes** (`series/<term>/`, `speaker/<term>/`) instead `require` the root `taxonomy-route-shim.php` and call `church_route_shim_boot_taxonomy($taxonomy, $slug)`, which forces the taxonomy/term query vars and boots WordPress directly.
 - **Photo album routes** (`photo-albums/<slug>/`) are not committed snapshots. `Church_Core_Photo_Albums` creates and removes those shim directories automatically at runtime so Hostinger fallback routing stays aligned with published albums.
 - **Photo album rewrites** are also self-healed once after deploy. `Church_Core_Photo_Albums` runs a one-time soft rewrite flush when its rewrite-version option is stale so `/photo-albums/<slug>/` does not depend on a manual permalink save after plugin updates.
 
-The page/post and taxonomy shim directories are committed snapshots of published URLs — when adding a sermon, series, or speaker, add the matching shim directory so the file-based fallback stays in sync. Photo album shims are the exception and should be managed by the plugin instead of by hand.
+Series and speaker shim directories (and the `page/N/` pagination shims) are committed snapshots — add the matching directory when a new series or speaker term first appears. Sermon and photo album shims are created by the plugin at runtime, so do not add those by hand. Run `docker compose run --rm wpcli church-core regenerate-shims --check` to report drift between the committed tree and the database.
 
 ### Content Model
 

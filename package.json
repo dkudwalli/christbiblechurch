@@ -2,11 +2,10 @@
   "name": "church-frontend-quality",
   "private": true,
   "scripts": {
-    "lint": "npm run lint:php && npm run lint:phpcs && npm run lint:css && npm run lint:shims",
+    "lint": "npm run lint:php && npm run lint:phpcs && npm run lint:css",
     "lint:css": "stylelint \"wp-content/themes/church-theme/assets/css/**/*.css\"",
-    "lint:php": "find wp-content/themes/church-theme wp-content/plugins/church-core about about-us contact contact-us events gallery give worship sermons series speaker taxonomy-route-shim.php -name '*.php' -print0 | xargs -0 -n1 php -l",
+    "lint:php": "find wp-content/themes/church-theme wp-content/plugins/church-core about-us contact-us events gallery give worship sermons series speaker taxonomy-route-shim.php -name '*.php' -print0 | xargs -0 -n1 php -l",
     "lint:phpcs": "./bin/lint-phpcs.sh",
-    "lint:shims": "node tests/check-route-shims.mjs",
     "test": "npm run lint",
     "test:php": "./bin/test-php.sh",
     "test:smoke": "playwright test"

@@ -54,21 +54,29 @@ while (have_posts()) :
             <div class="wrap">
                 <div class="video-frame video-frame--wide reveal">
                     <?php
-                    $embed_html = wp_oembed_get($youtube_url);
+                    // Built from the stored youtube_video_id rather than wp_oembed_get():
+                    // WP_oEmbed has no cache layer (the _oembed_ post-meta cache belongs to
+                    // the [embed] shortcode path), so that call blocked every sermon page
+                    // view on an HTTPS round-trip to youtube.com. Same player, no request.
+                    $youtube_id = (string) get_post_meta($post_id, 'youtube_video_id', true);
 
-                    if ($embed_html) {
-                        echo $embed_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-                    } else {
+                    if ($youtube_id !== '') :
                         ?>
+                        <iframe
+                            src="<?php echo esc_url('https://www.youtube.com/embed/' . $youtube_id); ?>"
+                            title="<?php echo esc_attr(get_the_title()); ?>"
+                            frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen
+                            loading="lazy"></iframe>
+                    <?php else : ?>
                         <div class="video-frame__fallback">
                             <p><?php esc_html_e('Watch this sermon on YouTube.', 'church-theme'); ?></p>
                             <a class="button button--secondary" href="<?php echo esc_url($youtube_url); ?>" target="_blank" rel="noopener noreferrer">
                                 <?php esc_html_e('Open Video', 'church-theme'); ?>
                             </a>
                         </div>
-                        <?php
-                    }
-                    ?>
+                    <?php endif; ?>
                 </div>
             </div>
         </section>
@@ -100,27 +108,27 @@ while (have_posts()) :
                 <section class="single-sermon__meta-grid reveal-stagger" aria-label="<?php esc_attr_e('Sermon details', 'church-theme'); ?>">
                     <article class="card single-sermon__meta-card reveal">
                         <p class="eyebrow"><?php esc_html_e('Date', 'church-theme'); ?></p>
-                        <h2><?php echo esc_html(church_theme_get_sermon_date($post_id)); ?></h2>
+                        <p class="meta-value"><?php echo esc_html(church_theme_get_sermon_date($post_id)); ?></p>
                     </article>
 
                     <?php if ($series_term) : ?>
                         <article class="card single-sermon__meta-card">
                             <p class="eyebrow"><?php esc_html_e('Series', 'church-theme'); ?></p>
-                            <h2><a href="<?php echo esc_url(church_theme_get_sermon_term_url($series_term)); ?>"><?php echo esc_html($series_term->name); ?></a></h2>
+                            <p class="meta-value"><a href="<?php echo esc_url(church_theme_get_sermon_term_url($series_term)); ?>"><?php echo esc_html($series_term->name); ?></a></p>
                         </article>
                     <?php endif; ?>
 
                     <?php if ($speaker_term) : ?>
                         <article class="card single-sermon__meta-card">
                             <p class="eyebrow"><?php esc_html_e('Preacher', 'church-theme'); ?></p>
-                            <h2><?php echo esc_html($speaker_term->name); ?></h2>
+                            <p class="meta-value"><?php echo esc_html($speaker_term->name); ?></p>
                         </article>
                     <?php endif; ?>
 
                     <?php if ($scripture !== '') : ?>
                         <article class="card single-sermon__meta-card">
                             <p class="eyebrow"><?php esc_html_e('Scripture', 'church-theme'); ?></p>
-                            <h2><?php echo esc_html($scripture); ?></h2>
+                            <p class="meta-value"><?php echo esc_html($scripture); ?></p>
                         </article>
                     <?php endif; ?>
                 </section>

@@ -1,12 +1,10 @@
 const { test, expect } = require("@playwright/test");
 const axeScriptPath = require.resolve("axe-core/axe.min.js");
-const coreAxeRules = [
-  "landmark-complementary-is-top-level",
-  "aria-allowed-role",
-  "label",
-  "link-name",
-  "button-name"
-];
+// Full WCAG 2.0/2.1 A+AA rule set rather than a hand-picked allowlist. Rules that
+// must stay off belong in disabledAxeRules below with a reason, so an exemption is
+// something you can read instead of an absence nobody notices.
+const axeTags = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"];
+const disabledAxeRules = {};
 
 async function ensureAxe(page) {
   const hasAxe = await page.evaluate(() => Boolean(window.axe));
@@ -16,15 +14,32 @@ async function ensureAxe(page) {
   }
 }
 
-async function runAxeRules(page, rules = coreAxeRules) {
+async function runAxeRules(page, tags = axeTags) {
   await ensureAxe(page);
 
-  return page.evaluate(async (runOnly) => {
+  return page.evaluate(
+    async ({ runOnly, rules }) => {
+      const results = await axe.run(document, {
+        runOnly: { type: "tag", values: runOnly },
+        rules
+      });
+
+      return results.violations.map((violation) => ({
+        id: violation.id,
+        impact: violation.impact,
+        nodes: violation.nodes.map((node) => node.target)
+      }));
+    },
+    { runOnly: tags, rules: disabledAxeRules }
+  );
+}
+
+async function runAxeRuleIds(page, ruleIds) {
+  await ensureAxe(page);
+
+  return page.evaluate(async (values) => {
     const results = await axe.run(document, {
-      runOnly: {
-        type: "rule",
-        values: runOnly
-      }
+      runOnly: { type: "rule", values }
     });
 
     return results.violations.map((violation) => ({
@@ -32,11 +47,11 @@ async function runAxeRules(page, rules = coreAxeRules) {
       impact: violation.impact,
       nodes: violation.nodes.map((node) => node.target)
     }));
-  }, rules);
+  }, ruleIds);
 }
 
-async function expectNoAxeViolations(page, context, rules = coreAxeRules) {
-  const violations = await runAxeRules(page, rules);
+async function expectNoAxeViolations(page, context, tags = axeTags) {
+  const violations = await runAxeRules(page, tags);
   expect(violations, `Unexpected axe violations on ${context}`).toEqual([]);
 }
 
@@ -342,9 +357,9 @@ test("single sermon audio uses native controls instead of MediaElement", async (
   const sermonLinks = page.locator(".sermon-card h2 a");
   const sermonCount = await sermonLinks.count();
 
-  if (sermonCount === 0) {
-    test.skip(true, "No sermons were rendered.");
-  }
+  // The bootstrap seeds sermons unconditionally, so zero here means the seed
+  // failed silently — assert rather than skip, or the next four checks vanish.
+  expect(sermonCount).toBeGreaterThan(0);
 
   const sermonHrefs = [];
 
@@ -367,9 +382,7 @@ test("single sermon audio uses native controls instead of MediaElement", async (
     }
   }
 
-  if (!foundAudioSermon) {
-    test.skip(true, "No sermon with audio was rendered on the first archive page.");
-  }
+  expect(foundAudioSermon).toBe(true);
 
   await expect(page.locator(".audio-player audio[controls][aria-labelledby]")).toBeVisible();
   await expect(page.locator(".audio-player .mejs-container")).toHaveCount(0);
@@ -460,8 +473,19 @@ test("footer stacks brand above metadata at mid-width without wrapping the email
   expect(new Set(footerLayout.labelHeights).size).toBe(1);
 });
 
-test("key templates pass the stable axe rule set", async ({ page }) => {
-  const pages = ["/about-us/", "/worship/", "/events/", "/contact-us/", "/give/"];
+test("key templates pass the WCAG A/AA rule set", async ({ page }) => {
+  // Includes the templates that carry the interactive widgets — the homepage
+  // slideshow and the lightbox on /gallery/ — which the old list never scanned.
+  const pages = [
+    "/",
+    "/about-us/",
+    "/worship/",
+    "/events/",
+    "/contact-us/",
+    "/give/",
+    "/gallery/",
+    "/sermons/"
+  ];
 
   for (const path of pages) {
     await page.goto(path);
@@ -474,7 +498,7 @@ test("hero and side panels do not expose nested complementary landmarks", async 
 
   for (const path of pages) {
     await page.goto(path);
-    const violations = await runAxeRules(page, ["landmark-complementary-is-top-level"]);
+    const violations = await runAxeRuleIds(page, ["landmark-complementary-is-top-level"]);
     expect(violations, `Unexpected complementary landmark violation on ${path}`).toEqual([]);
   }
 });
@@ -485,9 +509,7 @@ test("series taxonomy page renders sermon cards", async ({ page }) => {
   const seriesLinks = page.locator(".sermon-card .sermon-meta a[href*='/series/']");
   const seriesCount = await seriesLinks.count();
 
-  if (seriesCount === 0) {
-    test.skip(true, "No sermons with a series term were rendered on the archive page.");
-  }
+  expect(seriesCount).toBeGreaterThan(0);
 
   const href = await seriesLinks.first().getAttribute("href");
   expect(href).toBeTruthy();
@@ -503,24 +525,17 @@ test("speaker taxonomy page renders sermon cards", async ({ page }) => {
 
   const firstSermonLink = page.locator(".sermon-card h2 a").first();
 
-  if ((await firstSermonLink.count()) === 0) {
-    test.skip(true, "No sermons were rendered on the archive page.");
-  }
+  expect(await firstSermonLink.count()).toBeGreaterThan(0);
 
   const sermonHref = await firstSermonLink.getAttribute("href");
   await page.goto(sermonHref);
 
   const speakerCard = page.locator(".single-sermon__meta-card").filter({ hasText: "Preacher" });
 
-  if ((await speakerCard.count()) === 0) {
-    test.skip(true, "No speaker term found on the first sermon.");
-  }
+  expect(await speakerCard.count()).toBeGreaterThan(0);
 
-  const speakerName = await speakerCard.locator("h2").textContent();
-
-  if (!speakerName) {
-    test.skip(true, "Speaker name could not be read.");
-  }
+  const speakerName = await speakerCard.locator(".meta-value").textContent();
+  expect(speakerName).toBeTruthy();
 
   const slug = speakerName.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   await page.goto(`/speaker/${slug}/`);

@@ -81,14 +81,20 @@ final class Church_Core_Sermon_Route_Shims
             return;
         }
 
-        // Always ensure the archive listing shim exists. Creating per-sermon
-        // sermons/<slug>/ directories also creates the sermons/ parent; without a
-        // sermons/index.php the standard WordPress .htaccess (RewriteCond !-d skips
-        // existing directories) would let /sermons/ hit a directory with no index
-        // and 403. On production this is a no-op (the committed listing shim is
-        // already present and byte-identical); locally/CI it keeps /sermons/
-        // resolving. Cheap (single stat + content compare), so it runs every init.
-        self::ensure_listing_shim();
+        // Runs BEFORE the version gate on purpose, and a cheap in-memory guard keeps
+        // it to once per request. Anything that creates a sermons/<slug>/ directory
+        // also creates the sermons/ parent — including the per-sermon writer on
+        // save_post and the plugin's own tests — so the parent can appear long after
+        // the gated reconcile has already run and set its version option. Without a
+        // sermons/index.php the standard .htaccess (RewriteCond !-d skips existing
+        // directories) hands /sermons/ to Apache, which serves 403. Moving this
+        // inside the gate reproduces exactly that.
+        static $listing_checked = false;
+
+        if (! $listing_checked) {
+            $listing_checked = true;
+            self::ensure_listing_shim();
+        }
 
         if (get_option(self::ROUTE_SHIM_VERSION_OPTION) === self::ROUTE_SHIM_VERSION) {
             return;

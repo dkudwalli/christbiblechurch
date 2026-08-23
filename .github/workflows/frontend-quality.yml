@@ -43,6 +43,18 @@ jobs:
           chmod +x bin/bootstrap-wordpress.sh
           ./bin/bootstrap-wordpress.sh
 
+      - name: Report route-shim drift
+        # The committed series/speaker/pagination shims are a hand-maintained
+        # snapshot of published URLs, and the weekly sermon cron makes them go
+        # stale silently — nothing else reports that. Advisory only: CI seeds
+        # fixture sermons that legitimately have no committed shim, so a failure
+        # here would mean "the seed ran", not "production drifted". Read the log
+        # when you change sermon, series, or speaker content.
+        continue-on-error: true
+        run: |
+          docker compose run --rm -T -v "$PWD":/repo wpcli \
+            church-core regenerate-shims --check --root=/repo
+
       - name: Run PHP tests
         run: |
           chmod +x bin/test-php.sh

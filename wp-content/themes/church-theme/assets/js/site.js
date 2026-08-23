@@ -116,13 +116,23 @@ document.addEventListener("DOMContentLoaded", () => {
       field.addEventListener("blur", () => {
         const valid = field.checkValidity();
         field.setAttribute("aria-invalid", valid ? "false" : "true");
-        let errorEl = field.parentElement.querySelector(".contact-form__error");
+        // The input sits inside its <label>, and a label's whole subtree feeds the
+        // accessible name — so the message goes after the label, not after the
+        // field, or the field's name becomes "Name <validation message>".
+        const fieldLabel = field.closest(".contact-form__field") || field.parentElement;
+        // Scope to this field's own next sibling — a row holds two labels, so a
+        // row-wide querySelector would hand the email field the name's error.
+        const sibling = fieldLabel.nextElementSibling;
+        let errorEl =
+          sibling && sibling.classList.contains("contact-form__error")
+            ? sibling
+            : null;
         if (!valid) {
           if (!errorEl) {
             errorEl = document.createElement("span");
             errorEl.className = "contact-form__error";
             errorEl.setAttribute("role", "alert");
-            field.after(errorEl);
+            fieldLabel.after(errorEl);
           }
           errorEl.textContent = field.validationMessage;
         } else if (errorEl) {
@@ -302,6 +312,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (lightboxes.length > 0) {
     const dialog = document.createElement("dialog");
     dialog.className = "lightbox";
+    dialog.setAttribute("aria-label", "Photo viewer");
     dialog.innerHTML = `
       <div class="lightbox__content">
         <button class="lightbox__close" aria-label="Close" type="button">&times;</button>
@@ -317,20 +328,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const linkShell = dialog.querySelector("[data-lightbox-link-shell]");
     const closeBtn = dialog.querySelector(".lightbox__close");
 
-    const closeLightbox = () => {
+    // Escape closes a showModal() dialog natively, so all cleanup hangs off the
+    // `close` event — otherwise Escape would leave `is-open` and the old image
+    // behind. Closing is immediate: deferring dialog.close() to let the fade run
+    // kept a transparent modal live, trapping focus inside it.
+    dialog.addEventListener("close", () => {
       dialog.classList.remove("is-open");
-      // Wait for CSS transition to finish before actually closing
-      setTimeout(() => {
-        dialog.close();
-        img.src = "";
-      }, 300);
-    };
+      img.removeAttribute("src");
+    });
 
-    closeBtn.addEventListener("click", closeLightbox);
-    
+    closeBtn.addEventListener("click", () => dialog.close());
+
     dialog.addEventListener("click", (e) => {
       if (e.target === dialog) {
-        closeLightbox();
+        dialog.close();
       }
     });
 
@@ -408,6 +419,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const AUTO_MS = 6000;
     let current = 0;
     let timer = null;
+    // Set once the visitor takes manual control; autoplay never resumes after
+    // that, so arrows/dots/arrow-keys act as the pause mechanism (WCAG 2.2.2).
+    let userStopped = false;
 
     const go = (index) => {
       const next = (index + slides.length) % slides.length;
@@ -440,17 +454,19 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const start = () => {
-      if (bannerReducedMotion || document.hidden) {
+      if (userStopped || bannerReducedMotion || document.hidden) {
         return;
       }
       stop();
       timer = window.setInterval(() => go(current + 1), AUTO_MS);
     };
 
-    // Manual controls always work; they restart the auto-advance timer.
+    // Manual controls always work, and taking control stops the rotation for
+    // good so the visitor keeps the slide they chose.
     const goAndRestart = (index) => {
+      userStopped = true;
       go(index);
-      start();
+      stop();
     };
 
     if (prevButton) {

@@ -543,8 +543,7 @@ h4 {
 .content-placeholder h2,
 .content-aside h2,
 .visit-note h2,
-.single-sermon__meta-card h2,
-.site-footer__title {
+.single-sermon__meta-card .meta-value {
   margin: 0.35rem 0 0.7rem;
 }
 
@@ -663,24 +662,6 @@ button[type="submit"]:hover {
   color: var(--text-inverse);
 }
 
-.button--ghost {
-  background: transparent;
-  color: var(--accent-strong);
-  border: 0;
-  padding: 0.8rem 0.5rem;
-  text-decoration: underline;
-  text-decoration-color: transparent;
-  text-underline-offset: 4px;
-  transition: text-decoration-color 200ms ease, color 200ms ease;
-}
-
-.button--ghost:hover {
-  background: transparent;
-  color: var(--accent);
-  text-decoration-color: currentColor;
-  transform: none;
-}
-
 .text-link {
   color: var(--accent-strong);
   font-weight: 700;
@@ -716,7 +697,7 @@ button[type="submit"]:hover {
 }
 
 .sermon-meta a,
-.single-sermon__meta-card h2 a {
+.single-sermon__meta-card .meta-value a {
   color: var(--accent-strong);
 }
 
@@ -787,7 +768,6 @@ select:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.12);
   background: #fff;
-  outline: none;
 }
 
 input[type="search"],
@@ -826,23 +806,17 @@ select {
 }
 
 .page-hero__media,
-.section-visual,
-.person-card {
+.section-visual {
   overflow: hidden;
   padding: 0;
 }
 
 .page-hero__media img,
-.section-visual img,
-.person-card__media {
+.section-visual img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-}
-
-.page-hero__media img,
-.section-visual img {
   aspect-ratio: 4 / 3;
 }
 
@@ -850,17 +824,6 @@ select {
   display: grid;
   gap: 1rem;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-}
-
-.person-card__media {
-  aspect-ratio: 4 / 3;
-}
-
-.person-card__caption {
-  margin: 0;
-  padding: 1rem 1.1rem 1.15rem;
-  font-size: 0.95rem;
-  font-weight: 700;
 }
 
 .elder-board-intro {
@@ -1513,12 +1476,6 @@ select {
   display: grid;
   gap: 0.9rem;
   max-width: 19rem;
-}
-
-.site-footer__title {
-  font-size: 1.18rem;
-  font-weight: 700;
-  color: #fff;
 }
 
 .site-footer__meta {
@@ -2323,6 +2280,8 @@ button[aria-busy="true"]::after {
 
 /* === CONTACT FORM VALIDATION === */
 .contact-form__error {
+  /* Injected after the label, so inside .contact-form__row's two-column grid. */
+  grid-column: 1 / -1;
   display: block;
   margin-top: 0.3rem;
   color: #7d2222;

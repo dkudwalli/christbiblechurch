@@ -15,23 +15,18 @@ function church_theme_get_static_image_variants(string $relative_path, string $f
             continue;
         }
 
-        $dimensions = wp_getimagesize($variant_path);
+        // The width is already in the filename (foo-640.webp), and srcset is the
+        // only consumer — so trust it instead of opening every variant's header
+        // on every render.
+        $width = (int) $matches[1];
 
-        if (! is_array($dimensions)) {
-            continue;
-        }
-
-        $width = (int) ($dimensions[0] ?? 0);
-        $height = (int) ($dimensions[1] ?? 0);
-
-        if ($width < 1 || $height < 1) {
+        if ($width < 1) {
             continue;
         }
 
         $variants[$width] = [
             'src' => get_template_directory_uri() . '/' . trim($relative_directory . '/' . basename($variant_path), '/'),
             'width' => $width,
-            'height' => $height,
         ];
     }
 
@@ -101,7 +96,6 @@ function church_theme_get_static_image(
         'height' => $resolved_height,
         'object_position' => $object_position,
         'srcset' => church_theme_build_static_image_srcset($variants),
-        'variants' => $variants,
     ];
 }
 

@@ -17,8 +17,13 @@ COMPOSE="${COMPOSE:-docker compose}"
 CHURCH_TEST_BASE_URL="${CHURCH_TEST_BASE_URL:-http://wordpress}"
 CHURCH_TEST_HOST="${CHURCH_TEST_HOST:-localhost:8080}"
 
-TESTS=(
+# Pure-logic tests: no WordPress, no database, no container start.
+STANDALONE_TESTS=(
   "wp-content/plugins/church-core/tests/scripture-extractor.php"
+  "wp-content/plugins/church-core/tests/sync-import-gate.php"
+)
+
+TESTS=(
   "wp-content/plugins/church-core/tests/sermon-admin-sortable-date.php"
   "wp-content/plugins/church-core/tests/photo-album-route-shims.php"
   "wp-content/plugins/church-core/tests/sermon-route-shims.php"
@@ -27,6 +32,30 @@ TESTS=(
 )
 
 failures=0
+
+# PHP_BIN lets CI use the runner's php; falls back to a container when absent.
+PHP_BIN="${PHP_BIN:-php}"
+
+if ! command -v "${PHP_BIN}" >/dev/null 2>&1; then
+  PHP_BIN=""
+fi
+
+for test in "${STANDALONE_TESTS[@]}"; do
+  printf '\n=== %s ===\n' "$test"
+
+  if [ -n "${PHP_BIN}" ]; then
+    run_standalone=("${PHP_BIN}" "$test")
+  else
+    run_standalone=(${COMPOSE} run --rm -T --entrypoint php wordpress "/var/www/html/$test")
+  fi
+
+  if "${run_standalone[@]}"; then
+    :
+  else
+    echo "FAILED: ${test}" >&2
+    failures=$((failures + 1))
+  fi
+done
 
 for test in "${TESTS[@]}"; do
   printf '\n=== %s ===\n' "$test"

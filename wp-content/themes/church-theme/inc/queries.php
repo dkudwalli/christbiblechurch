@@ -302,9 +302,24 @@ function church_theme_get_photo_album_cover_asset(int $post_id): ?array
         }
     }
 
-    $photos = church_theme_get_photo_album_photo_assets($post_id);
+    // Resolve one attachment at a time and stop at the first usable one. Building
+    // the whole album's assets just to take [0] cost ~2 uncached queries plus a
+    // srcset build per photo, on an unpaginated gallery. The skip below matters:
+    // an album whose first photo was deleted must still fall through to the next.
+    foreach (church_theme_get_photo_album_photo_ids($post_id) as $attachment_id) {
+        $asset = church_theme_get_attachment_image_asset((int) $attachment_id);
 
-    return $photos !== [] ? $photos[0] : null;
+        if (! is_array($asset) || empty($asset['src'])) {
+            continue;
+        }
+
+        $asset['id'] = (int) $attachment_id;
+        $asset['title'] = get_the_title($attachment_id);
+
+        return $asset;
+    }
+
+    return null;
 }
 
 function church_theme_get_sermon_primary_term(int $post_id, string $taxonomy): ?WP_Term
