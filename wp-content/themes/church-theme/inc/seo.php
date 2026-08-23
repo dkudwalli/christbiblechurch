@@ -17,9 +17,9 @@ function church_theme_seo_description(int $post_id): string
     if (is_front_page()) {
         $text = church_theme_get_mod('welcome_summary');
     } elseif (is_singular('sermon') && $post_id > 0) {
-        $text = church_theme_get_sermon_excerpt_preview($post_id, 32);
+        $text = church_theme_get_post_preview($post_id, 32);
     } elseif (is_singular('event') && $post_id > 0) {
-        $text = church_theme_get_event_notes_preview($post_id, 32);
+        $text = church_theme_get_post_preview($post_id, 32, false);
     } elseif (is_singular() && $post_id > 0) {
         $text = (string) get_the_excerpt($post_id);
     } elseif (is_tax() || is_category() || is_tag()) {

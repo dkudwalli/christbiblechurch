@@ -40,7 +40,7 @@ $card_image = church_theme_get_sermon_card_image($post_id);
         <?php endif; ?>
     </p>
 
-    <p><?php echo esc_html(church_theme_get_sermon_excerpt_preview($post_id)); ?></p>
+    <p><?php echo esc_html(church_theme_get_post_preview($post_id, 24)); ?></p>
 
     <a class="text-link" href="<?php echo esc_url(church_theme_get_sermon_url($post_id)); ?>">
         <?php esc_html_e('Open sermon', 'church-theme'); ?>

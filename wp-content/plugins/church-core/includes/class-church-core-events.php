@@ -128,14 +128,14 @@ final class Church_Core_Events
 
     private static function format_input_datetime(string $value): string
     {
-        $date = self::parse_event_datetime($value);
+        $date = self::parse_datetime($value);
 
         return $date ? $date->format('Y-m-d\TH:i') : '';
     }
 
     private static function format_display_datetime(string $value): string
     {
-        $date = self::parse_event_datetime($value);
+        $date = self::parse_datetime($value);
 
         if (! $date) {
             return $value;
@@ -146,12 +146,12 @@ final class Church_Core_Events
 
     private static function normalize_event_start(string $value): string
     {
-        $date = self::parse_event_datetime($value);
+        $date = self::parse_datetime($value);
 
         return $date ? $date->format('Y-m-d H:i:s') : '';
     }
 
-    private static function parse_event_datetime(string $value): ?DateTimeImmutable
+    public static function parse_datetime(string $value): ?DateTimeImmutable
     {
         $value = trim($value);
 

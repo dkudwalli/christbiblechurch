@@ -50,18 +50,6 @@ final class Church_Core_Sermon_Sync_Admin
         $defaults = Church_Core_Sermon_Cron::get_default_settings();
         $settings = is_array($settings) ? $settings : [];
         $settings = wp_parse_args($settings, $defaults);
-        $schedule_time = $defaults['schedule_time'];
-
-        if (preg_match('/^(2[0-3]|[01]?\d):([0-5]\d)$/', (string) $settings['schedule_time'], $matches) === 1) {
-            $schedule_time = sprintf('%02d:%02d', (int) $matches[1], (int) $matches[2]);
-        }
-
-        $valid_weekdays = array_keys(self::get_weekday_options());
-        $schedule_weekday = sanitize_key((string) $settings['schedule_weekday']);
-
-        if (! in_array($schedule_weekday, $valid_weekdays, true)) {
-            $schedule_weekday = $defaults['schedule_weekday'];
-        }
 
         // Preserve the stored API key when the field is submitted blank (the form
         // renders it empty so the secret is never echoed into markup). A non-empty
@@ -76,8 +64,6 @@ final class Church_Core_Sermon_Sync_Admin
         $sanitized = [
             'api_key' => $submitted_api_key,
             'channel_id' => sanitize_text_field((string) $settings['channel_id']),
-            'schedule_weekday' => $schedule_weekday,
-            'schedule_time' => $schedule_time,
         ];
 
         self::sanitize_default_speaker_setting($settings, $sanitized);
@@ -353,18 +339,10 @@ final class Church_Core_Sermon_Sync_Admin
                         <tr>
                             <th scope="row"><?php esc_html_e('Weekly Sync Schedule', 'church-core'); ?></th>
                             <td>
-                                <select name="<?php echo esc_attr(Church_Core_Sermon_Cron::SETTINGS_OPTION); ?>[schedule_weekday]">
-                                    <?php foreach (self::get_weekday_options() as $value => $label) : ?>
-                                        <option value="<?php echo esc_attr($value); ?>" <?php selected((string) $settings['schedule_weekday'], $value); ?>>
-                                            <?php echo esc_html($label); ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                                <input type="time" name="<?php echo esc_attr(Church_Core_Sermon_Cron::SETTINGS_OPTION); ?>[schedule_time]" value="<?php echo esc_attr((string) $settings['schedule_time']); ?>" step="60">
-                                <p class="description">
+                                <p>
                                     <?php
                                     printf(
-                                        esc_html__('The schedule uses the WordPress timezone from Settings > General. Current timezone: %s.', 'church-core'),
+                                        esc_html__('Sundays at 12:30, in the WordPress timezone from Settings > General. Current timezone: %s.', 'church-core'),
                                         $timezone_label
                                     );
                                     ?>
@@ -505,19 +483,6 @@ final class Church_Core_Sermon_Sync_Admin
     private static function get_page_url(): string
     {
         return admin_url('edit.php?post_type=sermon&page=' . self::PAGE_SLUG);
-    }
-
-    private static function get_weekday_options(): array
-    {
-        return [
-            'sunday' => __('Sunday', 'church-core'),
-            'monday' => __('Monday', 'church-core'),
-            'tuesday' => __('Tuesday', 'church-core'),
-            'wednesday' => __('Wednesday', 'church-core'),
-            'thursday' => __('Thursday', 'church-core'),
-            'friday' => __('Friday', 'church-core'),
-            'saturday' => __('Saturday', 'church-core'),
-        ];
     }
 
     private static function assert_permissions(): void

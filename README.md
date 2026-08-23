@@ -86,13 +86,8 @@ The `church-core` plugin now includes a YouTube sync workflow for sermons:
 - stores `youtube_video_id` and `youtube_url` in post meta
 - extracts `scripture_reference` from YouTube titles when a recognizable Bible reference is present, including common short forms such as `Col. 3:16-17` and `Jn. 3:16`
 - auto-assigns the `speaker` taxonomy term `Pastor Benji`
-- backfills missing `youtube_video_id` values on existing sermons that already have a `youtube_url`
 
-The default auto-sync schedule is:
-
-- Sunday
-- 12:30 PM
-- WordPress site timezone
+The auto-sync schedule is fixed at Sunday 12:30 PM in the WordPress site timezone.
 
 Important:
 

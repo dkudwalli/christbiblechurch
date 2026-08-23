@@ -51,3 +51,6 @@ node_modules/
 .tools/
 playwright-report/
 test-results/
+
+# One-off deploy snapshots (rebuild from the repo, do not commit)
+dist/**/*.tar.gz

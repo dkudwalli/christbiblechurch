@@ -172,7 +172,7 @@ final class Church_Core_Youtube_Client
     private function fetch_videos_by_ids(array $video_ids)
     {
         $response = $this->request('videos', [
-            'part' => 'snippet,status,liveStreamingDetails,contentDetails',
+            'part' => 'snippet,status,liveStreamingDetails',
             'id' => implode(',', $video_ids),
             'maxResults' => min(50, count($video_ids)),
         ]);
@@ -201,7 +201,6 @@ final class Church_Core_Youtube_Client
         $playlist_snippet = isset($playlist_item['snippet']) && is_array($playlist_item['snippet']) ? $playlist_item['snippet'] : [];
         $live_details = isset($video['liveStreamingDetails']) && is_array($video['liveStreamingDetails']) ? $video['liveStreamingDetails'] : [];
         $status = isset($video['status']) && is_array($video['status']) ? $video['status'] : [];
-        $content_details = isset($video['contentDetails']) && is_array($video['contentDetails']) ? $video['contentDetails'] : [];
 
         $title = isset($snippet['title']) ? (string) $snippet['title'] : (string) ($playlist_snippet['title'] ?? '');
         $description = isset($snippet['description']) ? (string) $snippet['description'] : '';
@@ -217,12 +216,8 @@ final class Church_Core_Youtube_Client
             'published_at' => $published_at,
             'privacy_status' => isset($status['privacyStatus']) ? (string) $status['privacyStatus'] : '',
             'live_broadcast_content' => $live_broadcast_content,
-            'scheduled_start_time' => isset($live_details['scheduledStartTime']) ? (string) $live_details['scheduledStartTime'] : '',
-            'actual_start_time' => isset($live_details['actualStartTime']) ? (string) $live_details['actualStartTime'] : '',
             'actual_end_time' => isset($live_details['actualEndTime']) ? (string) $live_details['actualEndTime'] : '',
-            'duration' => isset($content_details['duration']) ? (string) $content_details['duration'] : '',
             'youtube_url' => 'https://www.youtube.com/watch?v=' . rawurlencode($video_id),
-            'is_livestream' => $live_broadcast_content !== 'none' || $live_details !== [],
         ];
     }
 

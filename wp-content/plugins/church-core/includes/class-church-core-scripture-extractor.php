@@ -24,7 +24,7 @@ final class Church_Core_Scripture_Extractor
         'Nehemiah' => ['Nehemiah', 'Neh', 'Ne'],
         'Esther' => ['Esther', 'Esth', 'Est'],
         'Job' => ['Job'],
-        'Psalms' => ['Psalms', 'Psalm', 'Psalm', 'Psalms', 'Ps'],
+        'Psalms' => ['Psalms', 'Psalm', 'Ps'],
         'Proverbs' => ['Proverbs', 'Prov', 'Pro', 'Prv', 'Pr'],
         'Ecclesiastes' => ['Ecclesiastes', 'Eccles', 'Eccl', 'Ecc', 'Qoh'],
         'Song of Solomon' => ['Song of Solomon', 'Song of Songs', 'Song', 'SOS', 'Canticles'],

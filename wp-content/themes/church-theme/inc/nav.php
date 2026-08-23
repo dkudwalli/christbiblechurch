@@ -55,12 +55,6 @@ function church_theme_named_pages(): array
         'give' => 'give',
         'contact' => 'contact-us',
         'contact-us' => 'contact-us',
-        'about-us.html' => 'about-us',
-        'events.html' => 'events',
-        'worship.html' => 'worship',
-        'gallery.html' => 'gallery',
-        'give.html' => 'give',
-        'contact-us.html' => 'contact-us',
     ];
 }
 
@@ -189,11 +183,11 @@ function church_theme_resolve_url(string $url): string
             return church_theme_get_page_url($named_pages[$path]) . $query . $fragment;
         }
 
-        if ($path === 'sermons' || $path === 'sermons.html') {
+        if ($path === 'sermons') {
             return church_theme_get_sermon_archive_url() . $query . $fragment;
         }
 
-        if ($path === 'events' || $path === 'events.html') {
+        if ($path === 'events') {
             return church_theme_get_event_archive_url() . $query . $fragment;
         }
     }
@@ -203,102 +197,6 @@ function church_theme_resolve_url(string $url): string
     }
 
     return $url;
-}
-
-function church_theme_get_primary_nav_items(): array
-{
-    $about_sections = church_theme_get_page_section_nav_items('about-us');
-    $worship_sections = church_theme_get_page_section_nav_items('worship');
-
-    return [
-        [
-            'label' => __('Home', 'church-theme'),
-            'url' => home_url('/'),
-        ],
-        [
-            'label' => __('About Us', 'church-theme'),
-            'url' => church_theme_get_page_url('about-us'),
-            'children' => $about_sections,
-        ],
-        [
-            'label' => __('Worship', 'church-theme'),
-            'url' => church_theme_get_page_url('worship'),
-            'children' => $worship_sections,
-        ],
-        [
-            'label' => __('Gallery', 'church-theme'),
-            'url' => church_theme_get_page_url('gallery'),
-        ],
-        [
-            'label' => __('Give', 'church-theme'),
-            'url' => church_theme_get_page_url('give'),
-        ],
-        [
-            'label' => __('Sermons', 'church-theme'),
-            'url' => church_theme_get_sermon_archive_url(),
-        ],
-        [
-            'label' => __('Contact Us', 'church-theme'),
-            'url' => church_theme_get_page_url('contact-us'),
-        ],
-    ];
-}
-
-function church_theme_get_page_section_nav_items(string $page_slug): array
-{
-    $page = church_theme_get_page_by_paths([$page_slug]);
-
-    if (! $page instanceof WP_Post) {
-        return [];
-    }
-
-    $items = [];
-
-    foreach (church_theme_get_child_sections($page->ID) as $section) {
-        $items[] = [
-            'label' => get_the_title($section),
-            'url' => church_theme_get_page_url($page_slug) . '#' . church_theme_get_section_anchor($section),
-        ];
-    }
-
-    return $items;
-}
-
-function church_theme_fallback_menu(): void
-{
-    $items = church_theme_get_primary_nav_items();
-
-    echo '<ul id="primary-menu" class="site-nav__list">';
-
-    foreach ($items as $item) {
-        $children = $item['children'] ?? [];
-        $has_children = $children !== [];
-
-        printf(
-            '<li class="menu-item%s"><a href="%s">%s</a>',
-            $has_children ? ' menu-item-has-children' : '',
-            esc_url($item['url']),
-            esc_html($item['label'])
-        );
-
-        if ($has_children) {
-            echo '<ul class="sub-menu">';
-
-            foreach ($children as $child) {
-                printf(
-                    '<li class="menu-item"><a href="%s">%s</a></li>',
-                    esc_url($child['url']),
-                    esc_html($child['label'])
-                );
-            }
-
-            echo '</ul>';
-        }
-
-        echo '</li>';
-    }
-
-    echo '</ul>';
 }
 
 function church_theme_filter_primary_menu_items(array $items, $args): array

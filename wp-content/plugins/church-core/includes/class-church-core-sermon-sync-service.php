@@ -18,7 +18,6 @@ final class Church_Core_Sermon_Sync_Service
     public function sync_recent_sermons(): array
     {
         $result = $this->get_default_result();
-        $result['backfilled'] += $this->backfill_existing_video_ids();
 
         $max_results = (int) apply_filters('church_core_sermon_sync_max_results', 25);
         $videos = $this->youtube_client->fetch_recent_channel_videos(max(1, $max_results));
@@ -52,17 +51,6 @@ final class Church_Core_Sermon_Sync_Service
                     $result['backfilled']++;
                 }
 
-                $result['skipped']++;
-                continue;
-            }
-
-            $legacy_post_id = $this->find_existing_post_by_youtube_url((string) $video['video_id']);
-
-            if ($legacy_post_id > 0) {
-                update_post_meta($legacy_post_id, Church_Core_Sermons::YOUTUBE_VIDEO_ID_META_KEY, (string) $video['video_id']);
-
-                $this->maybe_backfill_scripture_reference((int) $legacy_post_id, $scripture_reference);
-                $result['backfilled']++;
                 $result['skipped']++;
                 continue;
             }
@@ -335,65 +323,5 @@ final class Church_Core_Sermon_Sync_Service
         }
 
         return (int) $posts[0];
-    }
-
-    private function find_existing_post_by_youtube_url(string $video_id): int
-    {
-        // Unbounded: the LIKE on an 11-char video id is a cheap prefilter that matches
-        // ~0-1 rows, and each candidate is confirmed by exact id below — a low cap
-        // (was 10) could silently skip the real legacy post during backfill.
-        $posts = get_posts([
-            'post_type' => 'sermon',
-            'post_status' => 'any',
-            'posts_per_page' => -1,
-            'fields' => 'ids',
-            'meta_query' => [
-                [
-                    'key' => Church_Core_Sermons::YOUTUBE_URL_META_KEY,
-                    'value' => $video_id,
-                    'compare' => 'LIKE',
-                ]
-            ],
-        ]);
-
-        foreach ($posts as $post_id) {
-            $youtube_url = (string) get_post_meta((int) $post_id, Church_Core_Sermons::YOUTUBE_URL_META_KEY, true);
-
-            if (Church_Core_Youtube_Client::extract_video_id_from_url($youtube_url) === $video_id) {
-                return (int) $post_id;
-            }
-        }
-
-        return 0;
-    }
-
-    private function backfill_existing_video_ids(): int
-    {
-        $post_ids = get_posts([
-            'post_type' => 'sermon',
-            'post_status' => 'any',
-            'posts_per_page' => -1,
-            'fields' => 'ids',
-            'meta_query' => [
-                ['key' => Church_Core_Sermons::YOUTUBE_URL_META_KEY, 'compare' => 'EXISTS'],
-                ['key' => Church_Core_Sermons::YOUTUBE_VIDEO_ID_META_KEY, 'compare' => 'NOT EXISTS'],
-            ],
-        ]);
-
-        $backfilled = 0;
-
-        foreach ($post_ids as $post_id) {
-            $youtube_url = (string) get_post_meta((int) $post_id, Church_Core_Sermons::YOUTUBE_URL_META_KEY, true);
-            $video_id = Church_Core_Youtube_Client::extract_video_id_from_url($youtube_url);
-
-            if ($video_id === '') {
-                continue;
-            }
-
-            update_post_meta((int) $post_id, Church_Core_Sermons::YOUTUBE_VIDEO_ID_META_KEY, $video_id);
-            $backfilled++;
-        }
-
-        return $backfilled;
     }
 }

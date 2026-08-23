@@ -28,8 +28,6 @@ final class Church_Core_Sermon_Cron
             'api_key' => '',
             'channel_id' => '',
             'default_speaker_term_id' => 0,
-            'schedule_weekday' => 'sunday',
-            'schedule_time' => '12:30',
         ];
     }
 
@@ -99,7 +97,6 @@ final class Church_Core_Sermon_Cron
     public static function handle_scheduled_sync(): void
     {
         self::run_sync('cron');
-        self::schedule_next_event();
     }
 
     public static function run_sync(string $trigger = 'manual'): array
@@ -231,10 +228,14 @@ final class Church_Core_Sermon_Cron
             return;
         }
 
-        if (self::get_next_scheduled_timestamp() > 0) {
+        $event = wp_get_scheduled_event(self::EVENT_HOOK);
+
+        if ($event && $event->schedule === 'weekly') {
             return;
         }
 
+        // Converts installs still carrying the pre-'weekly' single-event schedule.
+        self::clear_scheduled_event();
         self::schedule_next_event();
     }
 
@@ -249,12 +250,7 @@ final class Church_Core_Sermon_Cron
 
     public static function clear_scheduled_event(): void
     {
-        $timestamp = wp_next_scheduled(self::EVENT_HOOK);
-
-        while (is_int($timestamp) && $timestamp > 0) {
-            wp_unschedule_event($timestamp, self::EVENT_HOOK);
-            $timestamp = wp_next_scheduled(self::EVENT_HOOK);
-        }
+        wp_clear_scheduled_hook(self::EVENT_HOOK);
     }
 
     public static function handle_settings_changed(): void
@@ -262,65 +258,19 @@ final class Church_Core_Sermon_Cron
         self::refresh_schedule();
     }
 
+    /**
+     * Sundays at 12:30 in the site timezone, on WP's own 'weekly' recurrence — so
+     * nothing has to re-arm the event after each run.
+     */
     private static function schedule_next_event(): void
     {
-        $timestamp = self::calculate_next_run_timestamp();
+        $next = new DateTimeImmutable('today 12:30', wp_timezone());
 
-        if ($timestamp <= 0) {
-            return;
+        if ($next->format('w') !== '0' || $next->getTimestamp() <= time()) {
+            $next = new DateTimeImmutable('next sunday 12:30', wp_timezone());
         }
 
-        wp_schedule_single_event($timestamp, self::EVENT_HOOK);
-    }
-
-    private static function calculate_next_run_timestamp(): int
-    {
-        $settings = self::get_settings();
-        $weekday = self::sanitize_weekday((string) $settings['schedule_weekday']);
-        $time = self::sanitize_time((string) $settings['schedule_time']);
-        [$hour, $minute] = array_map('intval', explode(':', $time));
-
-        $timezone = wp_timezone();
-        $now = new DateTimeImmutable('now', $timezone);
-        $target_weekday = (int) date('w', strtotime($weekday));
-        $current_weekday = (int) $now->format('w');
-        $days_ahead = ($target_weekday - $current_weekday + 7) % 7;
-        $candidate = $now->setTime($hour, $minute, 0);
-
-        if ($days_ahead > 0) {
-            $candidate = $candidate->modify('+' . $days_ahead . ' days');
-        }
-
-        if ($candidate <= $now) {
-            $candidate = $candidate->modify('+7 days');
-        }
-
-        return $candidate->getTimestamp();
-    }
-
-    private static function sanitize_weekday(string $weekday): string
-    {
-        $weekday = strtolower(trim($weekday));
-        $valid_weekdays = [
-            'sunday',
-            'monday',
-            'tuesday',
-            'wednesday',
-            'thursday',
-            'friday',
-            'saturday',
-        ];
-
-        return in_array($weekday, $valid_weekdays, true) ? $weekday : 'sunday';
-    }
-
-    private static function sanitize_time(string $time): string
-    {
-        if (preg_match('/^(2[0-3]|[01]?\d):([0-5]\d)$/', $time, $matches) !== 1) {
-            return '12:30';
-        }
-
-        return sprintf('%02d:%02d', (int) $matches[1], (int) $matches[2]);
+        wp_schedule_event($next->getTimestamp(), 'weekly', self::EVENT_HOOK);
     }
 
     private static function has_valid_configuration(array $settings): bool

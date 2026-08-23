@@ -109,7 +109,7 @@ Taxonomies: `series` (hierarchical), `speaker` (non-hierarchical).
 2. Playlist → recent video IDs (playlistItems endpoint)
 3. Video IDs → full details (videos endpoint)
 4. Deduplication via `youtube_video_id` post meta before creating sermon posts
-5. Default sync: Sundays at 12:30 PM Asia/Kolkata via WP-Cron
+5. Sync schedule: Sundays at 12:30 PM Asia/Kolkata, on WP-Cron's `weekly` recurrence (not configurable)
 
 ### Code Standards
 

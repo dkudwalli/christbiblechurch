@@ -44,7 +44,6 @@ if (! defined('ABSPATH')) {
                 'container' => false,
                 'menu_id' => 'primary-menu',
                 'menu_class' => 'site-nav__list',
-                'fallback_cb' => 'church_theme_fallback_menu',
             ]);
             ?>
         </nav>

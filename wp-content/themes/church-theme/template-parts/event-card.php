@@ -5,7 +5,7 @@ if (! defined('ABSPATH')) {
 
 $post_id = get_the_ID();
 $event_location = church_theme_get_event_location($post_id);
-$event_preview = church_theme_get_event_notes_preview($post_id, 24);
+$event_preview = church_theme_get_post_preview($post_id, 24, false);
 ?>
 <article class="card event-card reveal">
     <?php if (has_post_thumbnail($post_id)) : ?>

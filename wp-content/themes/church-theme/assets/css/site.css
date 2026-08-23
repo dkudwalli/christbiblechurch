@@ -820,11 +820,6 @@ select {
   aspect-ratio: 4 / 3;
 }
 
-.section-media-grid {
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-}
 
 .elder-board-intro {
   max-width: 56rem;
@@ -1625,6 +1620,7 @@ select {
   border-radius: 50%;
   box-shadow: 0 8px 24px rgba(30, 37, 41, 0.15);
   cursor: pointer;
+  text-decoration: none;
   opacity: 0;
   visibility: hidden;
   transform: translateY(16px);

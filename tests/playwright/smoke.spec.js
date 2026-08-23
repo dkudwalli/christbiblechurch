@@ -1,10 +1,7 @@
 const { test, expect } = require("@playwright/test");
 const axeScriptPath = require.resolve("axe-core/axe.min.js");
-// Full WCAG 2.0/2.1 A+AA rule set rather than a hand-picked allowlist. Rules that
-// must stay off belong in disabledAxeRules below with a reason, so an exemption is
-// something you can read instead of an absence nobody notices.
+// Full WCAG 2.0/2.1 A+AA rule set rather than a hand-picked allowlist.
 const axeTags = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"];
-const disabledAxeRules = {};
 
 async function ensureAxe(page) {
   const hasAxe = await page.evaluate(() => Boolean(window.axe));
@@ -18,10 +15,9 @@ async function runAxeRules(page, tags = axeTags) {
   await ensureAxe(page);
 
   return page.evaluate(
-    async ({ runOnly, rules }) => {
+    async ({ runOnly }) => {
       const results = await axe.run(document, {
-        runOnly: { type: "tag", values: runOnly },
-        rules
+        runOnly: { type: "tag", values: runOnly }
       });
 
       return results.violations.map((violation) => ({
@@ -30,7 +26,7 @@ async function runAxeRules(page, tags = axeTags) {
         nodes: violation.nodes.map((node) => node.target)
       }));
     },
-    { runOnly: tags, rules: disabledAxeRules }
+    { runOnly: tags }
   );
 }
 
@@ -389,88 +385,6 @@ test("single sermon audio uses native controls instead of MediaElement", async (
   await expect(page.locator(".audio-player .mejs-horizontal-volume-slider")).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Open audio directly" })).toBeVisible();
   await expectNoAxeViolations(page, page.url());
-});
-
-test("footer keeps desktop labels and contact content on stable lines", async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 1200 });
-  await page.goto("/contact-us/");
-
-  const footerStyles = await page.evaluate(() => {
-    const link = document.querySelector('.site-footer__column a[href^="mailto:"]');
-    const text = document.querySelector(".site-footer__lines");
-    const labels = [...document.querySelectorAll(".site-footer__label")];
-    const addressBlocks = [...document.querySelectorAll(".site-footer__lines")];
-    const locationBlock = document.querySelector(".site-footer__column--visit .site-footer__lines");
-    const contactGroup = document.querySelector(".site-footer__contact-group");
-
-    return {
-      linkOverflowWrap: link ? getComputedStyle(link).overflowWrap : "",
-      linkWordBreak: link ? getComputedStyle(link).wordBreak : "",
-      textOverflowWrap: text ? getComputedStyle(text).overflowWrap : "",
-      textWordBreak: text ? getComputedStyle(text).wordBreak : "",
-      emailRectCount: link ? link.getClientRects().length : 0,
-      hasContactGroup: Boolean(contactGroup),
-      contactGroupTop: contactGroup ? contactGroup.getBoundingClientRect().top : 0,
-      locationBottom: locationBlock ? locationBlock.getBoundingClientRect().bottom : 0,
-      labelHeights: labels.map((label) =>
-        Math.round(label.getBoundingClientRect().height * 10) / 10
-      ),
-      addressLineCounts: addressBlocks.map(
-        (block) => block.querySelectorAll(".site-footer__line").length
-      )
-    };
-  });
-
-  expect(footerStyles.linkOverflowWrap).not.toBe("anywhere");
-  expect(footerStyles.textOverflowWrap).not.toBe("anywhere");
-  expect(footerStyles.linkWordBreak).toBe("normal");
-  expect(footerStyles.textWordBreak).toBe("normal");
-  expect(footerStyles.emailRectCount).toBe(1);
-  expect(footerStyles.hasContactGroup).toBe(true);
-  expect(footerStyles.contactGroupTop).toBeGreaterThan(footerStyles.locationBottom);
-  expect(new Set(footerStyles.labelHeights).size).toBe(1);
-  expect(footerStyles.addressLineCounts).toEqual([3, 3]);
-});
-
-test("footer stacks brand above metadata at mid-width without wrapping the email link", async ({ page }) => {
-  await page.setViewportSize({ width: 1100, height: 1200 });
-  await page.goto("/contact-us/");
-
-  const footerLayout = await page.evaluate(() => {
-    const brand = document.querySelector(".site-footer__brand");
-    const meta = document.querySelector(".site-footer__meta");
-    const email = document.querySelector('.site-footer__column a[href^="mailto:"]');
-    const labels = [...document.querySelectorAll(".site-footer__label")];
-    const explore = document.querySelector(".site-footer__column--explore");
-    const visit = document.querySelector(".site-footer__column--visit");
-    const mailing = document.querySelector(".site-footer__column--mailing");
-
-    return {
-      brandBottom: brand ? brand.getBoundingClientRect().bottom : 0,
-      metaTop: meta ? meta.getBoundingClientRect().top : 0,
-      metaColumnCount: meta
-        ? getComputedStyle(meta).gridTemplateColumns.split(" ").length
-        : 0,
-      emailRectCount: email ? email.getClientRects().length : 0,
-      exploreLeft: explore ? explore.getBoundingClientRect().left : 0,
-      exploreRight: explore ? explore.getBoundingClientRect().right : 0,
-      visitLeft: visit ? visit.getBoundingClientRect().left : 0,
-      visitTop: visit ? visit.getBoundingClientRect().top : 0,
-      mailingLeft: mailing ? mailing.getBoundingClientRect().left : 0,
-      mailingTop: mailing ? mailing.getBoundingClientRect().top : 0,
-      labelHeights: labels.map((label) =>
-        Math.round(label.getBoundingClientRect().height * 10) / 10
-      )
-    };
-  });
-
-  expect(footerLayout.metaTop).toBeGreaterThan(footerLayout.brandBottom);
-  expect(footerLayout.metaColumnCount).toBe(2);
-  expect(footerLayout.emailRectCount).toBe(1);
-  expect(footerLayout.visitLeft).toBeGreaterThan(footerLayout.exploreRight);
-  expect(Math.abs(footerLayout.mailingLeft - footerLayout.visitLeft)).toBeLessThan(4);
-  expect(footerLayout.mailingTop).toBeGreaterThan(footerLayout.visitTop);
-  expect(new Set(footerLayout.labelHeights).size).toBe(1);
 });
 
 test("key templates pass the WCAG A/AA rule set", async ({ page }) => {

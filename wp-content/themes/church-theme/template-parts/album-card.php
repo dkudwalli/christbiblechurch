@@ -5,7 +5,7 @@ if (! defined('ABSPATH')) {
 
 $post_id = get_the_ID();
 $cover_image = church_theme_get_photo_album_cover_asset($post_id);
-$summary = church_theme_get_photo_album_summary_preview($post_id);
+$summary = church_theme_get_post_preview($post_id);
 ?>
 <article class="card album-card reveal">
     <?php if ($cover_image !== null) : ?>

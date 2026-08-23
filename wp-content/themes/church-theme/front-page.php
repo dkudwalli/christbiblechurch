@@ -161,7 +161,7 @@ $upcoming_events = church_theme_get_event_query(true, 3);
                             <span><?php echo esc_html((string) get_post_meta(get_the_ID(), 'scripture_reference', true)); ?></span>
                         <?php endif; ?>
                     </p>
-                    <p><?php echo esc_html(church_theme_get_sermon_excerpt_preview(get_the_ID())); ?></p>
+                    <p><?php echo esc_html(church_theme_get_post_preview(get_the_ID(), 24)); ?></p>
 
                     <div class="sermon-feature__actions" style="margin-top: 1rem;">
                         <a class="button button--secondary" href="<?php echo esc_url(church_theme_get_sermon_url(get_the_ID())); ?>">

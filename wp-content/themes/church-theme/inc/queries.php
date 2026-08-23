@@ -38,38 +38,7 @@ function church_theme_get_event_datetime_object(int $post_id): ?DateTimeImmutabl
 {
     $value = (string) get_post_meta($post_id, 'event_start', true);
 
-    if ($value === '') {
-        return null;
-    }
-
-    $timezone = wp_timezone();
-    $formats = [
-        'Y-m-d H:i:s',
-        'Y-m-d H:i',
-        'Y-m-d\TH:i',
-    ];
-
-    foreach ($formats as $format) {
-        $date = DateTimeImmutable::createFromFormat($format, $value, $timezone);
-
-        if (! $date instanceof DateTimeImmutable) {
-            continue;
-        }
-
-        $errors = DateTimeImmutable::getLastErrors();
-
-        if (! is_array($errors) || (($errors['warning_count'] ?? 0) === 0 && ($errors['error_count'] ?? 0) === 0)) {
-            return $date;
-        }
-    }
-
-    $timestamp = strtotime($value);
-
-    if (! $timestamp) {
-        return null;
-    }
-
-    return (new DateTimeImmutable('@' . $timestamp))->setTimezone($timezone);
+    return $value === '' || ! class_exists('Church_Core_Events') ? null : Church_Core_Events::parse_datetime($value);
 }
 
 function church_theme_get_event_datetime(int $post_id): string
@@ -88,17 +57,40 @@ function church_theme_get_event_location(int $post_id): string
     return (string) get_post_meta($post_id, 'event_location', true);
 }
 
-function church_theme_get_event_notes_preview(int $post_id, int $word_limit = 26): string
+
+/**
+ * Plain-text card/meta preview for any post: hand-written excerpt when there is
+ * one, otherwise the stripped post content. Pass $use_excerpt = false for post
+ * types (events) whose excerpt is not authored.
+ */
+function church_theme_get_post_preview(int $post_id, int $word_limit = 26, bool $use_excerpt = true): string
 {
-    $content = (string) get_post_field('post_content', $post_id);
-    $content = wp_strip_all_tags(strip_shortcodes($content));
-    $content = trim(preg_replace('/\s+/', ' ', $content) ?: '');
+    $content = $use_excerpt ? (string) get_post_field('post_excerpt', $post_id) : '';
 
     if ($content === '') {
-        return '';
+        $content = wp_strip_all_tags(strip_shortcodes((string) get_post_field('post_content', $post_id)));
     }
 
-    return wp_trim_words($content, $word_limit);
+    $content = trim(preg_replace('/\s+/', ' ', $content) ?: '');
+
+    return $content === '' ? '' : wp_trim_words($content, $word_limit);
+}
+
+/**
+ * Order by a date meta key while KEEPING posts that have none. A bare meta_key
+ * INNER-JOINs postmeta and drops them entirely; the OR meta_query LEFT-JOINs so
+ * undated posts sort last instead.
+ */
+function church_theme_date_meta_sort_args(string $meta_key): array
+{
+    return [
+        'meta_query' => [
+            'relation' => 'OR',
+            'date_present' => ['key' => $meta_key, 'compare' => 'EXISTS', 'type' => 'DATE'],
+            'date_missing' => ['key' => $meta_key, 'compare' => 'NOT EXISTS'],
+        ],
+        'orderby' => ['date_present' => 'DESC', 'date' => 'DESC'],
+    ];
 }
 
 function church_theme_get_photo_album_date(int $post_id): string
@@ -116,39 +108,7 @@ function church_theme_get_photo_album_date(int $post_id): string
     return $timestamp ? wp_date(get_option('date_format'), $timestamp) : $value;
 }
 
-function church_theme_get_photo_album_summary_preview(int $post_id, int $word_limit = 26): string
-{
-    $content = (string) get_post_field('post_excerpt', $post_id);
 
-    if ($content === '') {
-        $content = wp_strip_all_tags(strip_shortcodes((string) get_post_field('post_content', $post_id)));
-    }
-
-    $content = trim(preg_replace('/\s+/', ' ', $content) ?: '');
-
-    if ($content === '') {
-        return '';
-    }
-
-    return wp_trim_words($content, $word_limit);
-}
-
-function church_theme_get_sermon_excerpt_preview(int $post_id, int $word_limit = 24): string
-{
-    $content = (string) get_post_field('post_excerpt', $post_id);
-
-    if ($content === '') {
-        $content = wp_strip_all_tags(strip_shortcodes((string) get_post_field('post_content', $post_id)));
-    }
-
-    $content = trim(preg_replace('/\s+/', ' ', $content) ?: '');
-
-    if ($content === '') {
-        return '';
-    }
-
-    return wp_trim_words($content, $word_limit);
-}
 
 function church_theme_get_photo_album_query(int $posts_per_page = -1): WP_Query
 {
@@ -156,25 +116,13 @@ function church_theme_get_photo_album_query(int $posts_per_page = -1): WP_Query
         ? Church_Core_Photo_Albums::DATE_META_KEY
         : 'album_date';
 
-    return new WP_Query([
+    return new WP_Query(array_merge([
         'post_type' => 'photo_album',
         'post_status' => 'publish',
         'posts_per_page' => $posts_per_page,
-        // Order by album date but keep albums that have no date set. A bare meta_key
-        // INNER-JOINs postmeta and drops keyless albums from the gallery entirely;
-        // the OR meta_query LEFT-JOINs so dateless albums sort last instead.
-        'meta_query' => [
-            'relation' => 'OR',
-            'album_date_present' => ['key' => $meta_key, 'compare' => 'EXISTS', 'type' => 'DATE'],
-            'album_date_missing' => ['key' => $meta_key, 'compare' => 'NOT EXISTS'],
-        ],
-        'orderby' => [
-            'album_date_present' => 'DESC',
-            'date' => 'DESC',
-        ],
         'no_found_rows' => true,
         'ignore_sticky_posts' => true,
-    ]);
+    ], church_theme_date_meta_sort_args($meta_key)));
 }
 
 function church_theme_get_event_query(bool $upcoming, int $posts_per_page = -1): WP_Query
@@ -204,37 +152,23 @@ function church_theme_get_event_query(bool $upcoming, int $posts_per_page = -1):
 
 function church_theme_get_latest_sermon_query(int $limit = 1, int $offset = 0): WP_Query
 {
-    return new WP_Query([
+    return new WP_Query(array_merge([
         'post_type' => 'sermon',
         'posts_per_page' => $limit,
         'offset' => $offset,
-        // Keep sermons that have no sermon_date set (see church_theme_get_photo_album_query).
-        'meta_query' => [
-            'relation' => 'OR',
-            'sermon_date_present' => ['key' => 'sermon_date', 'compare' => 'EXISTS', 'type' => 'DATE'],
-            'sermon_date_missing' => ['key' => 'sermon_date', 'compare' => 'NOT EXISTS'],
-        ],
-        'orderby' => ['sermon_date_present' => 'DESC', 'date' => 'DESC'],
         'no_found_rows' => true,
-    ]);
+    ], church_theme_date_meta_sort_args('sermon_date')));
 }
 
 function church_theme_get_related_sermon_query(int $post_id, int $limit = 3): array
 {
     $series_term = church_theme_get_sermon_primary_term($post_id, 'series');
-    $base_args = [
+    $base_args = array_merge([
         'post_type' => 'sermon',
         'posts_per_page' => $limit,
         'post__not_in' => [$post_id],
-        // Keep sermons that have no sermon_date set (see church_theme_get_photo_album_query).
-        'meta_query' => [
-            'relation' => 'OR',
-            'sermon_date_present' => ['key' => 'sermon_date', 'compare' => 'EXISTS', 'type' => 'DATE'],
-            'sermon_date_missing' => ['key' => 'sermon_date', 'compare' => 'NOT EXISTS'],
-        ],
-        'orderby' => ['sermon_date_present' => 'DESC', 'date' => 'DESC'],
         'no_found_rows' => true,
-    ];
+    ], church_theme_date_meta_sort_args('sermon_date'));
 
     if ($series_term) {
         $series_args = $base_args;

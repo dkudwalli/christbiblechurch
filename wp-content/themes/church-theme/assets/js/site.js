@@ -31,12 +31,6 @@ document.addEventListener("DOMContentLoaded", () => {
     handleScroll();
   }
 
-  if (backToTop) {
-    backToTop.addEventListener("click", () => {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    });
-  }
-
   // Scroll-triggered reveal animations
   const reveals = document.querySelectorAll(".reveal");
   if (reveals.length > 0) {
@@ -306,7 +300,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   syncViewportState();
+});
 
+document.addEventListener("DOMContentLoaded", () => {
   // Lightbox implementation
   const lightboxes = document.querySelectorAll(".js-lightbox");
   if (lightboxes.length > 0) {
