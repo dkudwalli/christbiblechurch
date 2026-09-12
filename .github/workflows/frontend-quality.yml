@@ -36,7 +36,7 @@ jobs:
           npm run lint
 
       - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install --with-deps chromium webkit
 
       - name: Bootstrap WordPress
         run: |

@@ -38,10 +38,13 @@
   --accent-secondary-soft: rgba(128, 175, 68, 0.18);
   --highlight: #f0c041;
   --highlight-soft: rgba(240, 192, 65, 0.18);
-  --shadow: 0 18px 48px rgba(var(--surface-dark-rgb), 0.14);
-  --radius: 24px;
-  --radius-sm: 18px;
-  --control-height: 54px;
+  --shadow: 0 3px 12px rgba(var(--surface-dark-rgb), 0.04);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --control-height: 48px;
+  --header-min-height: 64px;
+  --header-row-height: var(--header-min-height);
+  --section-space: clamp(2rem, 5vw, 3rem);
   --wrap: min(1120px, calc(100vw - 2rem));
 }
 
@@ -59,10 +62,10 @@ body {
   margin: 0;
   color: var(--text);
   font-family: Inter, "Segoe UI", system-ui, sans-serif;
-  line-height: 1.65;
-  background:
-    radial-gradient(circle at top left, rgba(var(--accent-rgb), 0.06), transparent 28%),
-    linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
+  font-size: 1rem;
+  line-height: 1.6;
+  background: var(--bg);
+  overflow-wrap: anywhere;
 }
 
 img,
@@ -92,15 +95,16 @@ h2,
 h3,
 h4 {
   font-family: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  color: var(--surface-dark);
 }
 
 .site-header {
   position: sticky;
   top: 0;
   z-index: 40;
-  backdrop-filter: blur(18px);
-  background: rgba(252, 250, 245, 0.94);
+  background: var(--surface);
   border-bottom: 1px solid var(--line);
   transition: box-shadow 250ms ease, border-bottom-color 250ms ease;
 }
@@ -126,9 +130,9 @@ h4 {
 }
 
 .site-header__inner {
-  grid-template-columns: auto auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  min-height: 90px;
+  min-height: var(--header-min-height);
 }
 
 .site-brand {
@@ -199,7 +203,7 @@ h4 {
 .site-nav__list a {
   display: inline-flex;
   align-items: center;
-  min-height: 42px;
+  min-height: var(--control-height);
   padding: 0.35rem 0.9rem;
   border-radius: 999px;
   font-size: 0.95rem;
@@ -267,6 +271,8 @@ h4 {
 
 .site-nav__toggle {
   display: none;
+  align-items: center;
+  min-height: var(--control-height);
   justify-self: end;
   padding: 0.8rem 1rem;
   border: 1px solid var(--line);
@@ -281,7 +287,7 @@ h4 {
   align-items: center;
   justify-content: center;
   min-width: 42px;
-  min-height: 42px;
+  min-height: var(--control-height);
   padding: 0;
   border: 1px solid rgba(var(--accent-rgb), 0.16);
   border-radius: 16px;
@@ -315,15 +321,15 @@ h4 {
 .hero,
 .page-hero,
 .section {
-  padding: 4.75rem 0;
+  padding: var(--section-space) 0;
 }
 
 .page-hero {
-  padding-bottom: 2.25rem;
+  padding-bottom: 1.5rem;
 }
 
 .section--muted {
-  background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.04), rgba(255, 250, 246, 0.88));
+  background: var(--surface);
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
 }
@@ -334,17 +340,17 @@ h4 {
 .contact-grid,
 .content-grid,
 .sermon-feature {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .summary-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .event-grid {
   display: grid;
   gap: 1.5rem;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .event-archive__actions {
@@ -361,12 +367,12 @@ h4 {
 .hero h1,
 .page-hero h1 {
   margin: 0 0 1rem;
-  font-size: clamp(2.8rem, 4vw, 5rem);
-  line-height: 1.04;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 1.12;
 }
 
 .page-hero h1 {
-  font-size: clamp(2.4rem, 3.5vw, 4.25rem);
+  font-size: clamp(2rem, 4vw, 3rem);
 }
 
 .eyebrow,
@@ -374,16 +380,10 @@ h4 {
 .site-footer__label {
   margin: 0;
   color: var(--accent);
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.eyebrow::before {
-  content: "+";
-  margin-right: 0.45rem;
+  font-size: 0.8125rem;
   font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .hero__summary,
@@ -407,7 +407,7 @@ h4 {
 
 .breadcrumbs a {
   color: var(--accent-strong);
-  text-decoration: none;
+  text-decoration: underline;
 }
 
 .breadcrumbs > * + *::before {
@@ -455,24 +455,20 @@ h4 {
 .audio-player {
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: rgba(255, 255, 255, 0.94);
+  background: var(--surface-strong);
   box-shadow: var(--shadow);
 }
 
 .card,
 .callout {
-  padding: 1.65rem;
+  padding: 1.25rem;
 }
 
 .card--accent {
-  border-color: rgba(var(--accent-rgb), 0.18);
-  background:
-    linear-gradient(180deg, rgba(var(--accent-rgb), 0.08), rgba(255, 255, 255, 0.96) 24%),
-    var(--surface-strong);
+  border-color: var(--line);
+  background: var(--surface-strong);
   color: var(--text);
-  box-shadow:
-    inset 0 4px 0 rgba(var(--accent-rgb), 0.16),
-    0 18px 42px rgba(30, 37, 41, 0.08);
+  box-shadow: none;
 }
 
 .card--accent .card__label,
@@ -530,12 +526,10 @@ h4 {
 
 .section-heading h2 {
   margin: 0 0 0.7rem;
-  padding-left: 1rem;
-  border-left: 3px solid var(--highlight);
+  font-size: clamp(1.5rem, 3vw, 2rem);
 }
 
 .section-heading .eyebrow {
-  padding-left: calc(1rem + 3px);
   margin-bottom: 0.35rem;
 }
 
@@ -636,7 +630,7 @@ button[type="submit"] {
   min-height: var(--control-height);
   padding: 0.8rem 1.35rem;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   background: var(--accent);
   color: var(--text-inverse);
   cursor: pointer;
@@ -647,7 +641,6 @@ button[type="submit"] {
 
 .button:hover,
 button[type="submit"]:hover {
-  transform: translateY(-1px);
   background: var(--accent-strong);
 }
 
@@ -663,6 +656,9 @@ button[type="submit"]:hover {
 }
 
 .text-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-height);
   color: var(--accent-strong);
   font-weight: 700;
   background-image: linear-gradient(currentColor, currentColor);
@@ -716,12 +712,7 @@ button[type="submit"]:hover {
 .sermon-grid {
   display: grid;
   gap: 1.5rem;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.home-recent-sermons__label {
-  margin-top: 2.5rem;
-  margin-bottom: 1rem;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .sermon-card,
@@ -732,7 +723,7 @@ button[type="submit"]:hover {
 .filter-bar {
   display: grid;
   gap: 1rem;
-  grid-template-columns: 1.8fr 1fr 1fr auto;
+  grid-template-columns: minmax(0, 1fr);
   align-items: end;
 }
 
@@ -744,8 +735,10 @@ textarea,
 select {
   width: 100%;
   border: 1px solid var(--line-strong);
-  border-radius: 16px;
+  border-radius: var(--radius-sm);
   background: var(--surface-strong);
+  min-width: 0;
+  font-size: 1rem;
   color: var(--text);
   transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
 }
@@ -775,8 +768,8 @@ input[type="text"],
 input[type="email"],
 input[type="tel"],
 select {
-  height: var(--control-height);
-  padding: 0 1rem;
+  min-height: var(--control-height);
+  padding: 0.65rem 1rem;
 }
 
 textarea {
@@ -802,7 +795,7 @@ select {
 .content-aside,
 .content-placeholder,
 .section-card {
-  padding: 1.7rem;
+  padding: 1.25rem;
 }
 
 .page-hero__media,
@@ -871,9 +864,9 @@ select {
 .elder-card__family {
   margin: 0;
   color: var(--accent-secondary-strong);
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
@@ -897,7 +890,7 @@ select {
 .section-story {
   display: grid;
   gap: 1.5rem;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  grid-template-columns: minmax(0, 1fr);
   align-items: start;
 }
 
@@ -917,7 +910,7 @@ select {
 .album-grid {
   display: grid;
   gap: 1.5rem;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .gallery-feed__grid {
@@ -1000,7 +993,7 @@ select {
 .section-nav__list a {
   display: inline-flex;
   align-items: center;
-  min-height: 42px;
+  min-height: var(--control-height);
   padding: 0.45rem 1rem;
   border: 1px solid rgba(var(--accent-rgb), 0.16);
   border-radius: 999px;
@@ -1018,7 +1011,7 @@ select {
 
 .section-layout {
   display: grid;
-  gap: 2rem;
+  gap: 1rem;
 }
 
 .event-section {
@@ -1028,12 +1021,16 @@ select {
 
 .section-card {
   max-width: none;
-  padding: 2rem 2.25rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .section-card .prose,
 .section-story .prose {
-  font-size: 1.08rem;
+  font-size: 1.0625rem;
 }
 
 .section-card blockquote,
@@ -1105,7 +1102,7 @@ select {
 }
 
 .contact-grid {
-  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  grid-template-columns: minmax(0, 1fr);
   align-items: start;
 }
 
@@ -1117,9 +1114,7 @@ select {
 
 .contact-panel--form {
   border-color: rgba(var(--accent-rgb), 0.18);
-  box-shadow:
-    inset 0 4px 0 rgba(var(--accent-rgb), 0.1),
-    var(--shadow);
+  box-shadow: none;
 }
 
 .contact-panel__intro {
@@ -1200,7 +1195,7 @@ select {
 .map-frame {
   position: relative;
   overflow: hidden;
-  min-height: 420px;
+  min-height: 300px;
   background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.06), rgba(255, 255, 255, 0.98));
 }
 
@@ -1215,7 +1210,7 @@ select {
   position: relative;
   z-index: 1;
   height: 100%;
-  min-height: 420px;
+  min-height: 300px;
 }
 
 .map-frame__fallback {
@@ -1243,7 +1238,7 @@ select {
 .map-frame__placeholder {
   display: grid;
   place-content: center;
-  min-height: 420px;
+  min-height: 300px;
   padding: 2rem;
   text-align: center;
 }
@@ -1295,13 +1290,13 @@ select {
 .single-sermon__meta-grid {
   display: grid;
   gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
 }
 
 .event-meta-grid {
   display: grid;
   gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
 }
 
 .single-sermon__meta-card {
@@ -1332,7 +1327,7 @@ select {
 }
 
 .prose {
-  max-width: 760px;
+  max-width: 65ch;
 }
 
 .prose > *:first-child,
@@ -1345,9 +1340,12 @@ select {
   margin-bottom: 0;
 }
 
-.prose--compact,
+.prose--compact {
+  max-width: 65ch;
+}
+
 .prose--wide {
-  max-width: none;
+  max-width: 72ch;
 }
 
 .prose h2,
@@ -1440,7 +1438,7 @@ select {
 }
 
 .site-footer {
-  padding: 3rem 0 0;
+  padding: 2rem 0 0;
   background: var(--surface-dark);
   color: rgba(255, 255, 255, 0.78);
 }
@@ -1456,8 +1454,8 @@ select {
 .site-footer__inner {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 2.5rem;
-  padding-bottom: 2rem;
+  gap: 1.5rem;
+  padding-bottom: 1.5rem;
 }
 
 .site-footer__brand {
@@ -1475,14 +1473,13 @@ select {
 
 .site-footer__meta {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
   gap: 2rem;
 }
 
 .site-footer__column {
   min-width: 0;
-  padding-left: 1rem;
-  border-left: 2px solid rgba(255, 255, 255, 0.12);
+  padding-left: 0;
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
@@ -1521,6 +1518,12 @@ select {
   gap: 0.18rem;
 }
 
+.site-footer__contact-group a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-height);
+}
+
 .site-footer__contact-group {
   display: grid;
   gap: 0.7rem;
@@ -1554,12 +1557,15 @@ select {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 1rem;
 }
 
 .site-footer__nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-height);
   text-decoration: none;
   font-size: 0.94rem;
   transition: color 180ms ease;
@@ -1581,6 +1587,7 @@ select {
 
 .site-footer__social {
   display: inline-flex;
+  min-height: var(--control-height);
   align-items: center;
   gap: 0.45rem;
   font-size: 0.88rem;
@@ -1606,8 +1613,8 @@ select {
 
 .back-to-top {
   position: fixed;
-  bottom: 2rem;
-  right: 2rem;
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  right: max(1rem, env(safe-area-inset-right));
   z-index: 50;
   display: flex;
   align-items: center;
@@ -1670,8 +1677,9 @@ select {
 
 .lightbox__content {
   position: relative;
-  max-width: 90vw;
-  max-height: 90vh;
+  max-width: calc(100vw - 2rem);
+  max-height: calc(100dvh - 5rem);
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1679,25 +1687,30 @@ select {
 
 .lightbox__image {
   max-width: 100%;
-  max-height: 80vh;
+  max-height: calc(100dvh - 10rem);
+  flex-shrink: 0;
   object-fit: contain;
   border-radius: 8px;
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
 }
 
 .lightbox__close {
-  position: absolute;
-  top: -3rem;
-  right: -1rem;
-  background: transparent;
+  position: fixed;
+  top: max(0.5rem, env(safe-area-inset-top));
+  right: max(0.5rem, env(safe-area-inset-right));
+  z-index: 1;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--surface-dark);
   color: #fff;
   border: none;
   font-size: 2.5rem;
   cursor: pointer;
   line-height: 1;
   padding: 0.5rem;
-  opacity: 0.7;
-  transition: opacity 200ms ease, transform 200ms ease;
+  opacity: 1;
+  transition: opacity 200ms ease;
 }
 
 .lightbox__close:hover {
@@ -1724,6 +1737,246 @@ select {
 
 .lightbox__link:hover {
   color: #fff;
+}
+
+/* Homepage: practical actions precede photography on phones. */
+.home-hero > .wrap {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.home-hero .hero__summary {
+  margin-bottom: 0;
+}
+
+.home-visit {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  border-left: 3px solid var(--accent);
+}
+
+.home-visit p {
+  margin: 0 0 0.5rem;
+}
+
+.home-visit__time {
+  font-weight: 700;
+}
+
+.home-visit__venue {
+  font-size: 0.9375rem;
+}
+
+.home-visit .button {
+  justify-self: start;
+}
+
+.home-shortcuts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.home-shortcuts a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--control-height);
+  padding: 0.75rem 0.25rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  color: var(--surface-dark);
+  background: var(--surface);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.home-shortcuts a:hover {
+  background: var(--bg-muted);
+}
+
+.home-mission .summary-card {
+  padding: 0 0 0 1rem;
+  border: 0;
+  border-left: 2px solid var(--line-strong);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.home-mission .summary-card p {
+  margin: 0;
+}
+
+.sermon-feature__preview {
+  display: flex;
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: 112px;
+  border-radius: var(--radius-sm);
+  padding: 1rem;
+  background: var(--surface-dark);
+  color: var(--text-inverse);
+  font-weight: 700;
+  text-decoration: none;
+  overflow: hidden;
+}
+
+.sermon-feature__preview-fallback {
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.sermon-feature__preview:has(img) {
+  flex-direction: column;
+}
+
+.sermon-feature__preview img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+.sermon-feature__content h3 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.worship-gathering {
+  display: grid;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.worship-gathering .button {
+  justify-self: start;
+}
+
+.contact-direct-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.contact-practical {
+  padding-top: 0;
+}
+
+.contact-secondary .card {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+@media (min-width: 721px) {
+  .home-hero > .wrap {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 2rem;
+  }
+
+  .home-hero .hero__content,
+  .home-visit,
+  .home-shortcuts,
+  .home-hero__custom-cta {
+    grid-column: 1;
+  }
+
+  .home-hero .hero__media {
+    grid-column: 2;
+    grid-row: 1 / span 4;
+    align-self: stretch;
+  }
+
+  .home-hero .hero__media img {
+    height: 100%;
+  }
+
+  .contact-page {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+
+/* Shared mobile disclosures and readable content. */
+:where(.wrap, .card, .hero__grid, .page-hero__grid, .filter-bar) > * {
+  min-width: 0;
+}
+
+.has-js .site-nav[hidden] {
+  display: none;
+}
+
+.section-nav__summary,
+.filter-bar__more-summary {
+  min-height: var(--control-height);
+  padding: 0.75rem 0;
+  color: var(--surface-dark);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.filter-bar__more-fields {
+  display: grid;
+  gap: 1rem;
+  padding-top: 0.5rem;
+}
+
+.filter-bar__more {
+  min-width: 0;
+}
+
+.section-nav__disclosure[open] .section-nav__list {
+  padding-bottom: 0.5rem;
+}
+
+@media (min-width: 721px) {
+  .hero__grid,
+  .page-hero__grid,
+  .content-grid,
+  .contact-grid,
+  .section-story,
+  .sermon-feature {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .section-nav__summary,
+  .filter-bar__more-summary {
+    display: none;
+  }
+
+  .filter-bar {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) auto;
+  }
+
+  .filter-bar__more-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 0;
+  }
+
+  .album-grid,
+  .event-grid,
+  .sermon-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 961px) {
+  :root {
+    --header-min-height: 80px;
+  }
+
+  .album-grid,
+  .event-grid,
+  .sermon-grid,
+  .summary-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 @media (min-width: 1201px) {
@@ -1825,8 +2078,19 @@ select {
 }
 
 @media (max-width: 960px) {
-  .site-nav__toggle {
+  /* Hide only enhanced navigation before its script arrives on slow networks. */
+  .has-js .site-nav:not(.is-open) {
+    display: none;
+  }
+
+  html:not(.has-js) .site-header {
+    position: static;
+  }
+
+  .has-js .site-nav__toggle {
     display: inline-flex;
+    gap: 0.6rem;
+    padding: 0.5rem 0.75rem;
   }
 
   /* The collapsed nav becomes a full-width second grid row below; center the
@@ -1840,35 +2104,24 @@ select {
     display: block;
     grid-column: 1 / -1;
     justify-self: stretch;
-    overflow: hidden;
-    max-height: 0;
-    transition: max-height 280ms ease;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   .site-nav.is-open {
-    max-height: 600px;
+    max-height: calc(100vh - var(--header-row-height));
+    max-height: calc(100dvh - var(--header-row-height));
     padding-bottom: 1rem;
   }
 
   .site-nav__list,
   .site-nav__list .sub-menu,
-  .hero__grid,
-  .page-hero__grid,
-  .summary-grid,
-  .album-grid,
-  .event-grid,
-  .contact-grid,
-  .content-grid,
-  .section-story,
-  .sermon-grid,
-  .sermon-feature,
   .callout,
   .visit-note,
   .contact-form__row,
   .single-sermon__actions,
   .album-detail__actions,
   .event-actions,
-  .filter-bar,
   .site-footer__inner,
   .site-footer__meta {
     grid-template-columns: 1fr;
@@ -1962,11 +2215,11 @@ select {
   .hero,
   .page-hero,
   .section {
-    padding: 3.6rem 0;
+    padding: var(--section-space) 0;
   }
 
   .site-header__inner {
-    min-height: 82px;
+    min-height: var(--header-min-height);
   }
 
   .site-brand__mark {
@@ -1990,38 +2243,28 @@ select {
     min-height: 320px;
   }
 
-  /* Collapse the sticky section nav to a single swipeable row on phones so it
-     stops eating the reading area. Compound selector outranks the .section
-     padding rule above on equal specificity. */
-  .section.section-nav-band {
-    top: 82px;
-    padding: 0.6rem 0;
-  }
-
-  .section-nav-band .section-nav {
-    padding: 0;
-  }
-
-  .section-nav__list {
-    flex-wrap: nowrap;
-    gap: 0.5rem;
-    padding-bottom: 0.15rem;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-
-  .section-nav__list::-webkit-scrollbar {
+  .has-js .section-nav__disclosure:not([data-ready]) .section-nav__list,
+  .has-js .filter-bar__more[data-has-active-filters="false"]:not([data-ready]) .filter-bar__more-fields {
     display: none;
   }
 
-  .section-nav__list li {
-    flex: 0 0 auto;
+  .section.section-nav-band {
+    position: static;
+    padding: 0.5rem 0;
+  }
+
+  .section-nav__list {
+    display: grid;
+    gap: 0.25rem;
   }
 
   .section-nav__list a {
-    white-space: nowrap;
+    width: 100%;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: transparent;
   }
+
 }
 
 @media (min-width: 721px) {
@@ -2045,16 +2288,6 @@ select {
 }
 
 /* === MOTION / INTERACTIONS === */
-.card {
-  transition: transform 200ms ease, box-shadow 200ms ease;
-}
-
-.card:not(.elder-card, .contact-panel--form, .single-sermon__summary, .single-sermon__actions, .single-sermon__meta-card, .album-detail__summary, .album-detail__actions, .album-detail__photos):hover,
-.card:not(.elder-card, .contact-panel--form, .single-sermon__summary, .single-sermon__actions, .single-sermon__meta-card, .album-detail__summary, .album-detail__actions, .album-detail__photos):focus-within {
-  transform: translateY(-3px);
-  box-shadow: 0 24px 56px rgba(30, 37, 41, 0.14);
-}
-
 .button:active,
 button[type="submit"]:active {
   transform: translateY(1px);
@@ -2082,121 +2315,45 @@ button[type="submit"]:active {
   100% { background-position: -200% 0; }
 }
 
-/* === SCROLL-REVEAL ENTRANCE ANIMATIONS === */
+/* Content stays in place while loading and scrolling. */
 .reveal {
   opacity: 1;
-  transform: translateY(0);
-  transition: opacity 600ms ease, transform 600ms ease;
 }
 
-.has-js .reveal {
-  transform: translateY(16px);
-}
-
-.reveal.is-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Stagger children inside grids */
-.reveal-stagger > .reveal:nth-child(2) { transition-delay: 80ms; }
-.reveal-stagger > .reveal:nth-child(3) { transition-delay: 160ms; }
-.reveal-stagger > .reveal:nth-child(4) { transition-delay: 240ms; }
-.reveal-stagger > .reveal:nth-child(5) { transition-delay: 320ms; }
-.reveal-stagger > .reveal:nth-child(6) { transition-delay: 400ms; }
-
-/* Cards that are also reveal targets: compose hover lift with reveal */
-.card.reveal.is-visible:not(.elder-card, .contact-panel--form, .single-sermon__summary, .single-sermon__actions, .single-sermon__meta-card):hover {
-  transform: translateY(-3px);
-}
-
-/* === HERO VISUAL TEXTURE === */
+/* === HOME WELCOME === */
 .hero {
-  position: relative;
-  overflow: hidden;
-  background: var(--surface-dark);
-  color: var(--text-inverse);
-}
-
-.hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(var(--accent-soft) 1px, transparent 1px);
-  background-size: 28px 28px;
-  opacity: 0.5;
-  pointer-events: none;
-}
-
-.hero__card.card--accent {
-  border-top: 3px solid var(--highlight);
-}
-
-.hero__aside {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.hero__media {
-  margin: 0;
-  overflow: hidden;
-  border: 1px solid var(--line);
-  border-bottom: 0;
-  border-radius: var(--radius) var(--radius) 0 0;
-  box-shadow: 0 -4px 24px rgba(30, 37, 41, 0.06);
-}
-
-.hero__media img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  aspect-ratio: 3 / 2;
-  object-fit: cover;
-  object-position: center 70%;
-}
-
-.hero__aside .hero__card {
-  border-radius: 0 0 var(--radius) var(--radius);
+  background: var(--bg);
 }
 
 .hero__content {
   align-self: center;
 }
 
-/* === HERO — Wayfinding navy ground (base .hero bg/color set in HERO VISUAL TEXTURE) === */
-.hero h1 {
-  color: var(--text-inverse);
+.hero__media {
+  margin: 0;
+  overflow: hidden;
+  border-radius: var(--radius);
 }
 
-.hero .hero__summary {
-  color: rgba(246, 243, 236, 0.86);
+.hero__media img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  object-position: center 70%;
 }
 
-.hero .hero__meta {
-  color: rgba(246, 243, 236, 0.82);
-}
-
-.hero .hero__actions .text-link {
-  color: var(--text-inverse);
-}
-
-.hero .eyebrow {
-  color: var(--highlight);
-}
-
-/* === STICKY SECTION NAV === */
 .section-nav-band {
-  position: sticky;
-  top: 90px;
+  position: static;
+  padding: 0.5rem 0;
+  top: var(--header-row-height);
   z-index: 30;
-  backdrop-filter: blur(12px);
-  background: rgba(var(--bg-rgb), 0.92);
+  background: var(--surface);
 }
 
 .section-nav__list a.is-active {
-  border-color: rgba(var(--accent-rgb), 0.36);
-  background: rgba(var(--accent-rgb), 0.12);
+  background: var(--accent-soft);
   color: var(--accent-strong);
 }
 
@@ -2413,8 +2570,8 @@ html:not(.has-js) .hero-banner__content {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   padding: 0;
   color: var(--text-inverse);
   background: rgba(30, 37, 41, 0.45);
@@ -2453,12 +2610,11 @@ html:not(.has-js) .hero-banner__content {
   transform: translateX(-50%);
 }
 
-/* 12px visual dot inside a >=24px hit area (WCAG 2.5.8); padding + content-box
-   background-clip keep only the 12px circle painted while the button stays >=24px. */
+/* 12px visual dot inside a 48px touch target. */
 .hero-banner__dot {
   width: 12px;
   height: 12px;
-  padding: 6px;
+  padding: 18px;
   box-sizing: content-box;
   background: rgba(246, 243, 236, 0.5);
   background-clip: content-box;
@@ -2491,5 +2647,11 @@ html:not(.has-js) .hero-banner__content {
     opacity: 1;
     transform: none;
     transition: none;
+  }
+}
+
+@media (min-width: 961px) {
+  .has-js .section-nav-band {
+    position: sticky;
   }
 }

@@ -1,5 +1,5 @@
 :root {
-  --header-offset: 112px;
+  --header-offset: var(--header-row-height);
 }
 
 a {
@@ -39,12 +39,12 @@ a {
   transform: translateY(0);
 }
 
-:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
   outline: 3px solid var(--accent-bright);
   outline-offset: 3px;
 }
 
-:where(a, button, input, select, textarea, [tabindex]):focus:not(:focus-visible) {
+:where(a, button, input, select, textarea, summary, [tabindex]):focus:not(:focus-visible) {
   outline: none;
 }
 
@@ -53,11 +53,11 @@ a {
 }
 
 .site-main [id] {
-  scroll-margin-top: calc(var(--header-offset) + 1rem);
+  scroll-margin-top: calc(var(--header-offset) + var(--section-nav-offset, 0px) + 1rem);
 }
 
 [id].section {
-  scroll-margin-top: calc(var(--header-offset) + 4rem);
+  scroll-margin-top: calc(var(--header-offset) + var(--section-nav-offset, 0px) + 1rem);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -2,46 +2,43 @@
 if (! defined('ABSPATH')) {
     exit;
 }
-
 get_header();
-
 the_post();
 
 $sections = church_theme_get_child_sections(get_the_ID());
 $service_times = church_theme_split_lines(church_theme_get_mod('service_times'));
 $worship_location = church_theme_split_lines(church_theme_get_mod('worship_location'));
+$directions_url = church_theme_get_map_directions_url();
 ?>
-<section class="page-hero">
-    <div class="wrap page-hero__grid">
-        <div>
-            <h1><?php the_title(); ?></h1>
-            <div class="page-hero__summary prose prose--compact">
-                <?php echo apply_filters('the_content', get_the_content()); ?>
+<section class="page-hero worship-hero">
+    <div class="wrap">
+        <h1><?php the_title(); ?></h1>
+        <article class="card card--accent worship-gathering">
+            <div>
+                <p class="card__label"><?php esc_html_e('Gather With Us', 'church-theme'); ?></p>
+                <?php if ($service_times !== []) : ?>
+                    <ul class="stack-list">
+                        <?php foreach ($service_times as $service_time) : ?>
+                            <li><?php echo church_theme_icon('clock'); ?><?php echo esc_html($service_time); ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
+                <?php if ($worship_location !== []) : ?>
+                    <div class="page-hero__panel-meta">
+                        <strong><?php esc_html_e('Location', 'church-theme'); ?></strong>
+                        <p><?php echo esc_html(implode(', ', $worship_location)); ?></p>
+                    </div>
+                <?php endif; ?>
             </div>
-        </div>
-
-        <div class="card page-hero__panel">
-            <p class="card__label"><?php esc_html_e('Gather With Us', 'church-theme'); ?></p>
-            <?php if ($service_times !== []) : ?>
-                <ul class="stack-list">
-                    <?php foreach ($service_times as $service_time) : ?>
-                        <li><?php echo esc_html($service_time); ?></li>
-                    <?php endforeach; ?>
-                </ul>
+            <?php if ($directions_url !== '') : ?>
+                <a class="button button--secondary" href="<?php echo esc_url($directions_url); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e('Get Directions', 'church-theme'); ?></a>
             <?php endif; ?>
-
-            <?php if ($worship_location !== []) : ?>
-                <div class="page-hero__panel-meta">
-                    <strong><?php esc_html_e('Location', 'church-theme'); ?></strong>
-                    <p><?php echo esc_html(implode(', ', $worship_location)); ?></p>
-                </div>
-            <?php endif; ?>
-        </div>
+        </article>
+        <div class="page-hero__summary prose worship-introduction"><?php echo apply_filters('the_content', get_the_content()); ?></div>
     </div>
 </section>
 
-<?php
-get_template_part('template-parts/page', 'sections-body', [
+<?php get_template_part('template-parts/page', 'sections-body', [
     'sections' => $sections,
     'nav_label' => __('Worship page sections', 'church-theme'),
     'cta' => [
@@ -53,7 +50,5 @@ get_template_part('template-parts/page', 'sections-body', [
         'secondary_label' => __('About Crossroad South', 'church-theme'),
         'secondary_url' => church_theme_get_page_url('about-us'),
     ],
-]);
-?>
-<?php
-get_footer();
+]); ?>
+<?php get_footer();

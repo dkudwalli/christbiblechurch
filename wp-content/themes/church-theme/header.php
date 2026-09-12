@@ -8,6 +8,15 @@ if (! defined('ABSPATH')) {
 <head>
     <meta charset="<?php bloginfo('charset'); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script>
+        document.documentElement.classList.add("has-js");
+        // Keep the native fallback usable if the enhancement script cannot load.
+        document.addEventListener("error", function (event) {
+            if (event.target && event.target.id === "church-theme-site-js") {
+                document.documentElement.classList.remove("has-js");
+            }
+        }, true);
+    </script>
     <?php wp_head(); ?>
 </head>
 <body <?php body_class(); ?>>
@@ -34,6 +43,7 @@ if (! defined('ABSPATH')) {
 
         <button class="site-nav__toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-menu" aria-label="<?php esc_attr_e('Open main menu', 'church-theme'); ?>">
             <span class="site-nav__icon" aria-hidden="true"><span></span><span></span><span></span></span>
+            <span class="site-nav__toggle-label" aria-hidden="true"><?php esc_html_e('Menu', 'church-theme'); ?></span>
             <span class="screen-reader-text"><?php esc_html_e('Open main menu', 'church-theme'); ?></span>
         </button>
 

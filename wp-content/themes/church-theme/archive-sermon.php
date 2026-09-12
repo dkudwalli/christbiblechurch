@@ -23,6 +23,7 @@ $series_terms = get_terms([
 $archive_context = church_theme_get_sermon_archive_context();
 $pagination_base = str_replace('999999999', '%#%', esc_url(get_pagenum_link(999999999)));
 $has_active_filters = $current_search !== '' || $current_speaker !== '' || $current_series !== '';
+$has_active_taxonomy_filters = $current_speaker !== '' || $current_series !== '';
 
 if (is_wp_error($speakers)) {
     $speakers = [];
@@ -58,29 +59,34 @@ get_template_part('template-parts/page-hero', null, [
                 <input type="search" name="s" value="<?php echo esc_attr($current_search); ?>" placeholder="<?php esc_attr_e('Search sermons', 'church-theme'); ?>">
             </label>
 
-            <label>
-                <span class="filter-field__label"><?php esc_html_e('Speaker', 'church-theme'); ?></span>
-                <select name="speaker">
-                    <option value=""><?php esc_html_e('All speakers', 'church-theme'); ?></option>
-                    <?php foreach ($speakers as $speaker) : ?>
-                        <option value="<?php echo esc_attr($speaker->slug); ?>" <?php selected($current_speaker, $speaker->slug); ?>>
-                            <?php echo esc_html($speaker->name); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </label>
+            <details class="filter-bar__more" data-has-active-filters="<?php echo $has_active_taxonomy_filters ? 'true' : 'false'; ?>" open>
+                <summary class="filter-bar__more-summary"><?php esc_html_e('More filters', 'church-theme'); ?></summary>
+                <div class="filter-bar__more-fields">
+                    <label>
+                        <span class="filter-field__label"><?php esc_html_e('Speaker', 'church-theme'); ?></span>
+                        <select name="speaker">
+                            <option value=""><?php esc_html_e('All speakers', 'church-theme'); ?></option>
+                            <?php foreach ($speakers as $speaker) : ?>
+                                <option value="<?php echo esc_attr($speaker->slug); ?>" <?php selected($current_speaker, $speaker->slug); ?>>
+                                    <?php echo esc_html($speaker->name); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </label>
 
-            <label>
-                <span class="filter-field__label"><?php esc_html_e('Series', 'church-theme'); ?></span>
-                <select name="series">
-                    <option value=""><?php esc_html_e('All series', 'church-theme'); ?></option>
-                    <?php foreach ($series_terms as $series_term) : ?>
-                        <option value="<?php echo esc_attr($series_term->slug); ?>" <?php selected($current_series, $series_term->slug); ?>>
-                            <?php echo esc_html($series_term->name); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </label>
+                    <label>
+                        <span class="filter-field__label"><?php esc_html_e('Series', 'church-theme'); ?></span>
+                        <select name="series">
+                            <option value=""><?php esc_html_e('All series', 'church-theme'); ?></option>
+                            <?php foreach ($series_terms as $series_term) : ?>
+                                <option value="<?php echo esc_attr($series_term->slug); ?>" <?php selected($current_series, $series_term->slug); ?>>
+                                    <?php echo esc_html($series_term->name); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </label>
+                </div>
+            </details>
 
             <div class="filter-bar__actions">
                 <button class="button button--secondary" type="submit"><?php esc_html_e('Filter', 'church-theme'); ?></button>
